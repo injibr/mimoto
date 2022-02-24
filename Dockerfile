@@ -1,14 +1,5 @@
 FROM openjdk:11
 
-ARG SOURCE
-ARG COMMIT_HASH
-ARG COMMIT_ID
-ARG BUILD_TIME
-LABEL source=${SOURCE}
-LABEL commit_hash=${COMMIT_HASH}
-LABEL commit_id=${COMMIT_ID}
-LABEL build_time=${BUILD_TIME}
-
 # can be passed during Docker build as build time environment for github branch to pickup configuration from.
 ARG spring_config_label
 
@@ -74,7 +65,8 @@ ENV loader_path_env=${loader_path}
 # change volume to whichever storage directory you want to use for this container.
 VOLUME ${work_dir}/logs ${work_dir}/Glowroot
 
-COPY ./target/mosip-resident-app-*.jar mosip-resident-app.jar
+ADD ./target/mosip-resident-app-*.jar ./mosip-resident-app.jar
+#COPY ./target/mosip-resident-app-*.jar mosip-resident-app.jar
 
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
