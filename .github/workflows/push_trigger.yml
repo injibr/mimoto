@@ -61,7 +61,6 @@ jobs:
 
     - name: Ready the springboot artifacts
       run: |
-        cd
         echo $(find -name '*.jar')
         find -name '*.jar' -print | zip release.zip -@
         #find -name '*.jar' -executable -type f  -exec zip release.zip {} +
