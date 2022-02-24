@@ -61,6 +61,7 @@ jobs:
 
     - name: Ready the springboot artifacts
       run: |
+        cd
         echo $(find -name '*.jar')
         find -name '*.jar' -print | zip release.zip -@
         #find -name '*.jar' -executable -type f  -exec zip release.zip {} +
@@ -141,9 +142,9 @@ jobs:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
       if: failure() # Pick up events even if the job fails or is canceled.
 
+
   docker-mimoto:
     needs: build
-
     runs-on: ubuntu-latest
     env:
       NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
@@ -171,7 +172,7 @@ jobs:
           xpath: /*[local-name()="project"]/*[local-name()="version"]
 
       - name: Unzip and extract the id-repository-vid-service
-        run: unzip -uj "release.zip" "${{ env.SERVICE_LOCATION }}/target/*" -d "./${{ env.SERVICE_LOCATION }}/target"
+        run: unzip -uj "release.zip" "./target/*" -d "./target"
 
       - name: Get current date
         id: date
