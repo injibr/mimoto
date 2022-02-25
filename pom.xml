@@ -371,7 +371,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
                 <configuration>
-                    <!-- <executable>true</executable> -->
+                    <executable>true</executable>
                     <layout>JAR</layout>
                 </configuration>
                 <executions>
