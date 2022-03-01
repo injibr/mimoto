@@ -58,7 +58,7 @@ ENV work_dir=/home/${container_user}
 
 ARG loader_path=${work_dir}/additional_jars/
 
-RUN mkdir -p ${loader_path}
+RUN mkdir -p ${loader_path} ${work_dir}/data
 
 ENV loader_path_env=${loader_path}
 
