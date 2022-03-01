@@ -144,7 +144,7 @@ jobs:
           xml-file: ./${{ env.SERVICE_LOCATION }}/pom.xml
           xpath: /*[local-name()="project"]/*[local-name()="version"]
 
-      - name: Unzip and extract the residentapp service
+      - name: Unzip and extract the mimoto service
         run: unzip -uj "release.zip" "${{ env.SERVICE_LOCATION }}/target/*" -d "./${{ env.SERVICE_LOCATION }}/target"
 
       - name: Build image

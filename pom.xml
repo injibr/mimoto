@@ -8,10 +8,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.mosip</groupId>
-    <artifactId>mosip-resident-app</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>mosip-resident-app</name>
-    <description>MOSIP Resident App</description>
+    <artifactId>mimoto</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+    <name>mimoto</name>
+    <description>Mobile server backend supporting Inji.</description>
 
     <properties>
         <java.version>11</java.version>
