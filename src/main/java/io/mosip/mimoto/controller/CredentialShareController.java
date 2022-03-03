@@ -157,11 +157,11 @@ public class CredentialShareController {
     public ResponseEntity<CredentialDownloadResponseDTO> download(@RequestBody CredentialDownloadRequestDTO requestDTO)
             throws Exception {
         try {
+            JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId());
 
-            JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId(),
-                    requestDTO.getIndividualId());
+            JsonNode credentialJSON = utilities.getVC(requestDTO.getRequestId());
 
-            JsonNode credentialJSON = utilities.getVC(requestDTO.getRequestId(), requestDTO.getIndividualId());
+            utilities.removeCacheData(requestDTO.getRequestId());
 
             // Combine original encrypted verifiable credential and decrypted
             if (decryptedCredentialJSON != null && credentialJSON != null) {

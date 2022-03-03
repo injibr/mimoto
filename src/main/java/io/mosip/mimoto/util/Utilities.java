@@ -96,27 +96,43 @@ public class Utilities {
     }
 
     public JsonNode getEvent(String requestId, String individualId) throws JsonParseException, JsonMappingException, IOException {
-        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.EVENT_JSON_FILE_NAME, requestId, individualId));
+        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.EVENT_JSON_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
             return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
         }
         return null;
     }
 
-    public JsonNode getVC(String requestId, String individualId) throws JsonParseException, JsonMappingException, IOException {
-        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.VC_JSON_FILE_NAME, requestId, individualId));
+    public JsonNode getVC(String requestId) throws JsonParseException, JsonMappingException, IOException {
+        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.VC_JSON_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
             return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
         }
         return null;
     }
 
-    public JsonNode getDecryptedVC(String requestId, String individualId) throws JsonParseException, JsonMappingException, IOException {
-        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.CARD_JSON_FILE_NAME, requestId, individualId));
+    public JsonNode getDecryptedVC(String requestId) throws JsonParseException, JsonMappingException, IOException {
+        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.CARD_JSON_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
             return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
         }
         return null;
+    }
+
+    public void removeCacheData(String requestId) throws IOException {
+        List<Path> filePathList = new ArrayList<Path>();
+        filePathList.add(Path.of(dataPath, String.format(CredentialShareServiceImpl.EVENT_JSON_FILE_NAME, requestId)));
+        filePathList.add(Path.of(dataPath, String.format(CredentialShareServiceImpl.VC_JSON_FILE_NAME, requestId)));
+        filePathList.add(Path.of(dataPath, String.format(CredentialShareServiceImpl.CARD_JSON_FILE_NAME, requestId)));
+        for (Path filePath : filePathList) {
+            if (Files.exists(filePath)) {
+                try {
+                    Files.delete(filePath);
+                } catch (Exception e) {
+                    logger.error("Cannot delete file: " + filePath, e);
+                }
+            }
+        }
     }
 
     /**

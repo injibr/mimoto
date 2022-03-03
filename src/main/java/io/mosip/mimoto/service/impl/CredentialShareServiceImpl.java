@@ -68,7 +68,6 @@ import io.mosip.mimoto.exception.IdentityNotFoundException;
 import io.mosip.mimoto.exception.ParsingException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.exception.UINNotFoundInDatabase;
-import io.mosip.mimoto.exception.VidCreationException;
 import io.mosip.mimoto.model.CredentialStatusEvent;
 import io.mosip.mimoto.model.EventModel;
 import io.mosip.mimoto.model.StatusEvent;
@@ -91,8 +90,8 @@ import io.mosip.mimoto.util.WebSubSubscriptionHelper;
 @Service
 public class CredentialShareServiceImpl implements CredentialShareService {
     public static final String EVENT_JSON_FILE_NAME = "%s_EVENT.json";
-    public static final String VC_JSON_FILE_NAME = "%s_%s_VC.json";
-    public static final String CARD_JSON_FILE_NAME = "%s_%s_VCD.json";
+    public static final String VC_JSON_FILE_NAME = "%s_VC.json";
+    public static final String CARD_JSON_FILE_NAME = "%s_VCD.json";
 
     /** The Constant FINGER. */
     public static final String FINGER = "Finger";
@@ -224,7 +223,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             String uin = credentialJSON.getString("UIN");
     
             Path vcTextFilePath = Path.of(utilities.getDataPath(),
-                    String.format(VC_JSON_FILE_NAME, eventModel.getEvent().getTransactionId(), uin));
+                    String.format(VC_JSON_FILE_NAME, eventModel.getEvent().getTransactionId()));
             Files.deleteIfExists(vcTextFilePath);
             Files.write(vcTextFilePath, gson.toJson(gson.fromJson(decodedCredential, TreeMap.class)).getBytes(), StandardOpenOption.CREATE);
     
@@ -232,7 +231,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             byteMap = getDocuments(credentialJSON, credentialType, eventModel.getEvent().getTransactionId(), getSignature(sign, credential));
     
             Path textFilePath = Path.of(utilities.getDataPath(),
-                    String.format(CARD_JSON_FILE_NAME, eventModel.getEvent().getTransactionId(), uin));
+                    String.format(CARD_JSON_FILE_NAME, eventModel.getEvent().getTransactionId()));
             Files.deleteIfExists(textFilePath);
             Files.write(textFilePath, byteMap.get(UIN_TEXT_FILE), StandardOpenOption.CREATE);
             logger.info("Generated files from event:: " + textFilePath.toFile().getAbsolutePath());
