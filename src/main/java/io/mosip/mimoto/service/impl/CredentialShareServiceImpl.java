@@ -89,6 +89,7 @@ import io.mosip.mimoto.util.WebSubSubscriptionHelper;
 
 @Service
 public class CredentialShareServiceImpl implements CredentialShareService {
+    public static final String VC_REQUEST_FILE_NAME = "%s.json";
     public static final String EVENT_JSON_FILE_NAME = "%s_EVENT.json";
     public static final String VC_JSON_FILE_NAME = "%s_VC.json";
     public static final String CARD_JSON_FILE_NAME = "%s_VCD.json";

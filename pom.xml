@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
             <!-- mosip -->
-        <mosip.kernel.core.version>1.2.0-rc2-SNAPSHOT</mosip.kernel.core.version>
+        <mosip.kernel.core.version>1.2.0</mosip.kernel.core.version>
         <mosip.biometric.util.version>1.2.0</mosip.biometric.util.version>
 
             <!-- maven -->

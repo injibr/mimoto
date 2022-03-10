@@ -1,10 +1,13 @@
 package io.mosip.mimoto.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.Gson;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,6 +69,8 @@ public class CredentialShareController {
     @Autowired
     public CryptoCoreUtil cryptoCoreUtil;
 
+    private Gson gson = new Gson();
+
     @Autowired
     private Utilities utilities;
 
@@ -77,13 +82,22 @@ public class CredentialShareController {
      * @throws Exception
      */
     @PostMapping(path = "/callback/notify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthenticateContentAndVerifyIntent(secret = "${mosip.event.secret}", callback = "/v1/mimoto/credentialshare/callback/notify", topic = "${mosip.event.topic}")
+    @PreAuthenticateContentAndVerifyIntent(secret = "${mosip.event.secret}", callback = "${mosip.event.callBackUrl}", topic = "${mosip.event.topic}")
     public ResponseEntity<GenericResponseDTO> handleSubscribeEvent(@RequestBody EventModel eventModel)
             throws Exception {
-        logger.info("Received event:: transaction id = " + eventModel.getEvent().getTransactionId());
-        boolean documentGenerated = credentialShareService.generateDocuments(eventModel);
-        logger.info("Credential share process status: {} for event id: {}", documentGenerated, eventModel.getEvent().getId());
+        logger.info("Received websub event:: transaction id = " + eventModel.getEvent().getTransactionId());
         GenericResponseDTO responseDTO = new GenericResponseDTO();
+        Path vcRequestIdPath = Path.of(
+            utilities.getDataPath(),
+            String.format(CredentialShareServiceImpl.VC_REQUEST_FILE_NAME, eventModel.getEvent().getTransactionId())
+        );
+        // Only process event if request id file exists in the storange.
+        if (vcRequestIdPath.toFile().exists()) {
+            boolean documentGenerated = credentialShareService.generateDocuments(eventModel);
+            logger.info("Credential share process status: {} for event id: {}", documentGenerated, eventModel.getEvent().getId());
+        } else {
+            logger.warn("Event transaction id could not found in the storage, skipping...");
+        }
         responseDTO.setStatus("OK");
         responseDTO.setMessage("Successfully issued.");
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -96,7 +110,6 @@ public class CredentialShareController {
      * @return
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/request", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> request(@RequestBody AppCredentialRequestDTO requestDTO)
             throws Exception {
@@ -109,19 +122,28 @@ public class CredentialShareController {
         credentialReqDTO.setIndividualId(requestDTO.getIndividualId());
         credentialReqDTO.setOtp(requestDTO.getOtp());
         credentialReqDTO.setTransactionID(requestDTO.getTransactionID());
-        credentialReqDTO.setCredentialType("vercred");
-        credentialReqDTO.setUser("taheer");
+        credentialReqDTO.setCredentialType(requestDTO.getCredentialType());
+        credentialReqDTO.setUser(requestDTO.getUser());
 
         mosipCredentialRequestPayload.setId("mosip.resident.vid");
         mosipCredentialRequestPayload.setVersion("v1");
         mosipCredentialRequestPayload.setRequesttime(DateUtils.getRequestTimeString());
         mosipCredentialRequestPayload.setRequest(credentialReqDTO);
 
-        ResponseWrapper<CredentialRequestResponseDTO> responseWrapper = (ResponseWrapper<CredentialRequestResponseDTO>) restClientService
+        CredentialRequestResponseDTO response = (CredentialRequestResponseDTO)restClientService
                 .postApi(ApiName.RESIDENT_CREDENTIAL_REQUEST, "", "", mosipCredentialRequestPayload,
-                        ResponseWrapper.class, MediaType.APPLICATION_JSON);
+                CredentialRequestResponseDTO.class, MediaType.APPLICATION_JSON);
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
+        // Create request id file for later event.
+        if (response.getErrors() == null || response.getErrors().isEmpty()) {
+            Path vcRequestIdPath = Path.of(
+                utilities.getDataPath(),
+                String.format(CredentialShareServiceImpl.VC_REQUEST_FILE_NAME, response.getResponse().getRequestId())
+            );
+            Files.write(vcRequestIdPath, gson.toJson(response).getBytes());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -144,7 +166,7 @@ public class CredentialShareController {
         return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
     }
 
-    /** 
+    /**
      * Download a received and decrypted VC.
      * Original VC data and decrypted identity will be combined in a single response
      * to display on the frontend.
@@ -160,15 +182,14 @@ public class CredentialShareController {
             JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId());
 
             JsonNode credentialJSON = utilities.getVC(requestDTO.getRequestId());
-
-            utilities.removeCacheData(requestDTO.getRequestId());
-
             // Combine original encrypted verifiable credential and decrypted
             if (decryptedCredentialJSON != null && credentialJSON != null) {
                 CredentialDownloadResponseDTO credentialDownloadBody = new CredentialDownloadResponseDTO();
                 credentialDownloadBody.setCredential(decryptedCredentialJSON);
                 credentialDownloadBody.setVerifiableCredential(credentialJSON);
 
+                // Remove cached data.
+                utilities.removeCacheData(requestDTO.getRequestId());
                 return ResponseEntity.ok().body(credentialDownloadBody);
             }
 
