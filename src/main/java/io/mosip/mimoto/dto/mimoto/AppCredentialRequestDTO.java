@@ -8,5 +8,6 @@ public class AppCredentialRequestDTO {
     private String otp;
     private String transactionID;
     private String issuer;
-    private String credentialType;
+    private String credentialType = "vercred";
+    private String user;
 }
