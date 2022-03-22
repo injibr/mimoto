@@ -22,32 +22,31 @@ mvn spring-boot:run -Dspring.profiles.active=local
 - conf: configuration files for docker services.
 - data: using to store shared VC event and generated files.
 
-Follow the build section to compile and get the mosip-resident-app-0.2.0-SNAPSHOT.jar file in the target folder.
+Follow the build section to compile and get the mimoto-*.jar file in the target folder.
 
 Copy jar files to bin folder. Websub (hub.jar) and safety net is optional, depends on the client app implementation.
 
 ### Configuration
 
-conf/nginx/conf.d/mosip-residentapp.conf
+conf/nginx/conf.d/mimoto.conf
 ```nginx
-upstream mosip-residentapp-service {
-    server mosip-residentapp-service:8088;
+upstream mimoto-service {
+    server mimoto-service:8088;
 }
 
 server {
     listen 80;
     listen [::]:80;
-    #server_name  resident-app.newlogic.dev;
 
-    access_log /var/log/nginx/mosip-residentapp-service.access.log main;
+    access_log /var/log/nginx/mimoto-service.access.log main;
 
     location / {
         root /usr/share/nginx/html;
         index index.html index.htm;
     }
 
-    location /v1/resident {
-        proxy_pass http://mosip-residentapp-service/v1/resident;
+    location /v1/mimoto {
+        proxy_pass http://mimoto-service/v1/mimoto;
         proxy_set_header Host $http_host; # required for docker client's sake
         proxy_set_header X-Real-IP $remote_addr; # pass on real client's IP
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -70,27 +69,27 @@ services:
         ports:
             - 80:80
         links:
-            - mosip-residentapp-service
+            - mimoto-service
             - websub
             - safetynet
         depends_on:
-            - mosip-residentapp-service
+            - mimoto-service
 
-    mosip-residentapp-service:
+    mimoto-service:
         image: openjdk:11-jre-slim
         volumes:
-            - ./bin:/opt/mosip-residentapp-service
+            - ./bin:/opt/mimoto-service
             - ./data:/data
-        hostname: mosip-residentapp-service
+        hostname: mimoto-service
         restart: always
         command: >
         bash -c "cd /data && java -jar \
-            -Dpublic.url=https://resident-app.newlogic.dev \
+            -Dpublic.url=https://YOUR_PUBLIC_URL_FOR_MIMOTO_SERVICE \
             -Dcredential.data.path=/data \
             -Dmosip.event.delay-millisecs=5000 \
             -Dwebsub-resubscription-delay-millisecs=300000 \
             -Dsafetynet.api.key=GOOGLE_API_KEY \
-            /opt/mosip-residentapp-service/mosip-resident-app-0.2.0-SNAPSHOT.jar"
+            /opt/mimoto-service/mimoto-*.jar"
         expose:
             - 8088
 ```
@@ -109,7 +108,7 @@ docker-compose up -d
 Copy and replace the new version of the jar files in the bin folder and restart the docker service.
 
 ```shell
-docker-compose restart mosip-residentapp-service
+docker-compose restart mimoto-service
 ```
 
 ## Credits

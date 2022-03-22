@@ -8,10 +8,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.mosip</groupId>
-    <artifactId>mosip-resident-app</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>mosip-resident-app</name>
-    <description>MOSIP Resident App</description>
+    <artifactId>mimoto</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+    <name>mimoto</name>
+    <description>Mobile server backend supporting Inji.</description>
 
     <properties>
         <java.version>11</java.version>
@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
             <!-- mosip -->
-        <mosip.kernel.core.version>1.2.0-rc2-SNAPSHOT</mosip.kernel.core.version>
+        <mosip.kernel.core.version>1.2.0</mosip.kernel.core.version>
         <mosip.biometric.util.version>1.2.0</mosip.biometric.util.version>
 
             <!-- maven -->
@@ -41,7 +41,7 @@
         <h2.version>2.1.210</h2.version>
 
             <!-- test -->
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mockito.version>2.23.4</mockito.version>
         <powermock.version>1.7.4</powermock.version>
         <powermock.beta.version>2.0.7</powermock.beta.version>
@@ -64,7 +64,7 @@
         <bouncycastle.version>1.70</bouncycastle.version>
         <jwt.version> 3.8.1</jwt.version>
         <google.zxing.version>3.3.3</google.zxing.version>
-        <itextcore.version>7.1.0</itextcore.version>
+        <itextcore.version>7.2.0</itextcore.version>
         <itexthtml2pdf.version>2.0.0</itexthtml2pdf.version>
         <itext.version>5.5.13</itext.version>
         <commons-math3>3.6.1</commons-math3>
