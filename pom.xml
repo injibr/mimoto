@@ -50,7 +50,9 @@
         <logback.version>1.2.3</logback.version>
 
             <!-- json -->
-        <jackson.version>2.13.2.1</jackson.version>
+        <jackson.version>2.13.2</jackson.version>
+        <!-- jackson-databind security patch version -->
+        <jackson.databind.version>2.13.2.2</jackson.databind.version>
         <json.utility.version>20180130</json.utility.version>
         <json.schema.validator.version>2.2.10</json.schema.validator.version>
         <json.version>20180813</json.version>
@@ -238,7 +240,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson.databind.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
