@@ -19,7 +19,7 @@ public class Base64Adapter extends XmlAdapter<String, byte[]> {
      */
     @Override
     public byte[] unmarshal(String data) throws Exception {
-        return CryptoUtil.decodePlainBase64(data);
+        return CryptoUtil.decodeBase64(data);
     }
 
     /**
@@ -28,7 +28,7 @@ public class Base64Adapter extends XmlAdapter<String, byte[]> {
      */
     @Override
     public String marshal(byte[] data) throws Exception {
-        return CryptoUtil.encodeToPlainBase64(data);
+        return CryptoUtil.encodeBase64(data);
     }
 
 }
