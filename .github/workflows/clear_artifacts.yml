@@ -7,7 +7,11 @@ jobs:
   delete-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: kolpav/purge-artifacts-action@v1
+      - name: Purge Artifacts
+        if: env.ACCESS_TOKEN != null
+        uses: kolpav/purge-artifacts-action@v1
         with:
-          token: ${{ secrets. access_token }}
+          token: ${{ secrets.access_token }}
           expire-in: 2days # Setting this to 0 will delete all artifacts
+    env:
+      ACCESS_TOKEN: ${{ secrets.access_token }}

@@ -50,7 +50,9 @@
         <logback.version>1.2.3</logback.version>
 
             <!-- json -->
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.2</jackson.version>
+        <!-- jackson-databind security patch version -->
+        <jackson.databind.version>2.13.2.2</jackson.databind.version>
         <json.utility.version>20180130</json.utility.version>
         <json.schema.validator.version>2.2.10</json.schema.validator.version>
         <json.version>20180813</json.version>
@@ -192,7 +194,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.2.6</version>
+            <version>1.2.9</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
@@ -238,7 +240,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson.databind.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -513,9 +515,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>3.0.1</version>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>5.0.0</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -527,48 +529,48 @@
                 </executions>
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/build.json</generateGitPropertiesFilename>
                     <includeOnlyProperties>
                         <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
                         <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.branch$</includeOnlyProperty>
                     </includeOnlyProperties>
                     <commitIdGenerationMode>full</commitIdGenerationMode>
-                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                        <!-- <format>json</format> -->
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-        <profiles>
-            <profile>
-                <id>sonar</id>
-                <properties>
-                    <sonar.sources>.</sonar.sources>
-                    <sonar.inclusions>src/main/java/**,src/main/resources/**</sonar.inclusions>
-                    <sonar.exclusions>${sonar.coverage.exclusions}</sonar.exclusions>
-                    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                </properties>
-                <activation>
-                    <activeByDefault>false</activeByDefault>
-                </activation>
-                <build>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.sonarsource.scanner.maven</groupId>
-                            <artifactId>sonar-maven-plugin</artifactId>
-                            <version>${maven.sonar.plugin.version}</version>
-                            <executions>
-                                <execution>
-                                    <phase>verify</phase>
-                                    <goals>
-                                        <goal>sonar</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </build>
-            </profile>
-        </profiles>
+                    <format>json</format>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.sources>.</sonar.sources>
+                <sonar.inclusions>src/main/java/**,src/main/resources/**</sonar.inclusions>
+                <sonar.exclusions>${sonar.coverage.exclusions}</sonar.exclusions>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+            </properties>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${maven.sonar.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sonar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-    </project>
+</project>
