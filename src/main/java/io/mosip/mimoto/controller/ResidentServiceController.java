@@ -1,5 +1,8 @@
 package io.mosip.mimoto.controller;
 
+import io.mosip.mimoto.dto.mimoto.AidStatusRequestDTO;
+import io.mosip.mimoto.dto.mimoto.IndividualIdOtpRequestDTO;
+import io.mosip.mimoto.dto.resident.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.env.Environment;
@@ -16,13 +19,6 @@ import io.mosip.mimoto.core.http.RequestWrapper;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.mimoto.AppOTPRequestDTO;
 import io.mosip.mimoto.dto.mimoto.AppVIDGenerateRequestDTO;
-import io.mosip.mimoto.dto.resident.AuthLockRequestDTO;
-import io.mosip.mimoto.dto.resident.AuthLockUnlockResponseDTO;
-import io.mosip.mimoto.dto.resident.AuthUnlockRequestDTO;
-import io.mosip.mimoto.dto.resident.CredentialRequestResponseDTO;
-import io.mosip.mimoto.dto.resident.OTPRequestDTO;
-import io.mosip.mimoto.dto.resident.VIDGenerateRequestDTO;
-import io.mosip.mimoto.dto.resident.VIDGeneratorResponseDTO;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.DateUtils;
 import io.mosip.mimoto.util.LoggerUtil;
@@ -131,6 +127,38 @@ public class ResidentServiceController {
 
         ResponseWrapper<AuthLockUnlockResponseDTO> responseWrapper = (ResponseWrapper<AuthLockUnlockResponseDTO>) restClientService
                 .postApi(ApiName.RESIDENT_AUTH_UNLOCK, "", "", mosipAuthUnlockRequestPayload, ResponseWrapper.class, MediaType.APPLICATION_JSON);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
+    }
+
+    @PostMapping("/req/individualId/otp")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Object> individualIdOtpRequest(@RequestBody IndividualIdOtpRequestDTO requestDTO) throws Exception {
+        IndividualIdOTPRequestDTO mosipOTPRequestPayload = new IndividualIdOTPRequestDTO();
+        mosipOTPRequestPayload.setId("mosip.identity.otp.internal");
+        mosipOTPRequestPayload.setVersion("1.0");
+        mosipOTPRequestPayload.setRequestTime(DateUtils.getRequestTimeString());
+        mosipOTPRequestPayload.setAid(requestDTO.getAid());
+        mosipOTPRequestPayload.setOtpChannel(requestDTO.getOtpChannel());
+        mosipOTPRequestPayload.setTransactionID(requestDTO.getTransactionID());
+
+        OTPResponseDTO responseWrapper = (OTPResponseDTO) restClientService
+                .postApi(ApiName.RESIDENT_INDIVIDUALID_OTP, "", "", mosipOTPRequestPayload, OTPResponseDTO.class, MediaType.APPLICATION_JSON);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
+    }
+
+    @PostMapping("/aid/get-individual-id")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Object> aidGetIndividualId(@RequestBody AidStatusRequestDTO requestDTO) throws Exception {
+        RequestWrapper<AidStatusRequestDTO> mosipAuthLockRequestPayload = new RequestWrapper<>();
+        mosipAuthLockRequestPayload.setId("mosip.resident.checkstatus");
+        mosipAuthLockRequestPayload.setVersion("v1");
+        mosipAuthLockRequestPayload.setRequesttime(DateUtils.getRequestTimeString());
+        mosipAuthLockRequestPayload.setRequest(requestDTO);
+
+        ResponseWrapper<AidStatusResponseDTO> responseWrapper = (ResponseWrapper<AidStatusResponseDTO>) restClientService
+                .postApi(ApiName.RESIDENT_AID_GET_INDIVIDUALID, "", "", mosipAuthLockRequestPayload, ResponseWrapper.class, MediaType.APPLICATION_JSON);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
     }
