@@ -221,8 +221,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             credentialSubject = getCredentialSubject(decodedCredential);
 
             org.json.JSONObject credentialJSON = decrypt(decodedCredential, credentialSubject, encryptionPin);
-            String uin = credentialJSON.getString("UIN");
-    
+
             Path vcTextFilePath = Path.of(utilities.getDataPath(),
                     String.format(VC_JSON_FILE_NAME, eventModel.getEvent().getTransactionId()));
             Files.deleteIfExists(vcTextFilePath);
