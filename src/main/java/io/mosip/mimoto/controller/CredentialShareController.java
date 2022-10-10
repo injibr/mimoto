@@ -9,6 +9,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 
+import io.mosip.kernel.core.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -86,6 +87,7 @@ public class CredentialShareController {
     public ResponseEntity<GenericResponseDTO> handleSubscribeEvent(@RequestBody EventModel eventModel)
             throws Exception {
         logger.info("Received websub event:: transaction id = " + eventModel.getEvent().getTransactionId());
+        logger.debug("Received websub event:: " + JsonUtils.javaObjectToJsonString(eventModel));
         GenericResponseDTO responseDTO = new GenericResponseDTO();
         Path vcRequestIdPath = Path.of(
             utilities.getDataPath(),
