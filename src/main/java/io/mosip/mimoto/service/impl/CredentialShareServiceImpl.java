@@ -226,10 +226,10 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                     String.format(VC_JSON_FILE_NAME, eventModel.getEvent().getTransactionId()));
             Files.deleteIfExists(vcTextFilePath);
             Files.write(vcTextFilePath, gson.toJson(gson.fromJson(decodedCredential, TreeMap.class)).getBytes(), StandardOpenOption.CREATE);
-    
+
             String credentialType = eventModel.getEvent().getData().get("credentialType").toString();
             byteMap = getDocuments(credentialJSON, credentialType, eventModel.getEvent().getTransactionId(), getSignature(sign, credential));
-    
+
             Path textFilePath = Path.of(utilities.getDataPath(),
                     String.format(CARD_JSON_FILE_NAME, eventModel.getEvent().getTransactionId()));
             Files.deleteIfExists(textFilePath);
@@ -268,7 +268,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                 "CredentialShareServiceImpl::getDocuments()::entry");
 
         Map<String, byte[]> byteMap = new HashMap<>();
-        String uin = null;
+        String id = null;
         LogDescription description = new LogDescription();
         String individualBio = null;
         Map<String, Object> attributes = new LinkedHashMap<>();
@@ -276,9 +276,12 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         try {
             individualBio = credentialJSON.getString("biometrics");
             String individualBiometric = new String(individualBio);
-            uin = credentialJSON.getString("UIN");
+            id = credentialJSON.has("UIN") ? credentialJSON.getString("UIN") : credentialJSON.getString("VID");
             setTemplateAttributes(credentialJSON.toString(), attributes);
-            attributes.put(IdType.UIN.toString(), uin);
+            if (credentialJSON.has("UIN"))
+                attributes.put(IdType.UIN.toString(), id);
+            else
+                attributes.put(IdType.VID.toString(), id);
 
             byte[] textFileByte = createJSONFile(credentialJSON, individualBiometric, attributes);
             byteMap.put(UIN_TEXT_FILE, textFileByte);
@@ -326,7 +329,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                     : description.getCode();
             String moduleName = ModuleName.MIMOTO_SERVICE.toString();
             auditLogRequestBuilder.createAuditRequestBuilder(description.getMessage(), eventId, eventName, eventType,
-                    moduleId, moduleName, uin);
+                    moduleId, moduleName, id);
         }
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(), "",
                 "CredentialShareServiceImpl::getDocuments()::exit");
@@ -441,7 +444,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     /**
      * Gets the artifacts.
      *
-     * @param idJsonString the id json string
+     * @param jsonString the id json string
      * @param attribute    the attribute
      * @return the artifacts
      * @throws IOException    Signals that an I/O exception has occurred.
