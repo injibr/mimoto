@@ -142,6 +142,9 @@ public class CredentialShareServiceImpl implements CredentialShareService {
 
     private Logger logger = LoggerUtil.getLogger(CredentialShareServiceImpl.class);
 
+    @Value("${vercred.type.vid:PCN}")
+    private String vid;
+
     /** The core audit request builder. */
     @Autowired
     public AuditLogRequestBuilder auditLogRequestBuilder;
@@ -271,19 +274,18 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         String id = null;
         LogDescription description = new LogDescription();
         String individualBio = null;
-        Map<String, Object> attributes = new LinkedHashMap<>();
         boolean isTransactionSuccessful = false;
         try {
             individualBio = credentialJSON.getString("biometrics");
             String individualBiometric = new String(individualBio);
-            id = credentialJSON.has("UIN") ? credentialJSON.getString("UIN") : credentialJSON.getString("VID");
-            setTemplateAttributes(credentialJSON.toString(), attributes);
             if (credentialJSON.has("UIN"))
-                attributes.put(IdType.UIN.toString(), id);
+                id = credentialJSON.getString("UIN");
+            else if (credentialJSON.has(vid))
+                id = credentialJSON.getString(vid);
             else
-                attributes.put(IdType.VID.toString(), id);
+                id = null;
 
-            byte[] textFileByte = createJSONFile(credentialJSON, individualBiometric, attributes);
+            byte[] textFileByte = createJSONFile(credentialJSON, individualBiometric);
             byteMap.put(UIN_TEXT_FILE, textFileByte);
 
             // TODO: Uncomment this after datashare creation API fixed.
@@ -338,8 +340,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     }
 
     @SuppressWarnings("unchecked")
-    public byte[] createJSONFile(org.json.JSONObject credential, String individualBiometric,
-            Map<String, Object> attributes) throws IOException {
+    public byte[] createJSONFile(org.json.JSONObject credential, String individualBiometric) throws IOException {
         org.json.JSONObject outputJSON = new org.json.JSONObject();
         if (credential == null) {
             throw new IdentityNotFoundException(PlatformErrorMessages.MIMOTO_PIS_IDENTITY_NOT_FOUND.getMessage());
@@ -370,7 +371,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                     outputJSON.put(value, json.get(VALUE));
                 } else {
                     if (key.equals("biometrics")) {
-                        outputJSON.put(value, getBiometricsDataJSON(individualBiometric, attributes));
+                        outputJSON.put(value, getBiometricsDataJSON(individualBiometric));
                     } else {
                         outputJSON.put(value, object);
                     }
@@ -388,7 +389,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
      * @param attributes
      * @return
      */
-    public org.json.JSONObject getBiometricsDataJSON(String individualBiometric, Map<String, Object> attributes) {
+    public org.json.JSONObject getBiometricsDataJSON(String individualBiometric) {
         org.json.JSONObject biometrics = new org.json.JSONObject();
         if (individualBiometric != null) {
             CbeffToBiometricUtil util = new CbeffToBiometricUtil(cbeffutil);
