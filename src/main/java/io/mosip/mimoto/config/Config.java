@@ -1,6 +1,7 @@
 package io.mosip.mimoto.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -15,6 +16,9 @@ import io.mosip.kernel.auth.defaultadapter.filter.AuthFilter;
 import io.mosip.kernel.auth.defaultadapter.filter.CorsFilter;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.mimoto.util.LoggerUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +38,12 @@ public class Config extends WebSecurityConfigurerAdapter {
 
     @Value("${mosip.security.origins:localhost:8080}")
     private String origins;
+
+    @Bean
+    @ConfigurationProperties(prefix = "mosip.inji")
+    public Map<String, String> injiConfig() {
+        return new HashMap<>();
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
