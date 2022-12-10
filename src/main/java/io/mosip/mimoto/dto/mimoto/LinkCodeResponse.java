@@ -10,7 +10,7 @@ public class LinkCodeResponse {
     private String linkTransactionId;
     private String clientName;
     private String logoUrl;
-    private List<AuthFactorDto> authFactors;
+    private List<List<AuthFactorDto>> authFactors;
     private List<String> authorizeScopes;
     private List<String> essentialClaims;
     private List<String> voluntaryClaims;
