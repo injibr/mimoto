@@ -6,6 +6,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.JsonUtils;
 import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.core.http.RequestWrapper;
+import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
 import io.mosip.mimoto.service.RestClientService;
@@ -120,5 +121,19 @@ public class IdpController {
                 .postApi(ApiName.IDP_LINK_TRANSACTION, null, null,
                         reqDto, LinkTransactionResponseDto.class);
         return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @PostMapping("idp-authenticate")
+    public ResponseEntity<Object> idpAuthenticate(@RequestBody IdpAuthenticateRequestDto requestDTO) throws Exception {
+        ResponseWrapper<LinkedKycAuthResponse> response = new ResponseWrapper<>();
+
+        LinkedKycAuthResponse resp = new LinkedKycAuthResponse();
+        resp.setLinkedTransactionId(requestDTO.getLinkTransactionId());
+
+        response.setResponsetime(DateUtils.getUTCCurrentDateTimeString());
+        response.setId("mosip.mimoto.idp");
+        response.setResponse(resp);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
