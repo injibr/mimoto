@@ -13,9 +13,7 @@ import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.DateUtils;
 import io.mosip.mimoto.util.JoseUtil;
 import io.mosip.mimoto.util.LoggerUtil;
-import io.mosip.mimoto.util.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,25 +31,13 @@ public class IdpController {
     private static final String ID = "mosip.mimoto.idp";
     private Gson gson = new Gson();
 
-    @Value("${mosip.idp.partner.encryption.key}")
-    private String partnerEncryptionKey;
-
-    @Value("${mosip.idp.partner.id}")
-    private String partnerId;
-
-    // TODO: Temporary mocking, need to cleanup
-    @Value("${mimoto.mocked.requestid}")
-    String mockedReqid;
-
     @Autowired
     public RestClientService<Object> restClientService;
-
-    @Autowired
-    private Utilities utilities;
 
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@RequestBody BindingOtpRequestDto requestDTO) throws Exception {
+        logger.info("Received binding-otp request : " + JsonUtils.javaObjectToJsonString(requestDTO));
         ResponseWrapper<BindingOtpResponseDto> response = null;
         try {
             response = (ResponseWrapper<BindingOtpResponseDto>) restClientService
@@ -70,6 +56,8 @@ public class IdpController {
     public ResponseEntity<Object> request(@RequestBody WalletBindingRequestDTO requestDTO)
             throws Exception {
 
+        logger.info("Received wallet-binding request : " + JsonUtils.javaObjectToJsonString(requestDTO));
+
         ResponseWrapper<WalletBindingResponseDto> response = null;
         try {
             WalletBindingInnerRequestDto innerRequestDto = new WalletBindingInnerRequestDto();
@@ -79,8 +67,6 @@ public class IdpController {
             innerRequestDto.setPublicKey(JoseUtil.getJwkFromPublicKey(requestDTO.getRequest().getPublicKey()));
 
             WalletBindingInternalRequestDTO req = new WalletBindingInternalRequestDTO(requestDTO.getRequestTime(), innerRequestDto);
-
-            logger.info("Received wallet-binding request : " + JsonUtils.javaObjectToJsonString(requestDTO));
 
             response = (ResponseWrapper<WalletBindingResponseDto>) restClientService
                     .postApi(ApiName.WALLET_BINDING,
@@ -115,7 +101,6 @@ public class IdpController {
     @PostMapping("idp-authenticate")
     public ResponseEntity<Object> idpAuthenticate(@RequestBody IdpAuthenticateRequestDto requestDTO) throws Exception {
         logger.info("Received idp-authenticate request : " + JsonUtils.javaObjectToJsonString(requestDTO));
-
 
         IdpAuthRequestDto reqDto = new IdpAuthRequestDto();
         reqDto.setRequestTime(DateUtils.getRequestTimeString());
