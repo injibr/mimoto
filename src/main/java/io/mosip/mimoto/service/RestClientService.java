@@ -74,7 +74,7 @@ public interface RestClientService<T> {
      *                        the response type
      * @param mediaType
      *                        the content type
-     * 
+     *
      * @return the t
      * @throws ApisResourceAccessException
      *                                     the apis resource access exception
@@ -121,4 +121,7 @@ public interface RestClientService<T> {
     public T postApi(ApiName apiName, MediaType mediaType, List<String> pathsegments, List<String> queryParam,
             List<Object> queryParamValue,
             T requestedData, Class<?> responseType) throws ApisResourceAccessException;
+
+    public T postApi(ApiName apiName, T requestedData, Class<?> responseType, boolean useBearerToken)
+            throws ApisResourceAccessException;
 }

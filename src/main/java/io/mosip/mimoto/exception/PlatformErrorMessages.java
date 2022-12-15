@@ -73,7 +73,9 @@ public enum PlatformErrorMessages {
     API_NOT_ACCESSIBLE_EXCEPTION(PlatformConstants.PREFIX + "026", "Api not accessible failure"),
     CERTIFICATE_THUMBPRINT_ERROR(PlatformConstants.PREFIX + "026", "certificate thumbprint failure"),
     MIMOTO_INVALID_KEY_EXCEPTION(PlatformConstants.PREFIX + "027", "invalid key"),
-    MIMOTO_PDF_SIGN_EXCEPTION(PlatformConstants.PREFIX + "028", "error occured while signing pdf");
+    MIMOTO_PDF_SIGN_EXCEPTION(PlatformConstants.PREFIX + "028", "error occured while signing pdf"),
+    MIMOTO_WALLET_BINDING_EXCEPTION(PlatformConstants.PREFIX + "028", "Wallet binding exception occured"),
+    MIMOTO_OTP_BINDING_EXCEPTION(PlatformConstants.PREFIX + "029", "OTP binding exception occured");
 
     /** The error message. */
     private final String errorMessage;

@@ -5,9 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class IdpAuthenticateRequestDto {
-    private String requesttime;
-    private String linkTransactionId;
+public class IdpAuthInternalRequestDto {
+    private String linkedTransactionId;
     private String individualId;
     private List<IdpChallangeDto> challengeList;
 }
