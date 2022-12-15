@@ -287,6 +287,26 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         return obj;
     }
 
+    @Override
+    public Object postApi(ApiName apiName,
+                          Object requestedData, Class<?> responseType, boolean useBearerToken) throws ApisResourceAccessException {
+
+        logger.debug("RestClientServiceImpl::postApi()::entry");
+        Object obj = null;
+        String apiHostIpPort = env.getProperty(apiName.name());
+        if (apiHostIpPort != null) {
+            try {
+                obj = restApiClient.postApi(apiHostIpPort, MediaType.APPLICATION_JSON, requestedData, responseType, useBearerToken);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new ApisResourceAccessException(
+                        PlatformErrorMessages.MIMOTO_RCT_UNKNOWN_RESOURCE_EXCEPTION.getMessage(), e);
+            }
+        }
+        logger.debug("RestClientServiceImpl::postApi()::exit");
+        return obj;
+    }
+
     /**
      * Check null.
      *

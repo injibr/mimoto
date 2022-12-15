@@ -1,11 +1,20 @@
 package io.mosip.mimoto.util;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-
+import com.google.gson.Gson;
+import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.mimoto.core.http.RequestWrapper;
+import io.mosip.mimoto.dto.SecretKeyRequest;
+import io.mosip.mimoto.exception.TokenGenerationFailedException;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +25,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import io.mosip.kernel.core.logger.spi.Logger;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Iterator;
 
 /**
  * The Class RestApiClient.
@@ -28,11 +39,28 @@ public class RestApiClient {
 
     /** The logger. */
     private Logger logger = LoggerUtil.getLogger(RestApiClient.class);
+    private static final String authorization = "Authorization=";
 
     /** The builder. */
     @Autowired
     @Qualifier("selfTokenRestTemplate")
     private RestTemplate restTemplate;
+
+    @Autowired
+    @Qualifier("plainRestTemplate")
+    private RestTemplate plainRestTemplate;
+
+    @Value("${mosip.authmanager.url}")
+    private String authBaseUrl;
+
+    @Value("${mosip.iam.adapter.clientid}")
+    private String clientId;
+
+    @Value("${mosip.iam.adapter.clientsecret}")
+    private String secret;
+
+    @Value("${mosip.iam.adapter.appid}")
+    private String appId;
 
     @Autowired
     Environment environment;
@@ -101,6 +129,22 @@ public class RestApiClient {
         return result;
     }
 
+    public <T> T postApi(String uri, MediaType mediaType, Object requestType, Class<?> responseClass, boolean useBearerToken) throws Exception {
+        T result = null;
+        try {
+            logger.info("RestApiClient::postApi()::entry uri: {}", uri);
+            result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, useBearerToken), responseClass);
+        } catch (Exception e) {
+            logger.error("RestApiClient::postApi()::error uri: {} {} {}", uri, e.getMessage(), e);
+            System.setProperty("token", null);
+        }
+        return result;
+    }
+
+    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType) throws IOException {
+        return setRequestHeader(requestType, mediaType, false);
+    }
+
     /**
      * this method sets token to header of the request
      *
@@ -110,11 +154,19 @@ public class RestApiClient {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType) throws IOException {
+    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, boolean useBearerToken) throws IOException {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
         if (mediaType != null) {
             headers.add("Content-Type", mediaType.toString());
         }
+
+        if (useBearerToken) {
+            String bearerToken = System.getProperty("token");
+            if (bearerToken == null)
+                bearerToken = getBearerToken();
+            headers.add("Authorization", bearerToken);
+        }
+
         if (requestType != null) {
             try {
                 HttpEntity<Object> httpEntity = (HttpEntity<Object>) requestType;
@@ -131,5 +183,31 @@ public class RestApiClient {
             }
         } else
             return new HttpEntity<Object>(headers);
+    }
+
+    private String getBearerToken() throws IOException {
+
+        SecretKeyRequest request = new SecretKeyRequest(clientId, secret, appId);
+        RequestWrapper<SecretKeyRequest> req = new RequestWrapper<>();
+        req.setRequest(request);
+
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost(authBaseUrl);
+        Gson gson = new Gson();
+
+        StringEntity postingString = new StringEntity(gson.toJson(req));
+        post.setEntity(postingString);
+        post.setHeader("Content-type", "application/json");
+        HttpResponse response = httpClient.execute(post);
+        org.apache.http.HttpEntity entity = response.getEntity();
+        String responseBody = EntityUtils.toString(entity, "UTF-8");
+        Header[] cookie = response.getHeaders("Set-Cookie");
+        if (cookie.length == 0)
+            throw new TokenGenerationFailedException();
+        String token = response.getHeaders("Set-Cookie")[0].getValue();
+        token = token.replace(authorization, "");
+        token = "Bearer " + token.substring(0, token.indexOf(';'));
+        System.setProperty("token", token);
+        return token;
     }
 }
