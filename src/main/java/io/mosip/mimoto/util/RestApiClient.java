@@ -50,7 +50,7 @@ public class RestApiClient {
     @Qualifier("plainRestTemplate")
     private RestTemplate plainRestTemplate;
 
-    @Value("${mosip.authmanager.url}")
+    @Value("${mosip.authmanager.client-token-endpoint}")
     private String authBaseUrl;
 
     @Value("${mosip.iam.adapter.clientid}")
