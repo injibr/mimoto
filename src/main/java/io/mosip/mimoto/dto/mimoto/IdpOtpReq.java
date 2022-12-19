@@ -3,7 +3,8 @@ package io.mosip.mimoto.dto.mimoto;
 import lombok.Data;
 
 @Data
-public class IdpLinkCodeRequestDto {
+public class IdpOtpReq {
+
     private String requestTime;
-    private String transactionId;
+    private IdpOtpReqDto request;
 }
