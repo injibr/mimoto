@@ -5,6 +5,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.mimoto.core.http.RequestWrapper;
 import io.mosip.mimoto.dto.SecretKeyRequest;
 import io.mosip.mimoto.exception.TokenGenerationFailedException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -136,7 +138,12 @@ public class RestApiClient {
             result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, useBearerToken), responseClass);
         } catch (Exception e) {
             logger.error("RestApiClient::postApi()::error uri: {} {} {}", uri, e.getMessage(), e);
-            System.setProperty("token", null);
+            if (e instanceof HttpClientErrorException) {
+                HttpClientErrorException ex = (HttpClientErrorException)e;
+                if (ex.getStatusCode().value() == 401) {
+                    System.setProperty("token", "");
+                }
+            }
         }
         return result;
     }
@@ -162,7 +169,7 @@ public class RestApiClient {
 
         if (useBearerToken) {
             String bearerToken = System.getProperty("token");
-            if (bearerToken == null)
+            if (StringUtils.isEmpty(bearerToken))
                 bearerToken = getBearerToken();
             headers.add("Authorization", bearerToken);
         }
