@@ -40,7 +40,7 @@ public class Config extends WebSecurityConfigurerAdapter {
     private String origins;
 
     @Bean
-    @ConfigurationProperties(prefix = "mosip.inji")
+    @ConfigurationProperties(prefix = "inji_")
     public Map<String, String> injiConfig() {
         return new HashMap<>();
     }
