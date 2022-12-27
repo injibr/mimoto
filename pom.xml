@@ -21,6 +21,7 @@
             <!-- mosip -->
         <mosip.kernel.core.version>1.2.1-SNAPSHOT</mosip.kernel.core.version>
         <mosip.biometric.util.version>1.2.1-SNAPSHOT</mosip.biometric.util.version>
+        <mosip.kernel.auth.adapter.version>1.2.0.1-B1</mosip.kernel.auth.adapter.version>
 
             <!-- maven -->
         <maven.compiler.source>11</maven.compiler.source>
@@ -148,7 +149,7 @@
         <dependency>
             <groupId>io.mosip.kernel</groupId>
             <artifactId>kernel-auth-adapter</artifactId>
-            <version>${mosip.kernel.core.version}</version>
+            <version>${mosip.kernel.auth.adapter.version}</version>
         </dependency>
 
         <dependency>
