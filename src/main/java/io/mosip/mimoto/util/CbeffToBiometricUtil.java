@@ -1,24 +1,14 @@
 package io.mosip.mimoto.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.codec.binary.Base64;
-
+import io.mosip.kernel.biometrics.constant.BiometricType;
+import io.mosip.kernel.biometrics.entities.BIR;
 import io.mosip.kernel.core.logger.spi.Logger;
-import io.mosip.mimoto.constant.BiometricType;
 import io.mosip.mimoto.constant.LoggerFileConstant;
-import io.mosip.mimoto.entity.BIR;
-import io.mosip.mimoto.exception.BiometricException;
-import io.mosip.mimoto.exception.BiometricTagMatchException;
-import io.mosip.mimoto.exception.PlatformErrorMessages;
-import io.mosip.mimoto.model.KeyValuePair;
-import io.mosip.mimoto.service.impl.BioApiImpl;
 import io.mosip.mimoto.service.impl.CbeffImpl;
 import io.mosip.mimoto.spi.CbeffUtil;
-import io.mosip.mimoto.spi.IBioApi;
+import org.apache.commons.codec.binary.Base64;
+
+import java.util.List;
 
 /**
  * The Class CbeffToBiometricUtil.
@@ -33,7 +23,6 @@ public class CbeffToBiometricUtil {
     /** The cbeffutil. */
     private CbeffUtil cbeffutil = new CbeffImpl();
     /** the bioApi */
-    private IBioApi bioAPi = new BioApiImpl();
 
     /**
      * Instantiates a new cbeff to biometric util.
@@ -79,7 +68,7 @@ public class CbeffToBiometricUtil {
     /**
      * Gets the photo by type and sub type.
      *
-     * @param bIRTypeList the b IR type list
+     * @param bIRList the b IR type list
      * @param type        the type
      * @param subType     the sub type
      * @return the photo by type and sub type
@@ -125,40 +114,10 @@ public class CbeffToBiometricUtil {
     }
 
     /**
-     * Merge cbeff.
-     *
-     * @param cbeffFile1 the cbeff file 1
-     * @param cbeffFile2 the cbeff file 2
-     * @return the input stream
-     * @throws Exception the exception
-     */
-
-    public InputStream mergeCbeff(String cbeffFile1, String cbeffFile2) throws Exception {
-        byte[] mergedCbeffByte = null;
-        logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
-                "CbeffToBiometricUtil::mergeCbeff()::entry");
-
-        List<BIR> file1BirList = getBIRTypeList(cbeffFile1);
-        List<BIR> file2BirList = getBIRTypeList(cbeffFile2);
-
-        if (isBiometricTypeSame(file1BirList, file2BirList)) {
-            throw new BiometricTagMatchException(PlatformErrorMessages.MIMOTO_UTL_BIOMETRIC_TAG_MATCH.getCode());
-        }
-
-        file1BirList.addAll(file2BirList);
-        mergedCbeffByte = cbeffutil.createXML(file2BirList);
-
-        logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
-                "CbeffToBiometricUtil::mergeCbeff()::exit");
-
-        return new ByteArrayInputStream(mergedCbeffByte);
-    }
-
-    /**
      * Checks if is same type.
      *
-     * @param file1BirTypeList the file 1 bir type list
-     * @param file2BirTypeList the file 2 bir type list
+     * @param file1BirList the file 1 bir type list
+     * @param file2BirList the file 2 bir type list
      * @return true, if is same type
      */
     private boolean isBiometricTypeSame(List<BIR> file1BirList, List<BIR> file2BirList) {
@@ -179,51 +138,6 @@ public class CbeffToBiometricUtil {
     }
 
     /**
-     * Extract cbeff with types.
-     *
-     * @param cbeffFile the cbeff file
-     * @param types     the types
-     * @return the input stream
-     * @throws Exception the exception
-     */
-    public InputStream extractCbeffWithTypes(String cbeffFile, List<String> types) throws Exception {
-        List<BIR> extractedBIR = new ArrayList<>();
-        logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
-                "CbeffToBiometricUtil::extractCbeffWithTypes()::entry");
-
-        byte[] newCbeffByte = null;
-        List<BIR> file2BirTypeList = getBIRTypeList(cbeffFile);
-        for (BIR bir : file2BirTypeList) {
-            List<BiometricType> biometricTypeList = bir.getBdbInfo().getType();
-            for (String type : types) {
-                if (biometricTypeList.get(0).value().equalsIgnoreCase(type)) {
-                    extractedBIR.add(bir);
-                }
-            }
-        }
-        if (!extractedBIR.isEmpty()) {
-            newCbeffByte = cbeffutil.createXML(extractedBIR);
-        } else {
-            return null;
-        }
-        logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
-                "CbeffToBiometricUtil::extractCbeffWithTypes()::exit");
-
-        return new ByteArrayInputStream(newCbeffByte);
-    }
-
-    /**
-     * Convert BIRTYP eto BIR.
-     *
-     * @param listOfBIR the list of BIR
-     * @return the list
-     *//*
-         * public List<BIR> convertBIRTYPEtoBIR(List<BIRType> listOfBIR) {
-         * 
-         * return cbeffutil.convertBIRTypeToBIR(listOfBIR); }
-         */
-
-    /**
      * Gets the BIR type list.
      *
      * @param cbeffFileString the cbeff file string
@@ -233,29 +147,6 @@ public class CbeffToBiometricUtil {
 
     public List<BIR> getBIRTypeList(String cbeffFileString) throws Exception {
         return cbeffutil.getBIRDataFromXML(Base64.decodeBase64(cbeffFileString));
-    }
-
-    /**
-     * Gets the BIR type list.
-     * 
-     * @param xmlBytes byte array of XML data
-     * @return the BIR type list
-     * @throws Exception the exception
-     */
-    public List<BIR> getBIRDataFromXML(byte[] xmlBytes) throws Exception {
-        return cbeffutil.getBIRDataFromXML(xmlBytes);
-    }
-
-    /**
-     * Gets the BIR template
-     * 
-     * @param sample the sample
-     * @param flags  the flags
-     * @return the biometric record
-     * @throws BiometricException
-     */
-    public BIR extractTemplate(BIR sample, KeyValuePair[] flags) throws BiometricException {
-        return bioAPi.extractTemplate(sample, flags).getResponse();
     }
 
 }

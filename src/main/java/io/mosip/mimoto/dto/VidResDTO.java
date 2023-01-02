@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * This class will provide values to hold uin,vid and vidStatus
  * 
@@ -11,7 +13,7 @@ import lombok.Data;
  *
  */
 @Data
-public class VidResDTO {
+public class VidResDTO implements Serializable {
 
     /** The Value Of UIN in Decrypted value */
     @JsonProperty("UIN")

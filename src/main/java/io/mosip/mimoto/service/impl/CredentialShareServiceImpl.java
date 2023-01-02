@@ -30,6 +30,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 
+import io.mosip.kernel.biometrics.constant.BiometricType;
+import io.mosip.kernel.biometrics.entities.BDBInfo;
+import io.mosip.kernel.biometrics.entities.BIR;
 import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,7 +47,6 @@ import org.springframework.stereotype.Service;
 import io.mosip.biometrics.util.CommonUtil;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.websub.spi.PublisherClient;
-import io.mosip.mimoto.constant.BiometricType;
 import io.mosip.mimoto.constant.DocumentGeneratorExceptionCodeConstant;
 import io.mosip.mimoto.constant.EventId;
 import io.mosip.mimoto.constant.EventName;
@@ -57,8 +59,6 @@ import io.mosip.mimoto.dto.CryptoWithPinRequestDto;
 import io.mosip.mimoto.dto.CryptoWithPinResponseDto;
 import io.mosip.mimoto.dto.DataShare;
 import io.mosip.mimoto.dto.JsonValue;
-import io.mosip.mimoto.entity.BDBInfo;
-import io.mosip.mimoto.entity.BIR;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.CryptoManagerException;
 import io.mosip.mimoto.exception.DataShareException;
@@ -345,10 +345,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         if (credential == null) {
             throw new IdentityNotFoundException(PlatformErrorMessages.MIMOTO_PIS_IDENTITY_NOT_FOUND.getMessage());
         }
-        // Get JSON template from MOSIP config.
-        // String printTextFileJson = utilities.getPrintTextFileJson(utilities.getConfigServerFileStorageURL(),
-        //         utilities.getRegistrationProcessorPrintTextFile());
-        // JSONObject templateJSON = JsonUtil.objectMapperReadValue(printTextFileJson, JSONObject.class);
 
         // Use local JSON template to include biometrics.
         JSONObject templateJSON = utilities.getTemplate();
@@ -386,7 +382,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
      * Decode biometrics data from CBEFF and return biometrics JSON object.
      *
      * @param individualBiometric
-     * @param attributes
      * @return
      */
     public org.json.JSONObject getBiometricsDataJSON(String individualBiometric) {

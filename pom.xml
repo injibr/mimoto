@@ -22,6 +22,8 @@
         <mosip.kernel.core.version>1.2.1-SNAPSHOT</mosip.kernel.core.version>
         <mosip.biometric.util.version>1.2.1-SNAPSHOT</mosip.biometric.util.version>
         <mosip.kernel.auth.adapter.version>1.2.0.1-B1</mosip.kernel.auth.adapter.version>
+        <kernel.biometrics.api.version>1.2.1-SNAPSHOT</kernel.biometrics.api.version>
+        <vertx.version>3.9.1</vertx.version>
 
             <!-- maven -->
         <maven.compiler.source>11</maven.compiler.source>
@@ -79,7 +81,7 @@
 
 
         <sonar.coverage.exclusions>
-            **/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/dto/**,**/entity/**,**/model/**,**/exception/**,**/repository/**,**/security/**,**/*Config.java,**/*BootApplication.java,**/*VertxApplication.java,**/cbeffutil/**
+            **/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/dto/**,**/entity/**,**/model/**,**/exception/**,**/repository/**,**/security/**,**/*Config.java,**/*BootApplication.java,**/*VertxApplication.java,**/cbeffutil/**,**/core.http/**
         </sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/dto/**,**/entity/**,**/config/**</sonar.cpd.exclusions>
     </properties>
@@ -332,6 +334,12 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.25.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.mosip.kernel</groupId>
+            <artifactId>kernel-biometrics-api</artifactId>
+            <version>${kernel.biometrics.api.version}</version>
         </dependency>
 
 

@@ -17,7 +17,6 @@ import io.mosip.mimoto.util.AttestationOfflineVerify;
 import io.mosip.mimoto.util.AttestationOnlineVerify;
 import io.mosip.mimoto.util.LoggerUtil;
 
-@SpringBootApplication
 @RestController
 @RequestMapping(value = "/safetynet")
 public class AttestationServiceController {
@@ -37,7 +36,7 @@ public class AttestationServiceController {
      * @return
      */
     @PostMapping(path = "/offline/verify", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> processOffline(@RequestBody String attestation)
+    public ResponseEntity<Object> processOffline(@RequestBody String attestation)
     {
         try {
             AttestationStatement attestationStatement = attestationOfflineVerify.parseAndVerify(attestation);
@@ -58,7 +57,7 @@ public class AttestationServiceController {
      * @return
      */
     @PostMapping(path = "/online/verify", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> processOnline(@RequestBody String attestation)
+    public ResponseEntity<Object> processOnline(@RequestBody String attestation)
     {
         try {
             AttestationStatement attestationStatement = attestationOnlineVerify.parseAndVerify(attestation);
