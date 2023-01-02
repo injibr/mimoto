@@ -2,6 +2,8 @@ package io.mosip.mimoto.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * Instantiates a new data share.
  */
@@ -10,7 +12,7 @@ import lombok.Data;
  * Instantiates a new data share.
  */
 @Data
-public class DataShare {
+public class DataShare implements Serializable {
 
     /** The url. */
     private String url;

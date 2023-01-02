@@ -23,7 +23,6 @@ import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.DateUtils;
 import io.mosip.mimoto.util.LoggerUtil;
 
-@SpringBootApplication
 @RestController
 public class ResidentServiceController {
 
