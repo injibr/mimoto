@@ -2,6 +2,8 @@ package io.mosip.mimoto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.mosip.kernel.biometrics.spi.CbeffUtil;
+import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
 import org.json.simple.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,6 +30,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableScheduling
 @EnableAsync
 public class MimotoServiceApplication {
+    @Bean
+    @Primary
+    public CbeffUtil getCbeffUtil() {
+        return new CbeffImpl();
+    }
 
     @Bean
     public ThreadPoolTaskScheduler taskScheduler() {
