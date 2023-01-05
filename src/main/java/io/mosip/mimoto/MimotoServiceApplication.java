@@ -15,8 +15,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import io.mosip.mimoto.service.impl.CbeffImpl;
-import io.mosip.mimoto.spi.CbeffUtil;
 
 @SpringBootApplication(scanBasePackages = {
         "io.mosip.mimoto.*",
@@ -30,11 +28,6 @@ import io.mosip.mimoto.spi.CbeffUtil;
 @EnableScheduling
 @EnableAsync
 public class MimotoServiceApplication {
-    @Bean
-    @Primary
-    public CbeffUtil getCbeffUtil() {
-        return new CbeffImpl();
-    }
 
     @Bean
     public ThreadPoolTaskScheduler taskScheduler() {

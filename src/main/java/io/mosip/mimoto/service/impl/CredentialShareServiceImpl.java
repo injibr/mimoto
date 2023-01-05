@@ -1,39 +1,21 @@
 package io.mosip.mimoto.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
-
+import io.mosip.biometrics.util.CommonUtil;
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BDBInfo;
 import io.mosip.kernel.biometrics.entities.BIR;
-import org.joda.time.DateTime;
+import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.kernel.core.websub.spi.PublisherClient;
+import io.mosip.mimoto.constant.*;
+import io.mosip.mimoto.dto.CryptoWithPinRequestDto;
+import io.mosip.mimoto.dto.CryptoWithPinResponseDto;
+import io.mosip.mimoto.dto.JsonValue;
+import io.mosip.mimoto.exception.*;
+import io.mosip.mimoto.model.EventModel;
+import io.mosip.mimoto.service.CredentialShareService;
+import io.mosip.mimoto.service.RestClientService;
+import io.mosip.mimoto.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -44,48 +26,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import io.mosip.biometrics.util.CommonUtil;
-import io.mosip.kernel.core.logger.spi.Logger;
-import io.mosip.kernel.core.websub.spi.PublisherClient;
-import io.mosip.mimoto.constant.DocumentGeneratorExceptionCodeConstant;
-import io.mosip.mimoto.constant.EventId;
-import io.mosip.mimoto.constant.EventName;
-import io.mosip.mimoto.constant.EventType;
-import io.mosip.mimoto.constant.IdType;
-import io.mosip.mimoto.constant.LoggerFileConstant;
-import io.mosip.mimoto.constant.ModuleName;
-import io.mosip.mimoto.constant.PlatformSuccessMessages;
-import io.mosip.mimoto.dto.CryptoWithPinRequestDto;
-import io.mosip.mimoto.dto.CryptoWithPinResponseDto;
-import io.mosip.mimoto.dto.DataShare;
-import io.mosip.mimoto.dto.JsonValue;
-import io.mosip.mimoto.exception.ApiNotAccessibleException;
-import io.mosip.mimoto.exception.CryptoManagerException;
-import io.mosip.mimoto.exception.DataShareException;
-import io.mosip.mimoto.exception.DocumentGeneratorException;
-import io.mosip.mimoto.exception.ExceptionUtils;
-import io.mosip.mimoto.exception.IdentityNotFoundException;
-import io.mosip.mimoto.exception.ParsingException;
-import io.mosip.mimoto.exception.PlatformErrorMessages;
-import io.mosip.mimoto.exception.UINNotFoundInDatabase;
-import io.mosip.mimoto.model.CredentialStatusEvent;
-import io.mosip.mimoto.model.EventModel;
-import io.mosip.mimoto.model.StatusEvent;
-import io.mosip.mimoto.service.CredentialShareService;
-import io.mosip.mimoto.service.RestClientService;
-import io.mosip.mimoto.spi.CbeffUtil;
-import io.mosip.mimoto.util.AuditLogRequestBuilder;
-import io.mosip.mimoto.util.CbeffToBiometricUtil;
-import io.mosip.mimoto.util.CryptoCoreUtil;
-import io.mosip.mimoto.util.CryptoUtil;
-import io.mosip.mimoto.util.DataShareUtil;
-import io.mosip.mimoto.util.DateUtils;
-import io.mosip.mimoto.util.JsonUtil;
-import io.mosip.mimoto.util.LogDescription;
-import io.mosip.mimoto.util.LoggerUtil;
-import io.mosip.mimoto.util.RestApiClient;
-import io.mosip.mimoto.util.Utilities;
-import io.mosip.mimoto.util.WebSubSubscriptionHelper;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
 
 @Service
 public class CredentialShareServiceImpl implements CredentialShareService {
@@ -116,29 +70,14 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     @Autowired
     public CryptoCoreUtil cryptoCoreUtil;
 
-    /** The Constant FILE_SEPARATOR. */
-    public static final String FILE_SEPARATOR = File.separator;
+    @Autowired
+    CbeffToBiometricUtil util;
 
     /** The Constant VALUE. */
     public static final String VALUE = "value";
 
-    /** The Constant UIN_CARD_TEMPLATE. */
-    public static final String UIN_CARD_TEMPLATE = "RPR_UIN_CARD_TEMPLATE";
-
-    /** The Constant MASKED_UIN_CARD_TEMPLATE. */
-    public static final String MASKED_UIN_CARD_TEMPLATE = "RPR_MASKED_UIN_CARD_TEMPLATE";
-
-    /** The Constant FACE. */
-    public static final String FACE = "Face";
-
     /** The Constant UIN_TEXT_FILE. */
     public static final String UIN_TEXT_FILE = "textFile";
-
-    /** The Constant APPLICANT_PHOTO. */
-    public static final String APPLICANT_PHOTO = "ApplicantPhoto";
-
-    /** The Constant UINCARDPASSWORD. */
-    public static final String UINCARDPASSWORD = "mosip.registration.processor.print.service.uincard.password";
 
     private Logger logger = LoggerUtil.getLogger(CredentialShareServiceImpl.class);
 
@@ -147,54 +86,34 @@ public class CredentialShareServiceImpl implements CredentialShareService {
 
     /** The core audit request builder. */
     @Autowired
-    public AuditLogRequestBuilder auditLogRequestBuilder;
+    private AuditLogRequestBuilder auditLogRequestBuilder;
 
     /** The utilities. */
     @Autowired
-    public Utilities utilities;
+    private Utilities utilities;
 
     /** The rest client service. */
     @Autowired
-    public RestClientService<Object> restClientService;
-
-    /** The Constant INDIVIDUAL_BIOMETRICS. */
-    public static final String INDIVIDUAL_BIOMETRICS = "individualBiometrics";
-
-    /** The Constant VID_CREATE_ID. */
-    public static final String VID_CREATE_ID = "registration.processor.id.repo.generate";
-
-    /** The Constant REG_PROC_APPLICATION_VERSION. */
-    public static final String REG_PROC_APPLICATION_VERSION = "registration.processor.id.repo.vidVersion";
-
-    /** The Constant DATETIME_PATTERN. */
-    public static final String DATETIME_PATTERN = "mosip.print.datetime.pattern";
-
-    public static final String NAME = "name";
-
-    public static final String VID_TYPE = "registration.processor.id.repo.vidType";
-
-    /** The cbeffutil. */
-    @Autowired
-    public CbeffUtil cbeffutil;
+    private RestClientService<Object> restClientService;
 
     /** The env. */
     @Autowired
-    public Environment env;
+    private Environment env;
 
     @Autowired
-    public PublisherClient<String, Object, HttpHeaders> pb;
+    private PublisherClient<String, Object, HttpHeaders> pb;
 
     @Value("${mosip.datashare.partner.id}")
-    public String partnerId;
+    private String partnerId;
 
     @Value("${mosip.datashare.policy.id}")
-    public String policyId;
+    private String policyId;
 
     @Value("${mosip.template-language}")
-    public String templateLang;
+    private String templateLang;
 
     @Value("#{'${mosip.mandatory-languages:}'.concat('${mosip.optional-languages:}')}")
-    public String supportedLang;
+    private String supportedLang;
 
     public boolean generateDocuments(EventModel eventModel) throws Exception {
         Path eventFilePath = Path.of(utilities.getDataPath(),
@@ -292,14 +211,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             // statusUpdate(requestId, textFileByte, credentialType);
             isTransactionSuccessful = true;
 
-        } catch (UINNotFoundInDatabase e) {
-            description.setMessage(PlatformErrorMessages.MIMOTO_UIN_NOT_FOUND_IN_DATABASE.getMessage());
-            description.setCode(PlatformErrorMessages.MIMOTO_UIN_NOT_FOUND_IN_DATABASE.getCode());
-
-            logger.error(PlatformErrorMessages.MIMOTO_UIN_NOT_FOUND_IN_DATABASE.name(), e);
-            throw new DocumentGeneratorException(DocumentGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-                    e.getErrorText());
-
         } catch (Exception e) {
             description.setMessage(PlatformErrorMessages.MIMOTO_DOCUMENT_GENERATION_FAILED.getMessage());
             description.setCode(PlatformErrorMessages.MIMOTO_DOCUMENT_GENERATION_FAILED.getCode());
@@ -345,7 +256,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         if (credential == null) {
             throw new IdentityNotFoundException(PlatformErrorMessages.MIMOTO_PIS_IDENTITY_NOT_FOUND.getMessage());
         }
-
         // Use local JSON template to include biometrics.
         JSONObject templateJSON = utilities.getTemplate();
         Set<String> templateKeys = templateJSON.keySet();
@@ -374,7 +284,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                 }
             }
         }
-
         return outputJSON.toString().getBytes();
     }
 
@@ -387,7 +296,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     public org.json.JSONObject getBiometricsDataJSON(String individualBiometric) {
         org.json.JSONObject biometrics = new org.json.JSONObject();
         if (individualBiometric != null) {
-            CbeffToBiometricUtil util = new CbeffToBiometricUtil(cbeffutil);
             try {
                 List<BIR> bIRTypeList = util.getBIRTypeList(individualBiometric);
                 for (int i = 0; i < bIRTypeList.size(); i++) {
@@ -437,78 +345,8 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         return signature;
     }
 
-    /**
-     * Gets the artifacts.
-     *
-     * @param jsonString the id json string
-     * @param attribute    the attribute
-     * @return the artifacts
-     * @throws IOException    Signals that an I/O exception has occurred.
-     * @throws ParseException
-     */
-    @SuppressWarnings("unchecked")
-    public void setTemplateAttributes(String jsonString, Map<String, Object> attribute)
-            throws IOException, ParseException {
-        try {
-            JSONObject demographicIdentity = JsonUtil.objectMapperReadValue(jsonString, JSONObject.class);
-            if (demographicIdentity == null)
-                throw new IdentityNotFoundException(PlatformErrorMessages.MIMOTO_PIS_IDENTITY_NOT_FOUND.getMessage());
-
-            String mapperJsonString = utilities.getIdentityMappingJson(utilities.getConfigServerFileStorageURL(),
-                    utilities.getGetRegProcessorIdentityJson());
-            JSONObject mapperJson = JsonUtil.objectMapperReadValue(mapperJsonString, JSONObject.class);
-            JSONObject mapperIdentity = JsonUtil.getJSONObject(mapperJson,
-                    utilities.getGetRegProcessorDemographicIdentity());
-
-            List<String> mapperJsonKeys = new ArrayList<>(mapperIdentity.keySet());
-            for (String key : mapperJsonKeys) {
-                LinkedHashMap<String, String> jsonObject = JsonUtil.getJSONValue(mapperIdentity, key);
-                Object obj = null;
-                String values = jsonObject.get(VALUE);
-                for (String value : values.split(",")) {
-                    // Object object = demographicIdentity.get(value);
-                    Object object = demographicIdentity.get(value);
-                    if (object != null) {
-                        try {
-                            obj = new JSONParser().parse(object.toString());
-                        } catch (Exception e) {
-                            obj = object;
-                        }
-
-                        if (obj instanceof JSONArray) {
-                            // JSONArray node = JsonUtil.getJSONArray(demographicIdentity, value);
-                            JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, (JSONArray) obj);
-                            for (JsonValue jsonValue : jsonValues) {
-                                /*
-                                 * if (jsonValue.getLanguage().equals(primaryLang)) attribute.put(value + "_" +
-                                 * primaryLang, jsonValue.getValue()); if
-                                 * (jsonValue.getLanguage().equals(secondaryLang)) attribute.put(value + "_" +
-                                 * secondaryLang, jsonValue.getValue());
-                                 */
-                                if (supportedLang.contains(jsonValue.getLanguage()))
-                                    attribute.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
-
-                            }
-
-                        } else if (object instanceof JSONObject) {
-                            JSONObject json = (JSONObject) object;
-                            attribute.put(value, (String) json.get(VALUE));
-                        } else {
-                            attribute.put(value, String.valueOf(object));
-                        }
-                    }
-
-                }
-            }
-
-        } catch (JsonParseException | JsonMappingException e) {
-            logger.error("Error while parsing Json file", e);
-            throw new ParsingException(PlatformErrorMessages.MIMOTO_RGS_JSON_PARSING_EXCEPTION.getMessage(), e);
-        }
-    }
-
     @SuppressWarnings("unused")
-    public byte[] extractFaceImageData(byte[] decodedBioValue) {
+    private byte[] extractFaceImageData(byte[] decodedBioValue) {
 
         try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(decodedBioValue))) {
 
@@ -558,39 +396,8 @@ public class CredentialShareServiceImpl implements CredentialShareService {
 
     public String getCredentialSubject(String credential) {
         org.json.JSONObject jsonObject = new org.json.JSONObject(credential);
-        String credentialSubject = jsonObject.get("credentialSubject").toString();
+            String credentialSubject = jsonObject.get("credentialSubject").toString();
         return credentialSubject;
-    }
-
-    /**
-     * Create datashare and update printing status via websub.
-     * Should be call at the end of the event handler section.
-     *
-     * @param requestId
-     * @param data
-     * @param credentialType
-     * @throws DataShareException
-     * @throws ApiNotAccessibleException
-     * @throws IOException
-     * @throws Exception
-     */
-    public void statusUpdate(String requestId, byte[] data, String credentialType)
-            throws DataShareException, ApiNotAccessibleException, IOException, Exception {
-        DataShare dataShare = null;
-        dataShare = dataShareUtil.getDataShare(data, policyId, partnerId);
-        CredentialStatusEvent creEvent = new CredentialStatusEvent();
-        LocalDateTime currentDtime = DateUtils.getUTCCurrentDateTime();
-        StatusEvent sEvent = new StatusEvent();
-        sEvent.setId(UUID.randomUUID().toString());
-        sEvent.setRequestId(requestId);
-        sEvent.setStatus("printing");
-        sEvent.setUrl(dataShare.getUrl());
-        sEvent.setTimestamp(Timestamp.valueOf(currentDtime).toString());
-        creEvent.setPublishedOn(new DateTime().toString());
-        creEvent.setPublisher("PRINT_SERVICE");
-        creEvent.setTopic(topic);
-        creEvent.setEvent(sEvent);
-        webSubSubscriptionHelper.publish(topic, creEvent);
     }
 
     /**
