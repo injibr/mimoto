@@ -64,8 +64,9 @@ public class IdpController {
             WalletBindingInnerRequestDto innerRequestDto = new WalletBindingInnerRequestDto();
             innerRequestDto.setChallengeList(requestDTO.getRequest().getChallengeList());
             innerRequestDto.setIndividualId(requestDTO.getRequest().getIndividualId());
-            innerRequestDto.setTransactionId(requestDTO.getRequest().getTransactionId());
             innerRequestDto.setPublicKey(JoseUtil.getJwkFromPublicKey(requestDTO.getRequest().getPublicKey()));
+            innerRequestDto.setAuthFactorType(requestDTO.getRequest().getAuthFactorType());
+            innerRequestDto.setFormat(requestDTO.getRequest().getFormat());
 
             WalletBindingInternalRequestDTO req = new WalletBindingInternalRequestDTO(requestDTO.getRequestTime(), innerRequestDto);
 
@@ -73,7 +74,7 @@ public class IdpController {
                     .postApi(ApiName.WALLET_BINDING,
                             req, ResponseWrapper.class, useBearerToken);
         } catch (Exception e) {
-            logger.error("Wallet binding error occured for tranaction id " + requestDTO.getRequest().getTransactionId(), e);
+            logger.error("Wallet binding error occured for tranaction id " + requestDTO.getRequest().getIndividualId(), e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_WALLET_BINDING_EXCEPTION.getCode(), e.getMessage());
         }
 

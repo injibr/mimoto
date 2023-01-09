@@ -6,4 +6,5 @@ import lombok.Data;
 public class IdpChallangeDto {
     private String authFactorType;
     private String challenge;
+    private String format;
 }
