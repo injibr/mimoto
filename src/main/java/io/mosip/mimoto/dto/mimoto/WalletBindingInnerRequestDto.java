@@ -7,8 +7,9 @@ import java.util.List;
 
 @Data
 public class WalletBindingInnerRequestDto {
-    private String transactionId;
     private String individualId;
     private List<IdpChallangeDto> challengeList;
     private JwkDto publicKey;
+    private String authFactorType;
+    private String format;
 }

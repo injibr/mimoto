@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class WalletBindingResponseDto {
-    private String transactionId;
+    private String certificate;
     private String encryptedWalletBindingId;
     private String expireDateTime;
 }
