@@ -286,7 +286,7 @@ public class InjiControllerTest {
         LinkTransactionResponseDto response = new LinkTransactionResponseDto();
 
         Mockito.when(restClientService.postApi(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
+                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/link-transaction").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDTO)))
@@ -302,7 +302,7 @@ public class InjiControllerTest {
         IdpAuthInternalRequestDto innerDto = new IdpAuthInternalRequestDto();
         innerDto.setLinkedTransactionId("LinkedTransactionId");
         innerDto.setIndividualId("individualId");
-        IdpChallangeDto challangeDto = new IdpChallangeDto();
+        IdpAuthChallangeDto challangeDto = new IdpAuthChallangeDto();
         challangeDto.setAuthFactorType("OTP");
         challangeDto.setChallenge("1234");
         innerDto.setChallengeList(Lists.newArrayList(challangeDto));
@@ -319,7 +319,7 @@ public class InjiControllerTest {
         ResponseWrapper<LinkedTransactionResponseDto> response = new ResponseWrapper<>();
 
         Mockito.when(restClientService.postApi(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(otpResponse).thenReturn(response).thenReturn(otpResponse2);
+                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(otpResponse).thenReturn(response).thenReturn(otpResponse2);
 
         this.mockMvc.perform(post("/idp-authenticate").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDto)))
@@ -343,7 +343,7 @@ public class InjiControllerTest {
         ResponseWrapper<LinkedTransactionResponseDto> response = new ResponseWrapper<>();
 
         Mockito.when(restClientService.postApi(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
+                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/idp-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDto)))
@@ -367,7 +367,7 @@ public class InjiControllerTest {
         ResponseWrapper<CredentialRequestResponseDTO> response = new ResponseWrapper<>();
 
         Mockito.when(restClientService.postApi(Mockito.any(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response);
 
         this.mockMvc.perform(post("/req/otp").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDTO)))

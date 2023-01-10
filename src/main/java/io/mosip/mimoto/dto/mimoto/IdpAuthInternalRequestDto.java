@@ -8,5 +8,5 @@ import java.util.List;
 public class IdpAuthInternalRequestDto {
     private String linkedTransactionId;
     private String individualId;
-    private List<IdpChallangeDto> challengeList;
+    private List<IdpAuthChallangeDto> challengeList;
 }

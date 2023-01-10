@@ -89,8 +89,8 @@ public class IdpController {
             IdpLinkCodeDto dto = new IdpLinkCodeDto(requestDTO.getLinkCode());
             IdpLinkTransactionReqDto reqDto = new IdpLinkTransactionReqDto(requestDTO.getRequestTime(), dto);
             res = (LinkTransactionResponseDto) restClientService
-                    .postApi(ApiName.IDP_LINK_TRANSACTION, null, null,
-                            reqDto, LinkTransactionResponseDto.class);
+                    .postApi(ApiName.IDP_LINK_TRANSACTION,
+                            reqDto, LinkTransactionResponseDto.class, useBearerToken);
         } catch (Exception e) {
             logger.error("link-transaction error error occured for link code " + requestDTO.getLinkCode(), e);
             res = new LinkTransactionResponseDto(DateUtils.getRequestTimeString(), null,
@@ -111,8 +111,8 @@ public class IdpController {
             callIdpOtpApi(requestDTO);
 
             response = (ResponseWrapper<LinkedTransactionResponseDto>) restClientService
-                    .postApi(ApiName.IDP_AUTHENTICATE, null, null,
-                            requestDTO, ResponseWrapper.class);
+                    .postApi(ApiName.IDP_AUTHENTICATE,
+                            requestDTO, ResponseWrapper.class, useBearerToken);
         } catch (Exception e) {
             logger.error("idp-authenticate error error occured for link code " + requestDTO.getRequest().getLinkedTransactionId(), e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_WALLET_BINDING_EXCEPTION.getCode(), e.getMessage());
@@ -128,8 +128,8 @@ public class IdpController {
         ResponseWrapper<LinkedTransactionResponseDto> response = null;
         try {
             response = (ResponseWrapper<LinkedTransactionResponseDto>) restClientService
-                    .postApi(ApiName.IDP_CONSENT, null, null,
-                            requestDTO, ResponseWrapper.class);
+                    .postApi(ApiName.IDP_CONSENT,
+                            requestDTO, ResponseWrapper.class,useBearerToken);
         } catch (Exception e) {
             logger.error("link-transaction error error occured for link code " + requestDTO.getRequest().getLinkedTransactionId(), e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_WALLET_BINDING_EXCEPTION.getCode(), e.getMessage());
@@ -173,8 +173,8 @@ public class IdpController {
         req.setRequest(internalRequest);
 
         ResponseWrapper<BindingOtpResponseDto> response = (ResponseWrapper<BindingOtpResponseDto>) restClientService
-                .postApi(ApiName.IDP_OTP, null, null,
-                        req, ResponseWrapper.class);
+                .postApi(ApiName.IDP_OTP,
+                        req, ResponseWrapper.class, useBearerToken);
 
         if (response.getResponse() == null)
             throw new ApisResourceAccessException("Idp otp api not accessible");
