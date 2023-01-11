@@ -33,7 +33,10 @@ public class IdpController {
     private Gson gson = new Gson();
 
     @Autowired
-    public RestClientService<Object> restClientService;
+    private RestClientService<Object> restClientService;
+
+    @Autowired
+    private JoseUtil joseUtil;
 
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
@@ -70,9 +73,12 @@ public class IdpController {
 
             WalletBindingInternalRequestDTO req = new WalletBindingInternalRequestDTO(requestDTO.getRequestTime(), innerRequestDto);
 
-            response = (ResponseWrapper<WalletBindingResponseDto>) restClientService
+            ResponseWrapper<WalletBindingInternalResponseDto> internalResponse = (ResponseWrapper<WalletBindingInternalResponseDto>) restClientService
                     .postApi(ApiName.WALLET_BINDING,
                             req, ResponseWrapper.class, useBearerToken);
+
+            response = joseUtil.addThumbprintAndKeyId(internalResponse);
+
         } catch (Exception e) {
             logger.error("Wallet binding error occured for tranaction id " + requestDTO.getRequest().getIndividualId(), e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_WALLET_BINDING_EXCEPTION.getCode(), e.getMessage());
@@ -108,7 +114,7 @@ public class IdpController {
 
         try {
             // calling mock otp code which should be removed once idp backend is ready
-            callIdpOtpApi(requestDTO);
+            //callIdpOtpApi(requestDTO);
 
             response = (ResponseWrapper<LinkedTransactionResponseDto>) restClientService
                     .postApi(ApiName.IDP_AUTHENTICATE,
@@ -162,7 +168,7 @@ public class IdpController {
      * @param requestDTO
      * @return
      */
-    private void callIdpOtpApi(IdpAuthRequestDto requestDTO) throws ApisResourceAccessException {
+    /*private void callIdpOtpApi(IdpAuthRequestDto requestDTO) throws ApisResourceAccessException {
 
         IdpOtpReq req = new IdpOtpReq();
         req.setRequestTime(requestDTO.getRequestTime());
@@ -179,5 +185,5 @@ public class IdpController {
         if (response.getResponse() == null)
             throw new ApisResourceAccessException("Idp otp api not accessible");
 
-    }
+    }*/
 }

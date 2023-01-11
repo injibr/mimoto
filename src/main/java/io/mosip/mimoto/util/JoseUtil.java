@@ -1,21 +1,37 @@
 package io.mosip.mimoto.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.X509CertUtils;
+import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.CryptoUtil;
+import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.mimoto.JwkDto;
+import io.mosip.mimoto.dto.mimoto.WalletBindingInternalResponseDto;
+import io.mosip.mimoto.dto.mimoto.WalletBindingResponseDto;
+import org.jose4j.jws.JsonWebSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.UUID;
 
+@Component
 public class JoseUtil {
+
+    private final Logger logger = LoggerUtil.getLogger(JoseUtil.class);
+
+    @Autowired
+    private ObjectMapper mapper;
 
     public static JwkDto getJwkFromPublicKey(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
         String key = publicKeyString.replaceAll("\\n", "")
@@ -38,5 +54,44 @@ public class JoseUtil {
         JwkDto jwkDto = new JwkDto(jwk.getKeyType().toString(), ((RSAKey) jwk).getPublicExponent().toString(), ((RSAKey) jwk).getModulus().toString());
         return jwkDto;
 
+    }
+
+
+    public ResponseWrapper<WalletBindingResponseDto> addThumbprintAndKeyId(ResponseWrapper<WalletBindingInternalResponseDto> responseDto) {
+
+        logger.debug("Inside addThumbprintAndKeyId ");
+
+        ResponseWrapper<WalletBindingResponseDto> responseWrapper = new ResponseWrapper<>();
+        responseWrapper.setId(responseDto.getId());
+        responseWrapper.setResponsetime(responseDto.getResponsetime());
+        responseWrapper.setVersion(responseDto.getVersion());
+        responseWrapper.setErrors(responseDto.getErrors());
+
+        try {
+            if (responseDto.getResponse() != null) {
+                WalletBindingInternalResponseDto resp = mapper.readValue(
+                        mapper.writeValueAsString(responseDto.getResponse()), WalletBindingInternalResponseDto.class);
+                // generate thumbprint and key id
+                String certificate = resp.getCertificate();
+                X509Certificate x509Certificate = X509CertUtils.parse(certificate);
+                JsonWebSignature jwSign = new JsonWebSignature();
+                jwSign.setKeyIdHeaderValue(x509Certificate.getSerialNumber().toString(10));
+                jwSign.setX509CertSha256ThumbprintHeaderValue(x509Certificate);
+
+                // map fields with thumbprint and key id
+                WalletBindingResponseDto response = new WalletBindingResponseDto();
+                response.setCertificate(resp.getCertificate());
+                response.setEncryptedWalletBindingId(resp.getEncryptedWalletBindingId());
+                response.setExpireDateTime(resp.getExpireDateTime());
+                response.setKeyId(jwSign.getX509CertSha256ThumbprintHeaderValue());
+                response.setThumbprint(jwSign.getX509CertSha256ThumbprintHeaderValue());
+
+                responseWrapper.setResponse(response);
+            }
+        } catch (Exception e) {
+            logger.error("Exception occured while setting thumbprint ", e);
+        }
+
+        return responseWrapper;
     }
 }
