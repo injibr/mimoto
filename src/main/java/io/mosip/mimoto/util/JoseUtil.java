@@ -83,7 +83,7 @@ public class JoseUtil {
                 response.setCertificate(resp.getCertificate());
                 response.setEncryptedWalletBindingId(resp.getEncryptedWalletBindingId());
                 response.setExpireDateTime(resp.getExpireDateTime());
-                response.setKeyId(jwSign.getX509CertSha256ThumbprintHeaderValue());
+                response.setKeyId(jwSign.getKeyIdHeaderValue());
                 response.setThumbprint(jwSign.getX509CertSha256ThumbprintHeaderValue());
 
                 responseWrapper.setResponse(response);
