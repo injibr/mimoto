@@ -10,10 +10,10 @@ public class IndividualIdOTPRequestDTO {
 
     private String id;
     private String version;
-    private String transactionID;
+    private String transactionId;
     private String requestTime;
     private List<String> otpChannel;
-    private String aid;
+    private String individualId;
     private Map<String, Object> metadata;
 
 }

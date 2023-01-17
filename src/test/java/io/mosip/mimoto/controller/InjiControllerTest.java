@@ -10,6 +10,7 @@ import io.mosip.mimoto.TestBootApplication;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
+import io.mosip.mimoto.exception.ApisResourceAccessException;
 import io.mosip.mimoto.exception.BaseUncheckedException;
 import io.mosip.mimoto.model.Event;
 import io.mosip.mimoto.model.EventModel;
@@ -294,6 +295,40 @@ public class InjiControllerTest {
 
         this.mockMvc.perform(post("/link-transaction").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void idpAuthAndConsentTest() throws Exception {
+        AuthAndConsentRequestDto innerDto = new AuthAndConsentRequestDto();
+        innerDto.setLinkedTransactionId("LinkedTransactionId");
+        innerDto.setIndividualId("individualId");
+        innerDto.setLinkedTransactionId("LinkedTransactionId");
+        innerDto.setAcceptedClaims(Lists.newArrayList("OTP"));
+        IdpAuthChallangeDto challangeDto = new IdpAuthChallangeDto();
+        challangeDto.setAuthFactorType("OTP");
+        challangeDto.setChallenge("1234");
+        innerDto.setChallengeList(Lists.newArrayList(challangeDto));
+        IdpAuthAndConsentDto requestDto = new IdpAuthAndConsentDto();
+        requestDto.setRequestTime(DateUtils.getUTCCurrentDateTimeString());
+        requestDto.setRequest(innerDto);
+
+
+        LinkedTransactionResponseDto resp = new LinkedTransactionResponseDto();
+        resp.setLinkedTransactionId("linkedTransactionId");
+        ResponseWrapper<LinkedTransactionResponseDto> responseWrapper = new ResponseWrapper<>();
+        responseWrapper.setResponse(resp);
+
+        Mockito.when(restClientService.postApi(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(responseWrapper)
+                .thenReturn(responseWrapper).thenThrow(new ApisResourceAccessException("exception"));
+
+        this.mockMvc.perform(post("/idp-auth-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
+                .andExpect(status().isOk());
+
+        this.mockMvc.perform(post("/idp-auth-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
                 .andExpect(status().isOk());
     }
 
