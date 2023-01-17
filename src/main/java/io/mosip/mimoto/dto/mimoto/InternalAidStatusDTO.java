@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IdpAuthRequestDto {
-    private String requestTime;
-    private IdpAuthInternalRequestDto request;
+public class InternalAidStatusDTO {
+
+	private String individualId;
+	private String otp;
+	private String transactionId;
+	
 }

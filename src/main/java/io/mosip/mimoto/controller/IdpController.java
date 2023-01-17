@@ -1,5 +1,6 @@
 package io.mosip.mimoto.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import io.mosip.kernel.core.logger.spi.Logger;
@@ -38,6 +39,9 @@ public class IdpController {
     @Autowired
     private JoseUtil joseUtil;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@RequestBody BindingOtpRequestDto requestDTO) throws Exception {
@@ -51,8 +55,6 @@ public class IdpController {
             logger.error("Wallet binding otp error occured.", e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_OTP_BINDING_EXCEPTION.getCode(), e.getMessage());
         }
-
-
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -104,6 +106,46 @@ public class IdpController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @PostMapping("idp-auth-consent")
+    public ResponseEntity<Object> idpAuthAndConsent(@RequestBody IdpAuthAndConsentDto requestDTO) throws Exception {
+        logger.debug("Received idp-authenticate request : " + JsonUtils.javaObjectToJsonString(requestDTO));
+
+        AuthAndConsentRequestDto req = requestDTO.getRequest();
+
+        IdpAuthRequestDto authReqDto = new IdpAuthRequestDto(requestDTO.getRequestTime(),
+                new IdpAuthInternalRequestDto(req.getLinkedTransactionId(),
+                        req.getIndividualId(), req.getChallengeList()));
+
+
+        ResponseWrapper<LinkedTransactionResponseDto> idpResponse = null;
+
+        try {
+            ResponseWrapper<LinkedTransactionResponseDto> response = (ResponseWrapper<LinkedTransactionResponseDto>) restClientService
+                    .postApi(ApiName.IDP_AUTHENTICATE,
+                            authReqDto, new ResponseWrapper<LinkedTransactionResponseDto>().getClass(), useBearerToken);
+
+            if (response != null && response.getResponse() != null && response.getResponse() != null) {
+                LinkedTransactionResponseDto resp = objectMapper.readValue(
+                        JsonUtils.javaObjectToJsonString(response.getResponse()), LinkedTransactionResponseDto.class);
+                IdpConsentDto idpConsentRequestDto = new IdpConsentDto(requestDTO.getRequestTime(),
+                        new IdpConsentRequestDto(resp.getLinkedTransactionId(),
+                                req.getAcceptedClaims(), req.getPermittedAuthorizeScopes()));
+
+                idpResponse = (ResponseWrapper<LinkedTransactionResponseDto>) restClientService
+                        .postApi(ApiName.IDP_CONSENT,
+                                idpConsentRequestDto, ResponseWrapper.class,useBearerToken);
+            } else {
+                idpResponse = response;
+            }
+
+        } catch (Exception e) {
+            logger.error("idp-auth-consent error error occured for link code " + requestDTO.getRequest().getLinkedTransactionId(), e);
+            idpResponse = getErrorResponse(PlatformErrorMessages.MIMOTO_WALLET_BINDING_EXCEPTION.getCode(), e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(idpResponse);
     }
 
     @PostMapping("idp-authenticate")
@@ -161,29 +203,4 @@ public class IdpController {
         ErrorDTO errorDTO = new ErrorDTO(errorCode, errorMessage);
         return Lists.newArrayList(errorDTO);
     }
-
-    /**
-     * To be cleaned up later
-     *
-     * @param requestDTO
-     * @return
-     */
-    /*private void callIdpOtpApi(IdpAuthRequestDto requestDTO) throws ApisResourceAccessException {
-
-        IdpOtpReq req = new IdpOtpReq();
-        req.setRequestTime(requestDTO.getRequestTime());
-
-        IdpOtpReqDto internalRequest = new IdpOtpReqDto(requestDTO.getRequest().getLinkedTransactionId(),
-                requestDTO.getRequest().getIndividualId(), Lists.newArrayList("EMAIL"));
-
-        req.setRequest(internalRequest);
-
-        ResponseWrapper<BindingOtpResponseDto> response = (ResponseWrapper<BindingOtpResponseDto>) restClientService
-                .postApi(ApiName.IDP_OTP,
-                        req, ResponseWrapper.class, useBearerToken);
-
-        if (response.getResponse() == null)
-            throw new ApisResourceAccessException("Idp otp api not accessible");
-
-    }*/
 }

@@ -1,16 +1,14 @@
 package io.mosip.mimoto.dto.mimoto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class IdpConsentRequestDto {
+public class AuthAndConsentRequestDto {
     private String linkedTransactionId;
+    private String individualId;
     private List<String> acceptedClaims;
     private List<String> permittedAuthorizeScopes;
+    private List<IdpAuthChallangeDto> challengeList;
 }
