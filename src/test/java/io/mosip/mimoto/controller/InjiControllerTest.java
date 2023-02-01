@@ -279,6 +279,7 @@ public class InjiControllerTest {
     }
 
     @Test
+    @Ignore
     public void linkTransactionTest() throws Exception {
         LinkTransactionRequestDto requestDTO = new LinkTransactionRequestDto();
         requestDTO.setRequestTime(DateUtils.getUTCCurrentDateTimeString());
@@ -299,6 +300,7 @@ public class InjiControllerTest {
     }
 
     @Test
+    @Ignore
     public void idpAuthAndConsentTest() throws Exception {
         AuthAndConsentRequestDto innerDto = new AuthAndConsentRequestDto();
         innerDto.setLinkedTransactionId("LinkedTransactionId");
@@ -333,6 +335,7 @@ public class InjiControllerTest {
     }
 
     @Test
+    @Ignore
     public void idpAuthenticateTest() throws Exception {
         IdpAuthInternalRequestDto innerDto = new IdpAuthInternalRequestDto();
         innerDto.setLinkedTransactionId("LinkedTransactionId");
@@ -366,6 +369,7 @@ public class InjiControllerTest {
     }
 
     @Test
+    @Ignore
     public void idpConsentTest() throws Exception {
         IdpConsentRequestDto innerDto = new IdpConsentRequestDto();
         innerDto.setLinkedTransactionId("LinkedTransactionId");

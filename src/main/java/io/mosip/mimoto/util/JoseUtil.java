@@ -23,26 +23,22 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.UUID;
 
 @Component
 public class JoseUtil {
 
     private final Logger logger = LoggerUtil.getLogger(JoseUtil.class);
+    private static final String BEGIN_KEY = "-----BEGIN PUBLIC KEY-----";
+    private static final String END_KEY = "-----END PUBLIC KEY-----";
 
     @Autowired
     private ObjectMapper mapper;
 
     public static JwkDto getJwkFromPublicKey(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String key = publicKeyString.replaceAll("\\n", "")
-                .replace("-----BEGIN RSA PUBLIC KEY-----", "")
-                .replace("-----END RSA PUBLIC KEY-----", "");
 
-        org.bouncycastle.asn1.pkcs.RSAPublicKey pkcs1PublicKey = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(CryptoUtil.decodePlainBase64(key));
-        BigInteger modulus = pkcs1PublicKey.getModulus();
-        BigInteger publicExponent = pkcs1PublicKey.getPublicExponent();
-        RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
-
+        RSAPublicKeySpec keySpec = publicKeyString.startsWith(BEGIN_KEY) ? getKeySpecForPublicKey(publicKeyString) : getKeySpecForRSAKey(publicKeyString);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PublicKey publicKey = keyFactory.generatePublic(keySpec);
         // Convert to JWK format
@@ -54,6 +50,33 @@ public class JoseUtil {
         JwkDto jwkDto = new JwkDto(jwk.getKeyType().toString(), ((RSAKey) jwk).getPublicExponent().toString(), ((RSAKey) jwk).getModulus().toString());
         return jwkDto;
 
+    }
+
+    private static RSAPublicKeySpec getKeySpecForRSAKey(String publicKeyString) {
+        String key = publicKeyString.replaceAll("\\n", "")
+                .replace("-----BEGIN RSA PUBLIC KEY-----", "")
+                .replace("-----END RSA PUBLIC KEY-----", "");
+
+        org.bouncycastle.asn1.pkcs.RSAPublicKey pkcs1PublicKey = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(CryptoUtil.decodePlainBase64(key));
+        BigInteger modulus = pkcs1PublicKey.getModulus();
+        BigInteger publicExponent = pkcs1PublicKey.getPublicExponent();
+        RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
+        return keySpec;
+
+    }
+
+    private static RSAPublicKeySpec getKeySpecForPublicKey(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String key = publicKeyString.replaceAll("\\n", "")
+                .replace(BEGIN_KEY, "")
+                .replace(END_KEY, "");
+        X509EncodedKeySpec spec =
+                new X509EncodedKeySpec(CryptoUtil.decodePlainBase64(key));
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        RSAPublicKey generatePublic = (RSAPublicKey) kf.generatePublic(spec);
+        BigInteger modulus = generatePublic.getModulus();
+        BigInteger exponent = generatePublic.getPublicExponent();
+        RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
+        return keySpec;
     }
 
 
