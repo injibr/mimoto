@@ -10,6 +10,7 @@ import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.ApisResourceAccessException;
+import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.DateUtils;
@@ -51,6 +52,9 @@ public class IdpController {
             response = (ResponseWrapper<BindingOtpResponseDto>) restClientService
                     .postApi(ApiName.BINDING_OTP,
                             requestDTO, ResponseWrapper.class, useBearerToken);
+            if (response == null)
+                throw new IdpException();
+
         } catch (Exception e) {
             logger.error("Wallet binding otp error occured.", e);
             response = getErrorResponse(PlatformErrorMessages.MIMOTO_OTP_BINDING_EXCEPTION.getCode(), e.getMessage());
@@ -78,6 +82,9 @@ public class IdpController {
             ResponseWrapper<WalletBindingInternalResponseDto> internalResponse = (ResponseWrapper<WalletBindingInternalResponseDto>) restClientService
                     .postApi(ApiName.WALLET_BINDING,
                             req, ResponseWrapper.class, useBearerToken);
+
+            if (internalResponse == null)
+                throw new IdpException();
 
             response = joseUtil.addThumbprintAndKeyId(internalResponse);
 
