@@ -39,11 +39,17 @@ import java.util.Iterator;
 @Component
 public class RestApiClient {
 
-    /** The logger. */
+    /**
+     * The logger.
+     */
     private Logger logger = LoggerUtil.getLogger(RestApiClient.class);
     private static final String authorization = "Authorization=";
-
-    /** The builder. */
+    private static final String RETRIED = "retry";
+    private static final String YES = "yes";
+    private static final String NO = "no";
+    /**
+     * The builder.
+     */
     @Autowired
     @Qualifier("selfTokenRestTemplate")
     private RestTemplate restTemplate;
@@ -91,7 +97,7 @@ public class RestApiClient {
 
     /**
      * HTTP GET API
-     * 
+     *
      * @param <T>
      * @param url
      * @param responseType
@@ -142,6 +148,13 @@ public class RestApiClient {
                 HttpClientErrorException ex = (HttpClientErrorException)e;
                 if (ex.getStatusCode().value() == 401) {
                     System.setProperty("token", "");
+                    // bearer token renew logic
+                    if (System.getProperty(RETRIED) == null || System.getProperty(RETRIED).equalsIgnoreCase(NO)) {
+                        logger.info("System will to renew the auth token and retry once more.");
+                        System.setProperty(RETRIED, YES);
+                        postApi(uri, mediaType, requestType, responseClass, useBearerToken);
+                    } else
+                        System.setProperty(RETRIED, NO);
                 }
             }
         }
