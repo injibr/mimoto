@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 
 import io.mosip.kernel.core.util.JsonUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -115,6 +116,11 @@ public class CredentialShareController {
     @PostMapping(path = "/request", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> request(@RequestBody AppCredentialRequestDTO requestDTO)
             throws Exception {
+
+        if (StringUtils.isEmpty(requestDTO.getIndividualId())) {
+            logger.error("Received empty individual id for transaction id - " + requestDTO.getTransactionID());
+        }
+
         // Call mosip resident service to issue a new credential
         RequestWrapper<CredentialRequestDTO> mosipCredentialRequestPayload = new RequestWrapper<CredentialRequestDTO>();
 
