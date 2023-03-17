@@ -8,6 +8,7 @@ on:
       - 1.*
       - develop
       - release*
+      - 0.9
 
 jobs:
   build:
