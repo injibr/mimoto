@@ -58,6 +58,12 @@ public class RestApiClient {
     @Qualifier("plainRestTemplate")
     private RestTemplate plainRestTemplate;
 
+    @Value("${wallet.binding.partner.id}")
+    private String partnerId;
+
+    @Value("${wallet.binding.partner.api.key}")
+    private String partnerApiKey;
+
     @Value("${mosip.authmanager.client-token-endpoint}")
     private String authBaseUrl;
 
@@ -185,6 +191,8 @@ public class RestApiClient {
             if (StringUtils.isEmpty(bearerToken))
                 bearerToken = getBearerToken();
             headers.add("Authorization", bearerToken);
+            headers.add("partner-id", partnerId);
+            headers.add("partner-api-key", partnerApiKey);
         }
 
         if (requestType != null) {
