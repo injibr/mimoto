@@ -191,8 +191,8 @@ public class RestApiClient {
             if (StringUtils.isEmpty(bearerToken))
                 bearerToken = getBearerToken();
             headers.add("Authorization", bearerToken);
-            headers.add("partner_id", partnerId);
-            headers.add("partner_api_key", partnerApiKey);
+            headers.add("partner-id", partnerId);
+            headers.add("partner-api-key", partnerApiKey);
         }
 
         if (requestType != null) {
