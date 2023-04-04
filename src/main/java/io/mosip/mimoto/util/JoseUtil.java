@@ -104,7 +104,7 @@ public class JoseUtil {
                 // map fields with thumbprint and key id
                 WalletBindingResponseDto response = new WalletBindingResponseDto();
                 response.setCertificate(resp.getCertificate());
-                response.setEncryptedWalletBindingId(resp.getEncryptedWalletBindingId());
+                response.setEncryptedWalletBindingId(resp.getWalletUserId());
                 response.setExpireDateTime(resp.getExpireDateTime());
                 response.setKeyId(jwSign.getKeyIdHeaderValue());
                 response.setThumbprint(jwSign.getX509CertSha256ThumbprintHeaderValue());
