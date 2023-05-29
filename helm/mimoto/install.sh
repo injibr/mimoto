@@ -26,8 +26,22 @@ function installing_mimoto() {
   sed -i 's/\r$//' copy_secrets.sh
   ./copy_secrets.sh
 
+  echo "Do you have public domain & valid SSL? (Y/n) "
+  echo "Y: if you have public domain & valid ssl certificate"
+  echo "n: If you don't have a public domain and a valid SSL certificate. Note: It is recommended to use this option only in development environments."
+  read -p "" flag
+
+  if [ -z "$flag" ]; then
+    echo "'flag' was provided; EXITING;"
+    exit 1;
+  fi
+  ENABLE_INSECURE='--set initContainers=[]'
+  if [ "$flag" = "n" ]; then
+    ENABLE_INSECURE=;
+  fi
+
   echo Installing mimoto
-  helm -n $NS install mimoto mosip/mimoto --version $MIMOTO_CHART_VERSION
+  helm -n $NS install mimoto mosip/mimoto --version $MIMOTO_CHART_VERSION $ENABLE_INSECURE
 
   kubectl -n $NS  get deploy -o name |  xargs -n1 -t  kubectl -n $NS rollout status
 
