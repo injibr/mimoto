@@ -459,3 +459,5 @@ istio:
     - istio-system/public
   prefix: /mimotomobileapp
   rewrite: /v1/mimoto
+
+enable_insecure: false
