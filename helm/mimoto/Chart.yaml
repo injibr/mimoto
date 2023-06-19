@@ -1,0 +1,19 @@
+apiVersion: v2
+name: mimoto
+description: A Helm chart for MOSIP mimoto Application
+type: application
+version: 0.9.1
+appVersion: ""
+dependencies:
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 1.x.x
+home: https://mosip.io
+keywords:
+  - mosip
+  - mimoto
+maintainers:
+  - email: info@mosip.io
+    name: MOSIP

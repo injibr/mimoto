@@ -153,14 +153,11 @@ public class RestApiClient {
             if (e instanceof HttpClientErrorException) {
                 HttpClientErrorException ex = (HttpClientErrorException)e;
                 if (ex.getStatusCode().value() == 401) {
+                    // bearer token renew logic. Set token as empty so that it will auto-renew
                     System.setProperty("token", "");
-                    // bearer token renew logic
-                    if (System.getProperty(RETRIED) == null || System.getProperty(RETRIED).equalsIgnoreCase(NO)) {
-                        logger.info("System will to renew the auth token and retry once more.");
-                        System.setProperty(RETRIED, YES);
-                        postApi(uri, mediaType, requestType, responseClass, useBearerToken);
-                    } else
-                        System.setProperty(RETRIED, NO);
+                    // try one more time to pass existing call
+                    result = (T) plainRestTemplate.postForObject(
+                            uri, setRequestHeader(requestType, mediaType, useBearerToken), responseClass);
                 }
             }
         }
