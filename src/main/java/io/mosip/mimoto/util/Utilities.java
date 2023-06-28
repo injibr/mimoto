@@ -111,6 +111,14 @@ public class Utilities {
         return null;
     }
 
+    public JsonNode getRequestVC(String requestId) throws JsonParseException, JsonMappingException, IOException {
+        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.VC_REQUEST_FILE_NAME, requestId));
+        if (Files.exists(resourcePath)) {
+            return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
+        }
+        return null;
+    }
+
     public JsonNode getDecryptedVC(String requestId) throws JsonParseException, JsonMappingException, IOException {
         Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.CARD_JSON_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
