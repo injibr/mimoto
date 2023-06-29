@@ -9,7 +9,6 @@ import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
 import io.mosip.mimoto.dto.mimoto.*;
-import io.mosip.mimoto.exception.ApisResourceAccessException;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.RestClientService;
@@ -44,14 +43,14 @@ public class IdpController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    IdpUtil idpUtil;
+    RequestValidator requestValidator;
 
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@Valid @RequestBody BindingOtpRequestDto requestDTO, BindingResult result) throws Exception {
         logger.debug("Received binding-otp request : " + JsonUtils.javaObjectToJsonString(requestDTO));
-        ValidationUtil.validateInputRequest(result);
-        idpUtil.validateNotificationChannel(requestDTO);
+        requestValidator.validateInputRequest(result);
+        requestValidator.validateNotificationChannel(requestDTO.getRequest().getOtpChannels());
         ResponseWrapper<BindingOtpResponseDto> response = null;
         try {
             response = (ResponseWrapper<BindingOtpResponseDto>) restClientService

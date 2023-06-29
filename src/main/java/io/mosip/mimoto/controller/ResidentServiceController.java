@@ -2,8 +2,7 @@ package io.mosip.mimoto.controller;
 
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
-import io.mosip.mimoto.util.ResidentServiceUtil;
-import io.mosip.mimoto.util.ValidationUtil;
+import io.mosip.mimoto.util.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ public class ResidentServiceController {
     public RestClientService<Object> restClientService;
 
     @Autowired
-    ResidentServiceUtil residentServiceUtil;
+    RequestValidator requestValidator;
 
     @Autowired
     Environment env;
@@ -48,8 +47,8 @@ public class ResidentServiceController {
     @PostMapping("/req/otp")
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@Valid @RequestBody AppOTPRequestDTO requestDTO, BindingResult result) throws Exception {
-        ValidationUtil.validateInputRequest(result);
-        residentServiceUtil.validateNotificationChannel(requestDTO);
+        requestValidator.validateInputRequest(result);
+        requestValidator.validateNotificationChannel(requestDTO.getOtpChannel());
         OTPRequestDTO mosipOTPRequestPayload = new OTPRequestDTO();
         mosipOTPRequestPayload.setVersion("1.0");
         mosipOTPRequestPayload.setId("mosip.identity.otp.internal");

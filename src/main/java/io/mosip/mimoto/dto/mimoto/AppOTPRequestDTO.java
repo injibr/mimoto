@@ -12,7 +12,7 @@ public class AppOTPRequestDTO {
     @NotNull
     private String individualId;
     @NotNull
-    @Pattern(regexp = "UIN|VID")
+    @Pattern(regexp = "UIN|VID", message = "Only UIN or VID is allowed")
     private String individualIdType;
     @NotEmpty
     @NotNull

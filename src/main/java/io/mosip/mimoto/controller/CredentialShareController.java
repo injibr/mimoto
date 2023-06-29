@@ -72,7 +72,7 @@ public class CredentialShareController {
     public CryptoCoreUtil cryptoCoreUtil;
 
     @Autowired
-    CredentialShareUtil credentialShareUtil;
+    RequestValidator requestValidator;
 
     private Gson gson = new Gson();
 
@@ -190,14 +190,14 @@ public class CredentialShareController {
     public ResponseEntity<CredentialDownloadResponseDTO> download(@Valid @RequestBody CredentialDownloadRequestDTO requestDTO, BindingResult result)
             throws Exception {
         try {
-            ValidationUtil.validateInputRequest(result);
+            requestValidator.validateInputRequest(result);
             JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId());
             JsonNode requestedCredentialJSON = utilities.getRequestVC(requestDTO.getRequestId());
             JsonNode credentialJSON = utilities.getVC(requestDTO.getRequestId());
 
             // Combine original encrypted verifiable credential and decrypted
             if (decryptedCredentialJSON != null && credentialJSON != null) {
-                credentialShareUtil.validateCredentialDownloadRequest(requestDTO, requestedCredentialJSON);
+                requestValidator.validateCredentialDownloadRequest(requestDTO, requestedCredentialJSON);
                 CredentialDownloadResponseDTO credentialDownloadBody = new CredentialDownloadResponseDTO();
                 credentialDownloadBody.setCredential(decryptedCredentialJSON);
                 credentialDownloadBody.setVerifiableCredential(credentialJSON);
