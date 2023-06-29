@@ -7,7 +7,6 @@ on:
       - master
       - 1.*
       - develop
-      - api-request-validation
       - release*
 
 jobs:
