@@ -35,7 +35,7 @@ public enum PlatformErrorMessages {
     /** The rgs json parsing exception. */
     MIMOTO_RGS_JSON_PARSING_EXCEPTION(PlatformConstants.PREFIX + "017", "JSON Parsing Failed"),
     /** The invalid input parameter. */
-    MIMOTO_PGS_INVALID_INPUT_PARAMETER(PlatformConstants.PREFIX + "011", "Invalid Input Parameter - %s"),
+    MIMOTO_PGS_INVALID_INPUT_PARAMETER(PlatformConstants.PREFIX + "011", "Invalid Input Parameter"),
     /** The rgs json mapping exception. */
     MIMOTO_RGS_JSON_MAPPING_EXCEPTION(PlatformConstants.PREFIX + "016", "JSON Mapping Failed"),
     MIMOTO_PDF_SIGNATURE_EXCEPTION(PlatformConstants.PREFIX + "024", "PDF Signature error"),
