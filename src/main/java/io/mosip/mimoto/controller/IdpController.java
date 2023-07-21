@@ -29,7 +29,7 @@ import java.util.List;
 public class IdpController {
 
     private final Logger logger = LoggerUtil.getLogger(IdpController.class);
-    private static final boolean useBearerToken = true;
+    private static final boolean USE_BEARER_TOKEN = true;
     private static final String ID = "mosip.mimoto.idp";
     private Gson gson = new Gson();
 
@@ -55,7 +55,7 @@ public class IdpController {
         try {
             response = (ResponseWrapper<BindingOtpResponseDto>) restClientService
                     .postApi(ApiName.BINDING_OTP,
-                            requestDTO, ResponseWrapper.class, useBearerToken);
+                            requestDTO, ResponseWrapper.class, USE_BEARER_TOKEN);
             if (response == null)
                 throw new IdpException();
 
@@ -85,7 +85,7 @@ public class IdpController {
 
             ResponseWrapper<WalletBindingInternalResponseDto> internalResponse = (ResponseWrapper<WalletBindingInternalResponseDto>) restClientService
                     .postApi(ApiName.WALLET_BINDING,
-                            req, ResponseWrapper.class, useBearerToken);
+                            req, ResponseWrapper.class, USE_BEARER_TOKEN);
 
             if (internalResponse == null)
                 throw new IdpException();

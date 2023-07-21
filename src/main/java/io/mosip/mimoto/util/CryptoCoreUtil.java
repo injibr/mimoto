@@ -55,7 +55,7 @@ public class CryptoCoreUtil {
 
     private final static int THUMBPRINT_LENGTH = 32;
     private final static int NONCE = 12;
-    private final static int AADSize = 32;
+    private final static int AAD_SIZE = 32;
     public static final byte[] VERSION_RSA_2048 = "VER_R2".getBytes();
 
     @Value("${mosip.partner.prependThumbprint:true}")
@@ -124,9 +124,9 @@ public class CryptoCoreUtil {
             if (Arrays.equals(headerBytes, VERSION_RSA_2048)) {
                 encryptedSymmetricKey = Arrays.copyOfRange(encryptedKey, THUMBPRINT_LENGTH + VERSION_RSA_2048.length,
                         encryptedKey.length);
-                byte[] aad = Arrays.copyOfRange(encryptedData, 0, AADSize);
+                byte[] aad = Arrays.copyOfRange(encryptedData, 0, AAD_SIZE);
                 byte[] nonce = Arrays.copyOfRange(aad, 0, NONCE);
-                byte[] encData = Arrays.copyOfRange(encryptedData, AADSize, encryptedData.length);
+                byte[] encData = Arrays.copyOfRange(encryptedData, AAD_SIZE, encryptedData.length);
                 decryptedSymmetricKey = asymmetricDecrypt(privateKey.getPrivateKey(),
                         ((RSAPrivateKey) privateKey.getPrivateKey()).getModulus(), encryptedSymmetricKey);
                 symmetricKey = new SecretKeySpec(decryptedSymmetricKey, 0, decryptedSymmetricKey.length, "AES");

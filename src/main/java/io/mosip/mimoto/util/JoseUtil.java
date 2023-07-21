@@ -53,7 +53,7 @@ public class JoseUtil {
     }
 
     private static RSAPublicKeySpec getKeySpecForRSAKey(String publicKeyString) {
-        String key = publicKeyString.replaceAll("\\n", "")
+        String key = publicKeyString.replace("\n", "")
                 .replace("-----BEGIN RSA PUBLIC KEY-----", "")
                 .replace("-----END RSA PUBLIC KEY-----", "");
 
@@ -66,7 +66,7 @@ public class JoseUtil {
     }
 
     private static RSAPublicKeySpec getKeySpecForPublicKey(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String key = publicKeyString.replaceAll("\\n", "")
+        String key = publicKeyString.replace("\n", "")
                 .replace(BEGIN_KEY, "")
                 .replace(END_KEY, "");
         X509EncodedKeySpec spec =

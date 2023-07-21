@@ -37,5 +37,6 @@ public class ApisResourceAccessException extends BaseCheckedException {
     }
 
     public ApisResourceAccessException(String code, String message, Exception e) {
+        // TODO document why this method is empty
     }
 }

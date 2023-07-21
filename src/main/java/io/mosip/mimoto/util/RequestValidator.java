@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Component
 public class RequestValidator {
 
+    public static final String RESPONSE = "response";
     private static Logger logger = LoggerFactory.getLogger(RequestValidator.class);
 
     @Value("${mosip.notificationtype:EMAIL|PHONE}")
@@ -49,8 +50,8 @@ public class RequestValidator {
     }
 
     public void validateCredentialDownloadRequest(CredentialDownloadRequestDTO requestDTO, JsonNode requestedCredentialJSON) throws IOException, NoSuchFieldException {
-        if(requestedCredentialJSON.has("response") && requestedCredentialJSON.get("response").has("id")) {
-            String requestedIndividualId = requestedCredentialJSON.get("response").get("id").asText();
+        if(requestedCredentialJSON.has(RESPONSE) && requestedCredentialJSON.get(RESPONSE).has("id")) {
+            String requestedIndividualId = requestedCredentialJSON.get(RESPONSE).get("id").asText();
             if (!requestDTO.getIndividualId().equals(requestedIndividualId)) {
                 throw new InvalidInputException(PlatformErrorMessages.MIMOTO_PGS_INVALID_INPUT_PARAMETER.getMessage() + " - " + "individualId");
             }
