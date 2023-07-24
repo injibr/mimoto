@@ -3,10 +3,9 @@ package io.mosip.mimoto.exception;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * This utils contains exception utilities.
@@ -57,20 +56,6 @@ public final class ExceptionUtils {
         PrintWriter pw = new PrintWriter(sw, true);
         throwable.printStackTrace(pw);
         return sw.getBuffer().toString();
-    }
-
-    /**
-     * This method provide jsonvalue based on propname mention.
-     * 
-     * @param node     the jsonnode.
-     * @param propName the property name.
-     * @return the property value.
-     */
-    private static String getJsonValue(JsonNode node, String propName) {
-        if (node.get(propName) != null) {
-            return node.get(propName).asText();
-        }
-        return null;
     }
 
     public static void logRootCause(Throwable exception) {

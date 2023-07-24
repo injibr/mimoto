@@ -220,7 +220,7 @@ public class CryptoCoreUtil {
             throws InvalidCipherTextException {
 
         OAEPEncoding encode = new OAEPEncoding(new RSAEngine(), new SHA256Digest());
-        BigInteger exponent = new BigInteger("1");
+        BigInteger exponent = BigInteger.valueOf(1L);
         RSAKeyParameters keyParams = new RSAKeyParameters(false, keyModulus, exponent);
         encode.init(false, keyParams);
         return encode.processBlock(paddedPlainText, 0, paddedPlainText.length);

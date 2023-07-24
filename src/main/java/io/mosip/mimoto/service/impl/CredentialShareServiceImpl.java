@@ -197,13 +197,11 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         boolean isTransactionSuccessful = false;
         try {
             individualBio = credentialJSON.getString("biometrics");
-            String individualBiometric = new String(individualBio);
+            String individualBiometric = individualBio;
             if (credentialJSON.has("UIN"))
                 id = credentialJSON.getString("UIN");
             else if (credentialJSON.has(vid))
                 id = credentialJSON.getString(vid);
-            else
-                id = null;
 
             byte[] textFileByte = createJSONFile(credentialJSON, individualBiometric);
             byteMap.put(UIN_TEXT_FILE, textFileByte);
@@ -432,11 +430,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                 outputJSON.put(value + "_" + jsonValue.getLanguage(), jsonValue);
             }
         }
-    }
-
-    private static org.json.JSONObject getBioMetricsJSONObject(org.json.JSONObject biometrics, String type) {
-        return biometrics.has(type) ? biometrics.getJSONObject(type)
-                : new org.json.JSONObject();
     }
 
     @NotNull

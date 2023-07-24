@@ -6,6 +6,8 @@ package io.mosip.mimoto.constant;
  *         A Constant Class to hold all the default identifier values
  */
 public class CbeffConstant {
+    private CbeffConstant() {
+    }
 
     public static final long FORMAT_OWNER = 257;
 

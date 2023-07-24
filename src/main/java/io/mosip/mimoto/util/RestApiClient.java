@@ -12,7 +12,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,9 +45,6 @@ public class RestApiClient {
      */
     private Logger logger = LoggerUtil.getLogger(RestApiClient.class);
     private static final String AUTHORIZATION = "Authorization=";
-    private static final String RETRIED = "retry";
-    private static final String YES = "yes";
-    private static final String NO = "no";
     /**
      * The builder.
      */
@@ -226,8 +222,6 @@ public class RestApiClient {
         post.setEntity(postingString);
         post.setHeader("Content-type", "application/json");
         HttpResponse response = httpClient.execute(post);
-        org.apache.http.HttpEntity entity = response.getEntity();
-        String responseBody = EntityUtils.toString(entity, "UTF-8");
         Header[] cookie = response.getHeaders("Set-Cookie");
         if (cookie.length == 0)
             throw new TokenGenerationFailedException();

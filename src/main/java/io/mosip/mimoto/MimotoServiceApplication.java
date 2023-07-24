@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.mosip.kernel.biometrics.spi.CbeffUtil;
 import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
+import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.mimoto.util.LoggerUtil;
 import org.json.simple.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,6 +32,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableScheduling
 @EnableAsync
 public class MimotoServiceApplication {
+
+    private static Logger logger = LoggerUtil.getLogger(MimotoServiceApplication.class);
+
     @Bean
     @Primary
     public CbeffUtil getCbeffUtil() {
@@ -51,14 +56,14 @@ public class MimotoServiceApplication {
                 JSONObject.class
             );
         } catch (Exception e) {
-            System.err.println("Error when trying to read build.json file: " + e);
+            logger.error("Error when trying to read build.json file: " + e);
         }
         return new JSONObject();
     }
 
     public static void main(String[] args) {
         JSONObject gitProp = getGitProp();
-        System.out.println(
+        logger.info(
                 String.format(
                         "Mimoto Service version: %s - revision: %s @ branch: %s | build @ %s",
                         gitProp.get("git.build.version"),
