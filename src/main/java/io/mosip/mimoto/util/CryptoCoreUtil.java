@@ -209,23 +209,6 @@ public class CryptoCoreUtil {
         }
     }
 
-    /**
-     *
-     * @param paddedPlainText
-     * @return
-     * @throws InvalidCipherTextException
-     * @throws InvalidKeyException
-     */
-    private static byte[] unpadOAEPPadding(byte[] paddedPlainText, BigInteger keyModulus)
-            throws InvalidCipherTextException {
-
-        OAEPEncoding encode = new OAEPEncoding(new RSAEngine(), new SHA256Digest());
-        BigInteger exponent = BigInteger.valueOf(1L);
-        RSAKeyParameters keyParams = new RSAKeyParameters(false, keyModulus, exponent);
-        encode.init(false, keyParams);
-        return encode.processBlock(paddedPlainText, 0, paddedPlainText.length);
-    }
-
     private static byte[] symmetricDecrypt(SecretKey key, byte[] data, byte[] aad) {
         byte[] output = null;
         try {
