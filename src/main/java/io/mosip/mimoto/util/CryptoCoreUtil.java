@@ -247,8 +247,6 @@ public class CryptoCoreUtil {
 
     public byte[] symmetricDecrypt(SecretKey key, byte[] data, byte[] nonce, byte[] aad)
             throws InvalidAlgorithmParameterException {
-        // Objects.requireNonNull(key, null);
-        // CryptoUtils.verifyData(data);
         byte[] output = null;
         Cipher cipher;
         try {

@@ -383,7 +383,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     public org.json.JSONObject decryptAttribute(org.json.JSONObject data, String encryptionPin, String credential)
             throws ParseException {
 
-        // org.json.JSONObject jsonObj = new org.json.JSONObject(credential);
         JSONParser parser = new JSONParser(); // this needs the "json-simple" library
         Object obj = parser.parse(credential);
         JSONObject jsonObj = (org.json.simple.JSONObject) obj;
