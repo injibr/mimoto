@@ -263,12 +263,14 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             for (String value : templateValue.split(",")) {
                 Object object = credential.has(value) ? credential.get(value) : null;
                 if (object instanceof ArrayList) {
-                    generateOutputJSON(credential, outputJSON, value);
+                    appendLangToOutputJSONFields(credential, outputJSON, value);
                 } else if (object instanceof LinkedHashMap) {
                     org.json.JSONObject json = credential.getJSONObject(value);
                     outputJSON.put(value, json.get(VALUE));
+                } else if (key.equals("biometrics")) {
+                    outputJSON.put(value, getBiometricsDataJSON(individualBiometric));
                 } else {
-                    generateOutputJSON(individualBiometric, outputJSON, key, value, object);
+                    outputJSON.put(value, object);
                 }
             }
         }
@@ -412,15 +414,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         return data;
     }
 
-    private void generateOutputJSON(String individualBiometric, org.json.JSONObject outputJSON, String key, String value, Object object) {
-        if (key.equals("biometrics")) {
-            outputJSON.put(value, getBiometricsDataJSON(individualBiometric));
-        } else {
-            outputJSON.put(value, object);
-        }
-    }
-
-    private void generateOutputJSON(org.json.JSONObject credential, org.json.JSONObject outputJSON, String value) {
+    private void appendLangToOutputJSONFields(org.json.JSONObject credential, org.json.JSONObject outputJSON, String value) {
         JSONArray node = new JSONArray();
         node.addAll(credential.getJSONArray(value).toList());
         JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
