@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * The Class RestApiClient.
@@ -198,7 +199,7 @@ public class RestApiClient {
                 while (iterator.hasNext()) {
                     String key = iterator.next();
                     if (!(headers.containsKey(CONTENT_TYPE) && key.equals(CONTENT_TYPE)))
-                        headers.add(key, httpHeader.get(key).get(0));
+                        headers.add(key, Objects.requireNonNull(httpHeader.get(key)).get(0));
                 }
                 return new HttpEntity<Object>(httpEntity.getBody(), headers);
             } catch (ClassCastException | NullPointerException e) {
