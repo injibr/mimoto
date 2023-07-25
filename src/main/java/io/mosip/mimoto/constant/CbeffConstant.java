@@ -1,13 +1,15 @@
 package io.mosip.mimoto.constant;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * @author Ramadurai Pandian
  *
  *         A Constant Class to hold all the default identifier values
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CbeffConstant {
-    private CbeffConstant() {
-    }
 
     public static final long FORMAT_OWNER = 257;
 
