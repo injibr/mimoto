@@ -8,6 +8,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -93,8 +94,8 @@ public class MimotoConfigTest extends WebSecurityConfigurerAdapter {
         return new HashMap<>();
     }
 
-    @Test
-    public void testSwaggerConfigOpenApi() {
+    @Before
+    public void setUp() {
         InfoProperty info = new InfoProperty();
         info.setTitle("infoTitle");
         info.setVersion("infoVersion");
@@ -111,7 +112,10 @@ public class MimotoConfigTest extends WebSecurityConfigurerAdapter {
         openApiProperties.setService(service);
         openApiProperties.setInfo(info);
         ReflectionTestUtils.setField(swaggerConfig, "openApiProperties", openApiProperties);
+    }
 
+    @Test
+    public void testSwaggerConfigOpenApi() {
         OpenAPI expectedOpenAPI = new OpenAPI()
                 .components(new Components())
                 .info(new Info()
