@@ -7,6 +7,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -60,11 +61,11 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         if (apiHostIpPort != null) {
 
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
-            if (!checkNull(pathsegments)) {
+            if (!CollectionUtils.isEmpty(pathsegments)) {
                 addPathSegments(pathsegments, builder);
             }
 
-            if (!checkNull(queryParamName)) {
+            if (!StringUtils.isEmpty(queryParamName)) {
                 addQueryParam(queryParamName, queryParamValue, builder);
             }
 
@@ -99,11 +100,11 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         if (apiHostIpPort != null) {
 
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
-            if (!checkNull(pathsegments)) {
+            if (!CollectionUtils.isEmpty(pathsegments)) {
                 addPathSegments(pathsegments, builder);
             }
 
-            if (!checkNull(queryParamName)) {
+            if (!CollectionUtils.isEmpty(queryParamName)) {
                 for (int i = 0; i < queryParamName.size(); i++) {
                     builder.queryParam(queryParamName.get(i), queryParamValue.get(i));
                 }
@@ -139,7 +140,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!checkNull(queryParamName)) {
+            if (!StringUtils.isEmpty(queryParamName)) {
                 addQueryParam(queryParamName, queryParamValue, builder);
             }
 
@@ -193,15 +194,15 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!checkNull(pathsegments)) {
+            if (!CollectionUtils.isEmpty(pathsegments)) {
                 for (String segment : pathsegments) {
-                    if (!checkNull(segment)) {
+                    if (!StringUtils.isEmpty(segment)) {
                         builder.pathSegment(segment);
                     }
                 }
 
             }
-            if (!checkNull(queryParamName)) {
+            if (!StringUtils.isEmpty(queryParamName)) {
                 addQueryParam(queryParamName, queryParamValue, builder);
             }
 
@@ -233,7 +234,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!checkNull(pathsegments)) {
+            if (!CollectionUtils.isEmpty(pathsegments)) {
                 addPathSegments(pathsegments, builder);
             }
             if (!CollectionUtils.isEmpty(queryParamName)) {
@@ -278,21 +279,6 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         return obj;
     }
 
-    /**
-     * Check null.
-     *
-     * @param value the value passed
-     * @return true, if successful
-     */
-    private boolean checkNull(String value) {
-        return ((value == null) || (("").equals(value)));
-    }
-
-    private boolean checkNull(List<String> value) {
-        return ((value == null) || (value.isEmpty()));
-    }
-
-
     private static void addQueryParam(String queryParamName, String queryParamValue, UriComponentsBuilder builder) {
         String[] queryParamNameArr = queryParamName.split(",");
         String[] queryParamValueArr = queryParamValue.split(",");
@@ -303,7 +289,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
     private void addPathSegments(List<String> pathSegments, UriComponentsBuilder builder) {
         for (String segment : pathSegments) {
-            if (!checkNull(segment)) {
+            if (!StringUtils.isEmpty(segment)) {
                 builder.pathSegment(segment);
             }
         }
