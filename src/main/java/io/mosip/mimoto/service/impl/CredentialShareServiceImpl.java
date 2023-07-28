@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -51,6 +50,8 @@ public class CredentialShareServiceImpl implements CredentialShareService {
 
     /** The Constant FINGER. */
     public static final String FINGER = "Finger";
+    public static final String DATA_IMAGE_JPG_BASE_64 = "data:image/jpg;base64,";
+    public static final String DATA_BINARY_BASE_64 = "data:binary;base64,";
 
     private Gson gson = new Gson();
 
@@ -296,8 +297,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                     if (photoBytes != null) {
                         String data = getData(type, photoBytes);
                         if (subType.isEmpty()) {
-                            String formatPrefix = getFormatPrefix(type);
-                            biometrics.put(type, formatPrefix + data);
+                            addTypeToBiometricWithFormatPrefixAndData(biometrics, type, data);
                         } else {
                             addTypeToBiometricIfNotExists(biometrics, type, subType, data);
                         }
@@ -425,11 +425,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         }
     }
 
-    @NotNull
-    private static String getFormatPrefix(String type) {
-        return type.equalsIgnoreCase(BiometricType.FACE.value()) ? "data:image/jpg;base64," : "data:binary;base64,";
-    }
-
     private String getData(String type, byte[] photoBytes) {
         if (type.equalsIgnoreCase(BiometricType.FACE.value())) {
             // Convert face image from JPEG2000 to JPG and encode with base64.
@@ -440,10 +435,15 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         }
     }
 
+    private static void addTypeToBiometricWithFormatPrefixAndData(org.json.JSONObject biometrics, String type, String data) {
+        String formatPrefix = type.equalsIgnoreCase(BiometricType.FACE.value()) ? DATA_IMAGE_JPG_BASE_64 : DATA_BINARY_BASE_64;
+        biometrics.put(type, formatPrefix + data);
+    }
+
     private static void addTypeToBiometricIfNotExists(org.json.JSONObject biometrics, String type, List<String> subType, String data) {
         org.json.JSONObject typeList = biometrics.has(type) ? biometrics.getJSONObject(type)
                 : new org.json.JSONObject();
-        typeList.put(String.join("_", subType).toLowerCase(), "data:binary;base64," + data);
+        typeList.put(String.join("_", subType).toLowerCase(), DATA_BINARY_BASE_64 + data);
         if (!biometrics.has(type)) {
             biometrics.put(type, typeList);
         }
