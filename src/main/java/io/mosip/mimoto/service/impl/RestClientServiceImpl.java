@@ -2,6 +2,7 @@ package io.mosip.mimoto.service.impl;
 
 import java.util.List;
 
+import io.mosip.mimoto.constant.LoggerFileConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -27,8 +28,6 @@ import io.mosip.mimoto.util.RestApiClient;
 @Service
 public class RestClientServiceImpl implements RestClientService<Object> {
 
-    private static final String REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY = "RestClientServiceImpl::postApi()::entry";
-    private static final String REST_CLIENT_SERVICE_IMPL_POST_API_EXIT = "RestClientServiceImpl::postApi()::exit";
     /** The logger. */
     Logger logger = LoggerUtil.getLogger(RestClientServiceImpl.class);
 
@@ -131,7 +130,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
     public Object postApi(ApiName apiName, String queryParamName, String queryParamValue, Object requestedData,
             Class<?> responseType, MediaType mediaType) throws ApisResourceAccessException {
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
 
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
@@ -155,7 +154,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -186,7 +185,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
     public Object postApi(ApiName apiName, List<String> pathsegments, String queryParamName, String queryParamValue,
             Object requestedData, Class<?> responseType) throws ApisResourceAccessException {
 
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         UriComponentsBuilder builder = null;
@@ -217,7 +216,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -226,7 +225,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             List<Object> queryParamValue,
             Object requestedData, Class<?> responseType) throws ApisResourceAccessException {
 
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         UriComponentsBuilder builder = null;
@@ -255,7 +254,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -263,7 +262,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
     public Object postApi(ApiName apiName,
                           Object requestedData, Class<?> responseType, boolean useBearerToken) throws ApisResourceAccessException {
 
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         if (apiHostIpPort != null) {
@@ -275,7 +274,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
                         PlatformErrorMessages.MIMOTO_RCT_UNKNOWN_RESOURCE_EXCEPTION.getMessage(), e);
             }
         }
-        logger.debug(REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
