@@ -24,4 +24,8 @@ public class InvalidInputException extends BaseUncheckedException {
         super(errorCode, errorMessage);
     }
 
+    public InvalidInputException(String errorMessage) {
+        super(PlatformErrorMessages.MIMOTO_PGS_INVALID_INPUT_PARAMETER.getCode(), errorMessage);
+    }
+
 }
