@@ -9,21 +9,20 @@ import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
 import io.mosip.mimoto.dto.mimoto.*;
-import io.mosip.mimoto.exception.ApisResourceAccessException;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.RestClientService;
-import io.mosip.mimoto.util.DateUtils;
-import io.mosip.mimoto.util.JoseUtil;
-import io.mosip.mimoto.util.LoggerUtil;
+import io.mosip.mimoto.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -43,10 +42,15 @@ public class IdpController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    RequestValidator requestValidator;
+
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> otpRequest(@RequestBody BindingOtpRequestDto requestDTO) throws Exception {
+    public ResponseEntity<Object> otpRequest(@Valid @RequestBody BindingOtpRequestDto requestDTO, BindingResult result) throws Exception {
         logger.debug("Received binding-otp request : " + JsonUtils.javaObjectToJsonString(requestDTO));
+        requestValidator.validateInputRequest(result);
+        requestValidator.validateNotificationChannel(requestDTO.getRequest().getOtpChannels());
         ResponseWrapper<BindingOtpResponseDto> response = null;
         try {
             response = (ResponseWrapper<BindingOtpResponseDto>) restClientService

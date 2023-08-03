@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 
 import io.mosip.kernel.core.util.JsonUtils;
+import io.mosip.mimoto.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,10 +41,8 @@ import io.mosip.mimoto.dto.resident.CredentialRequestStatusResponseDTO;
 import io.mosip.mimoto.model.EventModel;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
-import io.mosip.mimoto.util.CryptoCoreUtil;
-import io.mosip.mimoto.util.DateUtils;
-import io.mosip.mimoto.util.LoggerUtil;
-import io.mosip.mimoto.util.Utilities;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/credentialshare")
@@ -70,6 +70,9 @@ public class CredentialShareController {
 
     @Autowired
     public CryptoCoreUtil cryptoCoreUtil;
+
+    @Autowired
+    RequestValidator requestValidator;
 
     private Gson gson = new Gson();
 
@@ -184,14 +187,17 @@ public class CredentialShareController {
      * @throws Exception
      */
     @PostMapping(path = "/download", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CredentialDownloadResponseDTO> download(@RequestBody CredentialDownloadRequestDTO requestDTO)
+    public ResponseEntity<CredentialDownloadResponseDTO> download(@Valid @RequestBody CredentialDownloadRequestDTO requestDTO, BindingResult result)
             throws Exception {
         try {
+            requestValidator.validateInputRequest(result);
             JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId());
-
+            JsonNode requestedCredentialJSON = utilities.getRequestVC(requestDTO.getRequestId());
             JsonNode credentialJSON = utilities.getVC(requestDTO.getRequestId());
+
             // Combine original encrypted verifiable credential and decrypted
             if (decryptedCredentialJSON != null && credentialJSON != null) {
+                requestValidator.validateCredentialDownloadRequest(requestDTO, requestedCredentialJSON);
                 CredentialDownloadResponseDTO credentialDownloadBody = new CredentialDownloadResponseDTO();
                 credentialDownloadBody.setCredential(decryptedCredentialJSON);
                 credentialDownloadBody.setVerifiableCredential(credentialJSON);

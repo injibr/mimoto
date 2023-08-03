@@ -207,12 +207,16 @@ public class InjiControllerTest {
 
         CredentialDownloadRequestDTO requestDTO = new CredentialDownloadRequestDTO();
         requestDTO.setRequestId("requestId");
+        requestDTO.setIndividualId("individualId");
 
         JsonNode credentialJSON = JsonNodeFactory.instance.objectNode();
         Mockito.when(utilities.getVC(Mockito.anyString())).thenReturn(credentialJSON);
 
         JsonNode decryptedCredentialJSON = JsonNodeFactory.instance.objectNode();
         Mockito.when(utilities.getDecryptedVC(Mockito.anyString())).thenReturn(decryptedCredentialJSON);
+
+        JsonNode requestCredentialJSON = JsonNodeFactory.instance.objectNode();
+        Mockito.when(utilities.getRequestVC(Mockito.anyString())).thenReturn(requestCredentialJSON);
 
         this.mockMvc.perform(post("/credentialshare/download").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(JsonUtils.javaObjectToJsonString(requestDTO)))
