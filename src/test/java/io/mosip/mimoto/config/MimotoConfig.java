@@ -1,15 +1,9 @@
 package io.mosip.mimoto.config;
 
-import io.mosip.kernel.auth.defaultadapter.filter.AuthFilter;
-import io.mosip.kernel.auth.defaultadapter.filter.CorsFilter;
-import io.mosip.mimoto.config.Config;
-import io.mosip.mimoto.config.OpenApiProperties;
-import io.mosip.mimoto.config.SwaggerConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +25,7 @@ import java.util.Map;
 @ComponentScan(basePackages = {
         "io.mosip.mimoto.*" }, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
         Config.class, OpenApiProperties.class, SwaggerConfig.class}))
-public class MimotoConfigTest extends WebSecurityConfigurerAdapter {
+public class MimotoConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
