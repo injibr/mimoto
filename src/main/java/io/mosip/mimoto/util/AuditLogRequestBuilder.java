@@ -1,8 +1,5 @@
 package io.mosip.mimoto.util;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +54,10 @@ public class AuditLogRequestBuilder {
      * @return the audit response dto
      */
     @SuppressWarnings("unchecked")
-    public ResponseWrapper<AuditResponseDto> createAuditRequestBuilder(String description, String eventId,
-            String eventName, String eventType, String registrationId, ApiName apiname) {
+    public ResponseWrapper<AuditResponseDto> createAuditRequestBuilder(String description, String eventId, String eventName, String eventType, String registrationId, ApiName apiname) {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
                 registrationId,
-                "AuditLogRequestBuilder:: createAuditRequestBuilder(String description, String eventId, String eventName, String eventType,\r\n"
-                        + "            String registrationId, ApiName apiname)::entry");
+                "AuditLogRequestBuilder:: createAuditRequestBuilder(String description, String eventId, String eventName, String eventType,\r\n            String registrationId, ApiName apiname)::entry");
 
         AuditRequestDto auditRequestDto = new AuditRequestDto();
         RequestWrapper<AuditRequestDto> requestWrapper = new RequestWrapper<>();

@@ -18,13 +18,14 @@
 package io.mosip.mimoto.dto.mimoto;
 
 import com.google.api.client.json.webtoken.JsonWebSignature;
+import com.google.api.client.json.webtoken.JsonWebToken.Payload;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.Key;
 
 /**
  * A statement returned by the Attestation API.
  */
-public class AttestationStatement extends JsonWebSignature.Payload {
+public class AttestationStatement extends Payload {
     /**
      * Embedded nonce sent as part of the request.
      */

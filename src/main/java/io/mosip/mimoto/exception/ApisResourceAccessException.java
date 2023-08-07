@@ -35,7 +35,4 @@ public class ApisResourceAccessException extends BaseCheckedException {
     public ApisResourceAccessException(String message, Throwable cause) {
         super(PlatformErrorMessages.MIMOTO_RCT_UNKNOWN_RESOURCE_EXCEPTION.getCode(), message, cause);
     }
-
-    public ApisResourceAccessException(String code, String message, Exception e) {
-    }
 }

@@ -12,7 +12,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * The Class RestApiClient.
@@ -39,14 +39,13 @@ import java.util.Iterator;
 @Component
 public class RestApiClient {
 
+    public static final String TOKEN = "token";
+    public static final String CONTENT_TYPE = "Content-Type";
     /**
      * The logger.
      */
     private Logger logger = LoggerUtil.getLogger(RestApiClient.class);
-    private static final String authorization = "Authorization=";
-    private static final String RETRIED = "retry";
-    private static final String YES = "yes";
-    private static final String NO = "no";
+    private static final String AUTHORIZATION = "Authorization=";
     /**
      * The builder.
      */
@@ -154,7 +153,7 @@ public class RestApiClient {
                 HttpClientErrorException ex = (HttpClientErrorException)e;
                 if (ex.getStatusCode().value() == 401) {
                     // bearer token renew logic. Set token as empty so that it will auto-renew
-                    System.setProperty("token", "");
+                    System.setProperty(TOKEN, "");
                     // try one more time to pass existing call
                     result = (T) plainRestTemplate.postForObject(
                             uri, setRequestHeader(requestType, mediaType, useBearerToken), responseClass);
@@ -180,11 +179,11 @@ public class RestApiClient {
     private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, boolean useBearerToken) throws IOException {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
         if (mediaType != null) {
-            headers.add("Content-Type", mediaType.toString());
+            headers.add(CONTENT_TYPE, mediaType.toString());
         }
 
         if (useBearerToken) {
-            String bearerToken = System.getProperty("token");
+            String bearerToken = System.getProperty(TOKEN);
             if (StringUtils.isEmpty(bearerToken))
                 bearerToken = getBearerToken();
             headers.add("Authorization", bearerToken);
@@ -199,8 +198,8 @@ public class RestApiClient {
                 Iterator<String> iterator = httpHeader.keySet().iterator();
                 while (iterator.hasNext()) {
                     String key = iterator.next();
-                    if (!(headers.containsKey("Content-Type") && key.equals("Content-Type")))
-                        headers.add(key, httpHeader.get(key).get(0));
+                    if (!(headers.containsKey(CONTENT_TYPE) && key.equals(CONTENT_TYPE)))
+                        headers.add(key, Objects.requireNonNull(httpHeader.get(key)).get(0));
                 }
                 return new HttpEntity<Object>(httpEntity.getBody(), headers);
             } catch (ClassCastException | NullPointerException e) {
@@ -224,15 +223,13 @@ public class RestApiClient {
         post.setEntity(postingString);
         post.setHeader("Content-type", "application/json");
         HttpResponse response = httpClient.execute(post);
-        org.apache.http.HttpEntity entity = response.getEntity();
-        String responseBody = EntityUtils.toString(entity, "UTF-8");
         Header[] cookie = response.getHeaders("Set-Cookie");
         if (cookie.length == 0)
             throw new TokenGenerationFailedException();
         String token = response.getHeaders("Set-Cookie")[0].getValue();
-        token = token.replace(authorization, "");
+        token = token.replace(AUTHORIZATION, "");
         token = "Bearer " + token.substring(0, token.indexOf(';'));
-        System.setProperty("token", token);
+        System.setProperty(TOKEN, token);
         return token;
     }
 }

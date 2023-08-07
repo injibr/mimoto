@@ -635,7 +635,7 @@ public final class DateUtils {
      * Provide UTC Current DateTime string for requestTime attribute.
      */
     public static String getRequestTimeString() {
-        return DateUtils.getUTCCurrentDateTimeString("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        return DateUtils.getUTCCurrentDateTimeString(UTC_DATETIME_PATTERN);
     }
 
     /**

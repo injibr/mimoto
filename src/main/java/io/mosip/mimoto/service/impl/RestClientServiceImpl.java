@@ -2,11 +2,13 @@ package io.mosip.mimoto.service.impl;
 
 import java.util.List;
 
+import io.mosip.mimoto.constant.LoggerFileConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -58,23 +60,12 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         if (apiHostIpPort != null) {
 
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
-            if (!((pathsegments == null) || (pathsegments.isEmpty()))) {
-                for (String segment : pathsegments) {
-                    if (!((segment == null) || (("").equals(segment)))) {
-                        builder.pathSegment(segment);
-                    }
-                }
-
+            if (!CollectionUtils.isEmpty(pathsegments)) {
+                addPathSegments(pathsegments, builder);
             }
 
-            if (!((queryParamName == null) || (("").equals(queryParamName)))) {
-
-                String[] queryParamNameArr = queryParamName.split(",");
-                String[] queryParamValueArr = queryParamValue.split(",");
-                for (int i = 0; i < queryParamNameArr.length; i++) {
-                    builder.queryParam(queryParamNameArr[i], queryParamValueArr[i]);
-                }
-
+            if (!StringUtils.isEmpty(queryParamName)) {
+                addQueryParam(queryParamName, queryParamValue, builder);
             }
 
             try {
@@ -108,16 +99,11 @@ public class RestClientServiceImpl implements RestClientService<Object> {
         if (apiHostIpPort != null) {
 
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
-            if (!((pathsegments == null) || (pathsegments.isEmpty()))) {
-                for (String segment : pathsegments) {
-                    if (!((segment == null) || (("").equals(segment)))) {
-                        builder.pathSegment(segment);
-                    }
-                }
-
+            if (!CollectionUtils.isEmpty(pathsegments)) {
+                addPathSegments(pathsegments, builder);
             }
 
-            if (((queryParamName != null) && (!queryParamName.isEmpty()))) {
+            if (!CollectionUtils.isEmpty(queryParamName)) {
                 for (int i = 0; i < queryParamName.size(); i++) {
                     builder.queryParam(queryParamName.get(i), queryParamValue.get(i));
                 }
@@ -144,7 +130,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
     public Object postApi(ApiName apiName, String queryParamName, String queryParamValue, Object requestedData,
             Class<?> responseType, MediaType mediaType) throws ApisResourceAccessException {
-        logger.debug("RestClientServiceImpl::postApi()::entry");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
 
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
@@ -153,13 +139,8 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!((queryParamName == null) || (("").equals(queryParamName)))) {
-                String[] queryParamNameArr = queryParamName.split(",");
-                String[] queryParamValueArr = queryParamValue.split(",");
-
-                for (int i = 0; i < queryParamNameArr.length; i++) {
-                    builder.queryParam(queryParamNameArr[i], queryParamValueArr[i]);
-                }
+            if (!StringUtils.isEmpty(queryParamName)) {
+                addQueryParam(queryParamName, queryParamValue, builder);
             }
 
             try {
@@ -173,7 +154,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug("RestClientServiceImpl::postApi()::exit");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -204,7 +185,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
     public Object postApi(ApiName apiName, List<String> pathsegments, String queryParamName, String queryParamValue,
             Object requestedData, Class<?> responseType) throws ApisResourceAccessException {
 
-        logger.debug("RestClientServiceImpl::postApi()::entry");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         UriComponentsBuilder builder = null;
@@ -212,21 +193,16 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!((pathsegments == null) || (pathsegments.isEmpty()))) {
+            if (!CollectionUtils.isEmpty(pathsegments)) {
                 for (String segment : pathsegments) {
-                    if (!((segment == null) || (("").equals(segment)))) {
+                    if (!StringUtils.isEmpty(segment)) {
                         builder.pathSegment(segment);
                     }
                 }
 
             }
-            if (!checkNull(queryParamName)) {
-                String[] queryParamNameArr = queryParamName.split(",");
-                String[] queryParamValueArr = queryParamValue.split(",");
-
-                for (int i = 0; i < queryParamNameArr.length; i++) {
-                    builder.queryParam(queryParamNameArr[i], queryParamValueArr[i]);
-                }
+            if (!StringUtils.isEmpty(queryParamName)) {
+                addQueryParam(queryParamName, queryParamValue, builder);
             }
 
             try {
@@ -240,7 +216,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug("RestClientServiceImpl::postApi()::exit");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -249,7 +225,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             List<Object> queryParamValue,
             Object requestedData, Class<?> responseType) throws ApisResourceAccessException {
 
-        logger.debug("RestClientServiceImpl::postApi()::entry");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         UriComponentsBuilder builder = null;
@@ -257,13 +233,8 @@ public class RestClientServiceImpl implements RestClientService<Object> {
             builder = UriComponentsBuilder.fromUriString(apiHostIpPort);
         if (builder != null) {
 
-            if (!((pathsegments == null) || (pathsegments.isEmpty()))) {
-                for (String segment : pathsegments) {
-                    if (!((segment == null) || (("").equals(segment)))) {
-                        builder.pathSegment(segment);
-                    }
-                }
-
+            if (!CollectionUtils.isEmpty(pathsegments)) {
+                addPathSegments(pathsegments, builder);
             }
             if (!CollectionUtils.isEmpty(queryParamName)) {
 
@@ -283,7 +254,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
 
             }
         }
-        logger.debug("RestClientServiceImpl::postApi()::exit");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
@@ -291,7 +262,7 @@ public class RestClientServiceImpl implements RestClientService<Object> {
     public Object postApi(ApiName apiName,
                           Object requestedData, Class<?> responseType, boolean useBearerToken) throws ApisResourceAccessException {
 
-        logger.debug("RestClientServiceImpl::postApi()::entry");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_ENTRY);
         Object obj = null;
         String apiHostIpPort = env.getProperty(apiName.name());
         if (apiHostIpPort != null) {
@@ -303,20 +274,23 @@ public class RestClientServiceImpl implements RestClientService<Object> {
                         PlatformErrorMessages.MIMOTO_RCT_UNKNOWN_RESOURCE_EXCEPTION.getMessage(), e);
             }
         }
-        logger.debug("RestClientServiceImpl::postApi()::exit");
+        logger.debug(LoggerFileConstant.REST_CLIENT_SERVICE_IMPL_POST_API_EXIT);
         return obj;
     }
 
-    /**
-     * Check null.
-     *
-     * @param queryParamName
-     *                       the query param name
-     * @return true, if successful
-     */
-    private boolean checkNull(String queryParamName) {
-
-        return ((queryParamName == null) || (("").equals(queryParamName)));
+    private static void addQueryParam(String queryParamName, String queryParamValue, UriComponentsBuilder builder) {
+        String[] queryParamNameArr = queryParamName.split(",");
+        String[] queryParamValueArr = queryParamValue.split(",");
+        for (int i = 0; i < queryParamNameArr.length; i++) {
+            builder.queryParam(queryParamNameArr[i], queryParamValueArr[i]);
+        }
     }
 
+    private void addPathSegments(List<String> pathSegments, UriComponentsBuilder builder) {
+        for (String segment : pathSegments) {
+            if (!StringUtils.isEmpty(segment)) {
+                builder.pathSegment(segment);
+            }
+        }
+    }
 }

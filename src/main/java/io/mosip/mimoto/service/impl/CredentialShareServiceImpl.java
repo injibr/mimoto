@@ -50,6 +50,8 @@ public class CredentialShareServiceImpl implements CredentialShareService {
 
     /** The Constant FINGER. */
     public static final String FINGER = "Finger";
+    public static final String DATA_IMAGE_JPG_BASE_64 = "data:image/jpg;base64,";
+    public static final String DATA_BINARY_BASE_64 = "data:binary;base64,";
 
     private Gson gson = new Gson();
 
@@ -139,7 +141,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             @SuppressWarnings("unchecked")
             Map<String, String> proofMap = (Map<String, String>) eventModel.getEvent().getData().get("proof");
             String sign = proofMap.get("signature").toString();
-    
+
             credentialSubject = getCredentialSubject(decodedCredential);
 
             org.json.JSONObject credentialJSON = decrypt(decodedCredential, credentialSubject, encryptionPin);
@@ -196,13 +198,11 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         boolean isTransactionSuccessful = false;
         try {
             individualBio = credentialJSON.getString("biometrics");
-            String individualBiometric = new String(individualBio);
+            String individualBiometric = individualBio;
             if (credentialJSON.has("UIN"))
                 id = credentialJSON.getString("UIN");
             else if (credentialJSON.has(vid))
                 id = credentialJSON.getString(vid);
-            else
-                id = null;
 
             byte[] textFileByte = createJSONFile(credentialJSON, individualBiometric);
             byteMap.put(UIN_TEXT_FILE, textFileByte);
@@ -264,23 +264,14 @@ public class CredentialShareServiceImpl implements CredentialShareService {
             for (String value : templateValue.split(",")) {
                 Object object = credential.has(value) ? credential.get(value) : null;
                 if (object instanceof ArrayList) {
-                    org.json.simple.JSONArray node = new org.json.simple.JSONArray();
-                    node.addAll(credential.getJSONArray(value).toList());
-                    JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
-                    for (JsonValue jsonValue : jsonValues) {
-                        if (supportedLang.contains(jsonValue.getLanguage())) {
-                            outputJSON.put(value + "_" + jsonValue.getLanguage(), jsonValue);
-                        }
-                    }
+                    appendLangToOutputJSONFields(credential, outputJSON, value);
                 } else if (object instanceof LinkedHashMap) {
                     org.json.JSONObject json = credential.getJSONObject(value);
                     outputJSON.put(value, json.get(VALUE));
+                } else if (key.equals("biometrics")) {
+                    outputJSON.put(value, getBiometricsDataJSON(individualBiometric));
                 } else {
-                    if (key.equals("biometrics")) {
-                        outputJSON.put(value, getBiometricsDataJSON(individualBiometric));
-                    } else {
-                        outputJSON.put(value, object);
-                    }
+                    outputJSON.put(value, object);
                 }
             }
         }
@@ -304,29 +295,11 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                     List<String> subType = bdbInfo.getSubtype();
                     byte[] photoBytes = util.getPhotoByTypeAndSubType(bIRTypeList, type, subType);
                     if (photoBytes != null) {
-                        String data;
-                        if (type.equalsIgnoreCase(BiometricType.FACE.value())) {
-                            // Convert face image from JPEG2000 to JPG and encode with base64.
-                            // Assume that the face image is in JPEG2000 format.
-                            data = java.util.Base64.getEncoder().encodeToString(CommonUtil.convertJP2ToJPEGBytes(extractFaceImageData(photoBytes)));
-                        } else {
-                            data = java.util.Base64.getEncoder().encodeToString(photoBytes);
-                        }
+                        String data = getData(type, photoBytes);
                         if (subType.isEmpty()) {
-                            String formatPrefix = null;
-                            if (type.equalsIgnoreCase(BiometricType.FACE.value())) {
-                                formatPrefix = "data:image/jpg;base64,";
-                            } else {
-                                formatPrefix = "data:binary;base64,";
-                            }
-                            biometrics.put(type, formatPrefix + data);
+                            addTypeToBiometricWithFormatPrefixAndData(biometrics, type, data);
                         } else {
-                            org.json.JSONObject typeList = biometrics.has(type) ? biometrics.getJSONObject(type)
-                                    : new org.json.JSONObject();
-                            typeList.put(String.join("_", subType).toLowerCase(), "data:binary;base64," + data);
-                            if (!biometrics.has(type)) {
-                                biometrics.put(type, typeList);
-                            }
+                            addTypeToBiometricIfNotExists(biometrics, type, subType, data);
                         }
                     }
                 }
@@ -412,7 +385,6 @@ public class CredentialShareServiceImpl implements CredentialShareService {
     public org.json.JSONObject decryptAttribute(org.json.JSONObject data, String encryptionPin, String credential)
             throws ParseException {
 
-        // org.json.JSONObject jsonObj = new org.json.JSONObject(credential);
         JSONParser parser = new JSONParser(); // this needs the "json-simple" library
         Object obj = parser.parse(credential);
         JSONObject jsonObj = (org.json.simple.JSONObject) obj;
@@ -429,7 +401,7 @@ public class CredentialShareServiceImpl implements CredentialShareService {
                 try {
                     cryptoWithPinResponseDto = cryptoUtil.decryptWithPin(cryptoWithPinRequestDto);
                 } catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException
-                        | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+                         | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
                     logger.error("Error while decrypting the data", e);
                     throw new CryptoManagerException(PlatformErrorMessages.MIMOTO_INVALID_KEY_EXCEPTION.getCode(),
                             PlatformErrorMessages.MIMOTO_INVALID_KEY_EXCEPTION.getMessage(), e);
@@ -442,4 +414,38 @@ public class CredentialShareServiceImpl implements CredentialShareService {
         return data;
     }
 
+    private void appendLangToOutputJSONFields(org.json.JSONObject credential, org.json.JSONObject outputJSON, String value) {
+        JSONArray node = new JSONArray();
+        node.addAll(credential.getJSONArray(value).toList());
+        JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
+        for (JsonValue jsonValue : jsonValues) {
+            if (supportedLang.contains(jsonValue.getLanguage())) {
+                outputJSON.put(value + "_" + jsonValue.getLanguage(), jsonValue);
+            }
+        }
+    }
+
+    private String getData(String type, byte[] photoBytes) {
+        if (type.equalsIgnoreCase(BiometricType.FACE.value())) {
+            // Convert face image from JPEG2000 to JPG and encode with base64.
+            // Assume that the face image is in JPEG2000 format.
+            return Base64.getEncoder().encodeToString(CommonUtil.convertJP2ToJPEGBytes(extractFaceImageData(photoBytes)));
+        } else {
+            return Base64.getEncoder().encodeToString(photoBytes);
+        }
+    }
+
+    private static void addTypeToBiometricWithFormatPrefixAndData(org.json.JSONObject biometrics, String type, String data) {
+        String formatPrefix = type.equalsIgnoreCase(BiometricType.FACE.value()) ? DATA_IMAGE_JPG_BASE_64 : DATA_BINARY_BASE_64;
+        biometrics.put(type, formatPrefix + data);
+    }
+
+    private static void addTypeToBiometricIfNotExists(org.json.JSONObject biometrics, String type, List<String> subType, String data) {
+        org.json.JSONObject typeList = biometrics.has(type) ? biometrics.getJSONObject(type)
+                : new org.json.JSONObject();
+        typeList.put(String.join("_", subType).toLowerCase(), DATA_BINARY_BASE_64 + data);
+        if (!biometrics.has(type)) {
+            biometrics.put(type, typeList);
+        }
+    }
 }
