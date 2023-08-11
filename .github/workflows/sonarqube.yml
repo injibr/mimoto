@@ -47,3 +47,28 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: mvn -Dgpg.skip -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=mimoto
+      
+      - name: Install jq
+        run: sudo apt-get -y install jq
+
+      - name: Check for critical bugs
+        run: |
+          # Fetch SonarQube issues using the API
+          SONAR_HOST_URL=https://sonarcloud.io
+          SONAR_PROJECT_KEY=mosip_mimoto
+
+          # Fetch issues using the SonarQube API
+          response=$(curl -s "${SONAR_HOST_URL}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&severities=CRITICAL&statuses=OPEN")
+          echo "The response is $response"
+
+          # Extract the value of "issues" field
+          issues_count=$(echo "$response" | jq '.issues | length')
+          echo "The number of issues $issues_count"
+
+          if [ "$issues_count" -eq 0 ]; then
+              echo "No critical issues found."
+          else
+              echo "Critical issues found. Failing the pipeline"
+              exit 1
+          fi
+
