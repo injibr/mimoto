@@ -21,7 +21,7 @@ if [ "$flag" = "n" ]; then
 fi
 
 NS=mimoto
-CHART_VERSION=12.0.1-B3
+CHART_VERSION=12.0.2
 
 echo Create $NS namespace
 kubectl create ns $NS
@@ -74,7 +74,17 @@ function installing_onboarder() {
     --set onboarding.configmaps.s3.s3-bucket-name="$s3_bucket" \
     $ENABLE_INSECURE \
     -f values.yaml \
-    --version $CHART_VERSION
+    --version $CHART_VERSION \
+    --wait --wait-for-jobs
+
+    wallet_binding_partner_api_key=$(kubectl logs -n $NS job/mimoto-keybinding-partner-onboarder-mimoto-keybinding | grep "mpartner default mimoto keybinding apikey:" | awk '{print $6}')
+    echo Wallet Binding Partner Api Key is $wallet_binding_partner_api_key
+    kubectl -n $NS create secret generic mimoto-wallet-binding-partner-api-key --from-literal=mimoto-wallet-binding-partner-api-key=$wallet_binding_partner_api_key --dry-run=client -o yaml | kubectl apply -f -
+    ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
+    kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+    kubectl -n config-server get deploy -o name |  xargs -n1 -t  kubectl -n config-server rollout status
+    kubectl rollout restart deployment -n mimoto mimoto
+    echo Mimoto wallet binding partner api key updated successfully.
 
     echo Reports are moved to S3 under onboarder bucket
     return 0
