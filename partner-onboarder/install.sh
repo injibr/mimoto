@@ -77,9 +77,6 @@ function installing_onboarder() {
     --version $CHART_VERSION \
     --wait --wait-for-jobs
 
-    wallet_binding_partner_api_key=$(kubectl logs -n $NS job/mimoto-keybinding-partner-onboarder-mimoto-keybinding | grep "mpartner default mimoto keybinding apikey:" | awk '{print $6}')
-    echo Wallet Binding Partner Api Key is $wallet_binding_partner_api_key
-    kubectl -n $NS create secret generic mimoto-wallet-binding-partner-api-key --from-literal=mimoto-wallet-binding-partner-api-key=$wallet_binding_partner_api_key --dry-run=client -o yaml | kubectl apply -f -
     ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
     kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
     kubectl -n config-server get deploy -o name |  xargs -n1 -t  kubectl -n config-server rollout status
