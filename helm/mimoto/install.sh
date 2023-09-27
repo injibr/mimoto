@@ -41,9 +41,9 @@ function installing_mimoto() {
   fi
 
   echo Setting up dummy values for Mimoto Wallet Binding api key and Mimoto OIDC Partner Client ID
-  kubectl -n $NS create secret generic mimoto-wallet-binding-partner-api-key --from-literal=mimoto-wallet-binding-partner-api-key=111111 --dry-run=client -o yaml | kubectl apply -f -
+  kubectl -n $NS create secret generic mimoto-wallet-binding-partner-api-key --from-literal=mimoto-wallet-binding-partner-api-key= --dry-run=client -o yaml | kubectl apply -f -
   ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
-  kubectl -n $NS create secret generic mimoto-oidc-partner-clientid --from-literal=mimoto-oidc-partner-clientid=111111 --dry-run=client -o yaml | kubectl apply -f -
+  kubectl -n $NS create secret generic mimoto-oidc-partner-clientid --from-literal=mimoto-oidc-partner-clientid= --dry-run=client -o yaml | kubectl apply -f -
   ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto config-server
   kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
   kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
