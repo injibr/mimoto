@@ -465,5 +465,5 @@ enable_insecure: false
 volumes:
   secrets:
     mimoto:
-      key: keystorep12
+      key: oidckeystore.p12
       path: /home/mosip/certs
