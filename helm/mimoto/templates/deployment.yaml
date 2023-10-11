@@ -94,7 +94,7 @@ spec:
             - name: JDK_JAVA_OPTIONS
               value: {{ .Values.additionalResources.javaOpts }}
             - name: KEYSTORE_P12_PATH
-              value: {{ .Values.volumes.secrets.mimoto.path }}
+              value: {{ .Values.volumes.secrets.mimotooidc.path }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
