@@ -67,7 +67,7 @@ function installing_onboarder() {
     s3_user_key=$( kubectl -n s3 get cm s3 -o json | jq -r '.data."s3-user-key"' )
 
     echo Onboarding default partners
-    helm -n $NS install mimoto-keybinding-partner-onboarder mosip/partner-onboarder \
+    helm -n $NS install mimoto-partner-onboarder mosip/partner-onboarder \
     --set onboarding.configmaps.s3.s3-host="$s3_url" \
     --set onboarding.configmaps.s3.s3-user-key="$s3_user_key" \
     --set onboarding.configmaps.s3.s3-region="$s3_region" \
@@ -84,7 +84,8 @@ function installing_onboarder() {
     kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
     kubectl -n config-server get deploy -o name |  xargs -n1 -t  kubectl -n config-server rollout status
 
-    kubectl rollout restart deployment -n mimoto mimoto
+    kubectl -n config-server rollout restart deployment config-server
+    kubectl -n mimoto rollout restart deployment mimoto
 
     echo Reports are moved to S3 under onboarder bucket
     return 0
