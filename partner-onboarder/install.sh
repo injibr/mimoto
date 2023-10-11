@@ -88,10 +88,8 @@ function installing_onboarder() {
     kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
     kubectl -n config-server set env --keys=mimoto-oidc-keystore-password --from secret/mimoto-oidc-keystore-password deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
 
-    kubectl -n config-server get deploy -o name |  xargs -n1 -t  kubectl -n config-server rollout status
-
     kubectl -n config-server rollout restart deployment config-server
-    kubectl -n mimoto rollout restart deployment mimoto
+    kubectl -n config-server rollout status deployment config-server
 
     echo Reports are moved to S3 under onboarder bucket
     return 0
