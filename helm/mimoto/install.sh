@@ -47,7 +47,7 @@ function installing_mimoto() {
   ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto config-server
 
   echo Updating mimoto-oidc-keystore-password value
-  kubectl -n $NS create secret generic mimoto-oidc-keystore-password --from-literal=mimoto-oidc-keystore-password='mosip123' --dry-run=client -o yaml | kubectl apply -f -
+  kubectl -n $NS create secret generic mimoto-oidc-keystore-password --from-literal=mimoto-oidc-keystore-password='' --dry-run=client -o yaml | kubectl apply -f -
   ./copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto config-server
 
   kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_

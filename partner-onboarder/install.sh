@@ -77,11 +77,17 @@ function installing_onboarder() {
     --version $CHART_VERSION \
     --wait --wait-for-jobs
 
+    echo Updating mimoto-oidc-keystore-password value
+    kubectl -n $NS create secret generic mimoto-oidc-keystore-password --from-literal=mimoto-oidc-keystore-password='mosip123' --dry-run=client -o yaml | kubectl apply -f -
+    ./copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto config-server
+
     echo Updating Mimoto wallet binding partner api key and Mimoto OIDC Partner Client ID
     ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
     ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto config-server
     kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
     kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+    kubectl -n config-server set env --keys=mimoto-oidc-keystore-password --from secret/mimoto-oidc-keystore-password deployment/config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+
     kubectl -n config-server get deploy -o name |  xargs -n1 -t  kubectl -n config-server rollout status
 
     kubectl -n config-server rollout restart deployment config-server
