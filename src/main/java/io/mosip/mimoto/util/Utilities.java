@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import io.mosip.kernel.core.logger.spi.Logger;
@@ -55,7 +56,9 @@ public class Utilities {
 
     private Logger logger = LoggerUtil.getLogger(Utilities.class);
 
-    /** The Constant FILE_SEPARATOR. */
+    /**
+     * The Constant FILE_SEPARATOR.
+     */
     public static final String FILE_SEPARATOR = "\\";
 
     @Autowired
@@ -64,25 +67,41 @@ public class Utilities {
     @Autowired
     private RestApiClient restApiClient;
 
-    /** The rest client service. */
+    /**
+     * The rest client service.
+     */
     @Autowired
     private RestClientService<Object> restClientService;
 
-    /** The config server file storage URL. */
+    /**
+     * The config server file storage URL.
+     */
     @Value("${config.server.file.storage.uri}")
     private String configServerFileStorageURL;
 
-    /** The get reg processor identity json. */
+    /**
+     * The get reg processor identity json.
+     */
     @Value("${registration.processor.identityjson}")
     private String getRegProcessorIdentityJson;
 
-    /** The get reg processor demographic identity. */
+    /**
+     * The get reg processor demographic identity.
+     */
     @Value("${registration.processor.demographic.identity}")
     private String getRegProcessorDemographicIdentity;
 
-    /** The registration processor abis json. */
+    /**
+     * The registration processor abis json.
+     */
     @Value("${registration.processor.print.textfile}")
     private String registrationProcessorPrintTextFile;
+
+    /**
+     * The get reg issuers config json.
+     */
+    @Value("${mosip.openid.issuers}")
+    private String getIssuersConfigJson;
 
     private String mappingJsonString = null;
 
@@ -90,6 +109,12 @@ public class Utilities {
 
     private String printTextFileJsonString = null;
 
+    private String issuersConfigJsonString = null;
+
+//    uncomment for running mimoto Locally to populate the issuers json
+//    public Utilities(@Value("classpath:openid-issuers-config.json") Resource resource) throws IOException {
+//        issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
+//    }
 
     public JSONObject getTemplate() throws JsonParseException, JsonMappingException, IOException {
         return objectMapper.readValue(classLoader.getResourceAsStream(defaultTemplate), JSONObject.class);
@@ -147,10 +172,8 @@ public class Utilities {
     /**
      * Gets the json.
      *
-     * @param configServerFileStorageURL
-     *            the config server file storage URL
-     * @param uri
-     *            the uri
+     * @param configServerFileStorageURL the config server file storage URL
+     * @param uri                        the uri
      * @return the json
      */
     public String getJson(String configServerFileStorageURL, String uri) {
@@ -197,7 +220,7 @@ public class Utilities {
             ResponseWrapper<IdResponseDTO> idResponseDto;
 
             idResponseDto = (ResponseWrapper<IdResponseDTO>) restClientService.getApi(ApiName.IDREPOGETIDBYUIN, pathSegments, "", "",
-                ResponseWrapper.class);
+                    ResponseWrapper.class);
             if (idResponseDto == null) {
                 logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.UIN.toString(), "",
                         "Utilities::retrieveIdrepoJson()::exit idResponseDto is null");
@@ -231,8 +254,7 @@ public class Utilities {
      * RegistrationProcessorIdentity java class.
      *
      * @return the registration processor identity json
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     public JSONObject getRegistrationProcessorMappingJson() throws IOException {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
@@ -255,6 +277,11 @@ public class Utilities {
             return hm.get("value") != null ? hm.get("value").toString() : null;
         }
         return jsonObject.get(key) != null ? jsonObject.get(key).toString() : null;
+    }
+
+    public String getIssuersConfigJsonValue() throws IOException {
+        return  (issuersConfigJsonString != null && !issuersConfigJsonString.isEmpty()) ?
+                issuersConfigJsonString : getJson(configServerFileStorageURL, getIssuersConfigJson);
     }
 
 

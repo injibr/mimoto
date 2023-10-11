@@ -8,15 +8,21 @@ import io.mosip.kernel.core.util.JsonUtils;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeResponse;
 import io.mosip.mimoto.TestBootApplication;
 import io.mosip.mimoto.core.http.ResponseWrapper;
+import io.mosip.mimoto.dto.IssuerDTO;
+import io.mosip.mimoto.dto.IssuersDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
+import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.ApisResourceAccessException;
 import io.mosip.mimoto.exception.BaseUncheckedException;
+import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.model.Event;
 import io.mosip.mimoto.model.EventModel;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
+import io.mosip.mimoto.service.impl.IssuersServiceImpl;
 import io.mosip.mimoto.util.*;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,11 +41,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import static io.mosip.mimoto.exception.PlatformErrorMessages.API_NOT_ACCESSIBLE_EXCEPTION;
+import static io.mosip.mimoto.exception.PlatformErrorMessages.INVALID_ISSUER_ID_EXCEPTION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -66,8 +74,14 @@ public class InjiControllerTest {
     @MockBean
     private CredentialShareServiceImpl credentialShareService;
 
+    @MockBean
+    private IssuersServiceImpl issuersService;
+
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    Utilities utilities;
 
     @MockBean
     private AttestationOfflineVerify attestationOfflineVerify;
@@ -80,9 +94,6 @@ public class InjiControllerTest {
 
     @MockBean
     public CryptoCoreUtil cryptoCoreUtil;
-
-    @MockBean
-    private Utilities utilities;
 
     @Before
     public void setup() throws IOException {
@@ -112,12 +123,79 @@ public class InjiControllerTest {
                 .andExpect(status().isOk());
     }
 
+    static IssuerDTO getIssuerDTO(String issuerName) {
+        IssuerDTO issuer = new IssuerDTO();
+        issuer.setId(issuerName + "id");
+        issuer.setDisplayName(issuerName);
+        issuer.setLogoUrl("/logo");
+        issuer.setClientId("123");
+        if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
+        else {
+            issuer.setRedirectUrl(null);
+            issuer.setServiceConfiguration(null);
+            issuer.setAdditionalHeaders(null);
+            issuer.setScopes(null);
+        }
+        return issuer;
+    }
+
+    @Test
+    public void getAllIssuersTest() throws Exception {
+        IssuersDTO issuers = new IssuersDTO();
+        issuers.setIssuers((List.of(getIssuerDTO("Issuer1"), getIssuerDTO("Issuer2"))));
+        Mockito.when(issuersService.getAllIssuers())
+                .thenReturn(issuers)
+                .thenThrow(new ApiNotAccessibleException());
+
+        mockMvc.perform(get("/issuers").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
+                        Matchers.allOf(
+                                Matchers.hasKey("id"),
+                                Matchers.hasKey("displayName"),
+                                Matchers.hasKey("logoUrl"),
+                                Matchers.hasKey("clientId"),
+                                Matchers.hasKey("wellKnownEndpoint"),
+                                Matchers.not(Matchers.hasKey("redirectUrl")),
+                                Matchers.not(Matchers.hasKey("serviceConfiguration")),
+                                Matchers.not(Matchers.hasKey("additionalHeaders")),
+                                Matchers.not(Matchers.hasKey("scopes"))
+                        )
+                )));
+
+        mockMvc.perform(get("/issuers").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
+                .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
+    }
+
+    @Test
+    public void getIssuerConfigTest() throws Exception {
+        Mockito.when(issuersService.getIssuerConfig("id1"))
+                .thenReturn(getIssuerDTO("Issuer1"))
+                .thenThrow(new ApiNotAccessibleException());
+        Mockito.when(issuersService.getIssuerConfig("invalidId")).thenReturn(null);
+
+        mockMvc.perform(get("/issuers/id1").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/issuers/invalidId").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(INVALID_ISSUER_ID_EXCEPTION.getCode())))
+                .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(INVALID_ISSUER_ID_EXCEPTION.getMessage())));
+
+        mockMvc.perform(get("/issuers/id1").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
+                .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
+    }
+
     @Test
     public void processOfflineTest() throws Exception {
         AttestationStatement attestationStatement = new AttestationStatement();
         Mockito.when(attestationOfflineVerify.parseAndVerify(Mockito.anyString())).thenReturn(attestationStatement);
         this.mockMvc.perform(post("/safetynet/offline/verify").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("offlineStr"))
+                        .content("offlineStr"))
                 .andExpect(status().isOk());
     }
 
@@ -126,7 +204,7 @@ public class InjiControllerTest {
         AttestationStatement attestationStatement = new AttestationStatement();
         Mockito.when(attestationOfflineVerify.parseAndVerify(Mockito.anyString())).thenThrow(new Exception("Exception"));
         this.mockMvc.perform(post("/safetynet/offline/verify").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("offlineStr"))
+                        .content("offlineStr"))
                 .andExpect(status().isOk());
     }
 
@@ -135,7 +213,7 @@ public class InjiControllerTest {
         AttestationStatement attestationStatement = new AttestationStatement();
         Mockito.when(attestationOnlineVerify.parseAndVerify(Mockito.anyString())).thenReturn(attestationStatement);
         this.mockMvc.perform(post("/safetynet/online/verify").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("offlineStr"))
+                        .content("offlineStr"))
                 .andExpect(status().isOk());
     }
 
@@ -144,11 +222,13 @@ public class InjiControllerTest {
         AttestationStatement attestationStatement = new AttestationStatement();
         Mockito.when(attestationOnlineVerify.parseAndVerify(Mockito.anyString())).thenThrow(new Exception("Exception"));
         this.mockMvc.perform(post("/safetynet/online/verify").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("offlineStr"))
+                        .content("offlineStr"))
                 .andExpect(status().isOk());
     }
 
-    /** CREDENTIAL SHARE CONTROLLER TEST CASES */
+    /**
+     * CREDENTIAL SHARE CONTROLLER TEST CASES
+     */
 
     @Test
     @Ignore
@@ -162,7 +242,7 @@ public class InjiControllerTest {
         Mockito.when(credentialShareService.generateDocuments(Mockito.any())).thenReturn(true);
 
         this.mockMvc.perform(post("/v1/mimoto/credentialshare/callback/notify").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(eventModel)))
+                        .content(JsonUtils.javaObjectToJsonString(eventModel)))
                 .andExpect(status().isOk());
     }
 
@@ -186,7 +266,7 @@ public class InjiControllerTest {
         Mockito.when(credentialShareService.generateDocuments(Mockito.any())).thenReturn(true);
 
         this.mockMvc.perform(post("/credentialshare/request").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -219,23 +299,25 @@ public class InjiControllerTest {
         Mockito.when(utilities.getRequestVC(Mockito.anyString())).thenReturn(requestCredentialJSON);
 
         this.mockMvc.perform(post("/credentialshare/download").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
 
         Mockito.when(utilities.getDecryptedVC(Mockito.anyString())).thenReturn(null);
 
         this.mockMvc.perform(post("/credentialshare/download").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isNotFound());
 
         Mockito.when(utilities.getDecryptedVC(Mockito.anyString())).thenThrow(new IOException("Exception"));
 
         this.mockMvc.perform(post("/credentialshare/download").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isNotFound());
     }
 
-    /** IDP CONTROLLER TEST CASES */
+    /**
+     * IDP CONTROLLER TEST CASES
+     */
 
     @Test
     public void otpRequestTest() throws Exception {
@@ -251,11 +333,11 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/binding-otp").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(post("/binding-otp").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -274,11 +356,11 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/wallet-binding").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(post("/wallet-binding").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -295,11 +377,11 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/link-transaction").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(post("/link-transaction").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -326,7 +408,7 @@ public class InjiControllerTest {
         responseWrapper.setResponse(resp);
 
         Mockito.when(restClientService.postApi(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(responseWrapper)
+                        Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(responseWrapper)
                 .thenReturn(responseWrapper).thenThrow(new ApisResourceAccessException("exception"));
 
         this.mockMvc.perform(post("/idp-auth-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -364,11 +446,11 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(otpResponse).thenReturn(response).thenReturn(otpResponse2);
 
         this.mockMvc.perform(post("/idp-authenticate").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDto)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(post("/idp-authenticate").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDto)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
                 .andExpect(status().isOk());
     }
 
@@ -389,15 +471,17 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response).thenThrow(new BaseUncheckedException("Exception"));
 
         this.mockMvc.perform(post("/idp-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDto)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(post("/idp-consent").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDto)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDto)))
                 .andExpect(status().isOk());
     }
 
-    /** RESIDENT CONTROLLER TEST CASES */
+    /**
+     * RESIDENT CONTROLLER TEST CASES
+     */
     @Test
     public void residentOtpRequestTest() throws Exception {
         AppOTPRequestDTO requestDTO = new AppOTPRequestDTO();
@@ -413,7 +497,7 @@ public class InjiControllerTest {
                 Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenReturn(response);
 
         this.mockMvc.perform(post("/req/otp").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -432,7 +516,7 @@ public class InjiControllerTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         this.mockMvc.perform(post("/vid").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -451,7 +535,7 @@ public class InjiControllerTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         this.mockMvc.perform(post("/req/auth/lock").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -470,7 +554,7 @@ public class InjiControllerTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         this.mockMvc.perform(post("/req/auth/unlock").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -487,7 +571,7 @@ public class InjiControllerTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         this.mockMvc.perform(post("/req/individualId/otp").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -504,7 +588,7 @@ public class InjiControllerTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         this.mockMvc.perform(post("/aid/get-individual-id").contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(JsonUtils.javaObjectToJsonString(requestDTO)))
+                        .content(JsonUtils.javaObjectToJsonString(requestDTO)))
                 .andExpect(status().isOk());
     }
 }

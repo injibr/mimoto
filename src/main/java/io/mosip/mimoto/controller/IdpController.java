@@ -5,27 +5,27 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.JsonUtils;
-import io.mosip.kernel.core.util.exception.JsonProcessingException;
 import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
+import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.IdpException;
-import io.mosip.mimoto.exception.InvalidInputException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
+import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class IdpController {
@@ -46,6 +46,12 @@ public class IdpController {
 
     @Autowired
     RequestValidator requestValidator;
+
+    @Value("${mosip.oidc.esignet.token.endpoint}")
+    String tokenEndpoint;
+
+    @Autowired
+    IdpService idpService;
 
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
@@ -100,6 +106,21 @@ public class IdpController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping(value = "/get-token", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseEntity getToken(@RequestParam Map<String, String> params) {
+        logger.debug("Started Token Call get-token-> " + params.toString());
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            HttpEntity<MultiValueMap<String, String>> request = idpService.constructGetTokenRequest(params);
+            TokenResponseDTO response = restTemplate.postForObject(tokenEndpoint, request, TokenResponseDTO.class);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception ex){
+            logger.error("Exception Occured while invoking the get-token endpoint", ex);
+            ResponseWrapper response = getErrorResponse(PlatformErrorMessages.MIMOTO_IDP_GENERIC_EXCEPTION.getCode(), ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     private ResponseWrapper getErrorResponse(String errorCode, String errorMessage) {

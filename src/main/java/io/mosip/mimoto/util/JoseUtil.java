@@ -1,5 +1,8 @@
 package io.mosip.mimoto.util;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -13,17 +16,22 @@ import io.mosip.mimoto.dto.mimoto.WalletBindingInternalResponseDto;
 import io.mosip.mimoto.dto.mimoto.WalletBindingResponseDto;
 import org.jose4j.jws.JsonWebSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -32,9 +40,28 @@ public class JoseUtil {
     private final Logger logger = LoggerUtil.getLogger(JoseUtil.class);
     private static final String BEGIN_KEY = "-----BEGIN PUBLIC KEY-----";
     private static final String END_KEY = "-----END PUBLIC KEY-----";
+    private static final String ALG_RS256 = "RS256";
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private CryptoCoreUtil cryptoCoreUtil;
+
+    @Value("${mosip.oidc.p12.filename}")
+    private String fileName;
+
+    @Value("${mosip.oidc.p12.password}")
+    private String cyptoPassword;
+
+    @Value("${mosip.oidc.p12.path}")
+    String keyStorePath;
+
+    @Value("${mosip.oidc.p12.alias}")
+    private String alias;
+
+    @Value("${mosip.oidc.esignet.aud}")
+    private String audience;
 
     public static JwkDto getJwkFromPublicKey(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -116,5 +143,30 @@ public class JoseUtil {
         }
 
         return responseWrapper;
+    }
+
+    public String getJWT(String clientId) {
+
+        Map<String, Object> header = new HashMap<>();
+        header.put("alg", ALG_RS256);
+
+        String keyStorePathWithFileName = keyStorePath + fileName;
+        Date issuedAt = Date.from(Instant.now());
+        Date expiresAt = Date.from(Instant.now().plusMillis(120000));
+        KeyStore.PrivateKeyEntry privateKeyEntry= null;
+        try {
+            privateKeyEntry = cryptoCoreUtil.loadP12(keyStorePathWithFileName, alias, cyptoPassword);
+        } catch (IOException e) {
+           logger.error("Exception happened while loading the p12 file for invoking token call.");
+        }
+        RSAPrivateKey privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
+        return JWT.create()
+                .withHeader(header)
+                .withIssuer(clientId)
+                .withSubject(clientId)
+                .withAudience(audience)
+                .withExpiresAt(expiresAt)
+                .withIssuedAt(issuedAt)
+                .sign(Algorithm.RSA256(null, privateKey));
     }
 }
