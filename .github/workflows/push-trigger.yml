@@ -20,6 +20,7 @@ on:
       - 1.*
       - develop*
       - MOSIP*
+      - qa-develop
 
 jobs:
   build-mimoto:
