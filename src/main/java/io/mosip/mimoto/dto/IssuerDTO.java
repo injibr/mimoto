@@ -1,7 +1,9 @@
 package io.mosip.mimoto.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.util.List;
@@ -13,23 +15,29 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
 @Data
 public class IssuerDTO {
     @Expose
-    String id;
+    String credential_issuer;
     @Expose
-    String displayName;
+    List<DisplayDTO> display;
     @Expose
     String protocol;
     @Expose
-    String logoUrl;
-    @Expose
-    String clientId;
+    String client_id;
+    @SerializedName(".well-known")
+    @JsonProperty(".well-known")
     @Expose
     String wellKnownEndpoint;
     @JsonInclude(NON_NULL)
-    String redirectUrl;
+    String redirect_uri;
     @JsonInclude(NON_NULL)
-    List<String> scopes;
+    List<String> scopes_supported;
     @JsonInclude(NON_NULL)
-    ServiceConfiguration serviceConfiguration;
+    String authorization_endpoint;
     @JsonInclude(NON_NULL)
-    Map<String, String> additionalHeaders;
+    String token_endpoint;
+    @JsonInclude(NON_NULL)
+    String credential_endpoint;
+    @JsonInclude(NON_NULL)
+    String credential_audience;
+    @JsonInclude(NON_NULL)
+    Map<String, String> additional_headers;
 }

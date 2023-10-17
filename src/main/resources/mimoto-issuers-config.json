@@ -1,0 +1,27 @@
+{
+  "issuers": [
+    {
+      "credential_issuer": "ESignet",
+      "display": [
+        {
+          "name": "e-Signet",
+          "logo": {
+            "url": "https://esignet.dev1.mosip.net/logo.png",
+            "alt_text": "esignet-logo"
+          },
+          "language": "en"
+        }
+      ],
+      "protocol": "OpenId4VCI",
+      "client_id": "7-j3xRzU3SODdoNgSGvO_cD8UijH3AIWRDAg1x-M",
+      "scopes_supported": ["mosip_identity_vc_ldp"],
+      "additional_headers": { "Accept": "application/json" },
+      ".well-known": null,
+      "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
+      "authorization_endpoint": "https://esignet.dev1.mosip.net/authorize",
+      "token_endpoint": "https://api.dev1.mosip.net/residentmobileapp/get-token",
+      "credential_endpoint": "https://api-internal.dev1.mosip.net/v1/esignet/vci/credential",
+      "credential_audience": "https://esignet.dev1.mosip.net/v1/esignet"
+    }
+  ]
+}
