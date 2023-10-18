@@ -1,6 +1,20 @@
 {
   "issuers": [
     {
+      "credential_issuer": "Mosip",
+      "display": [
+        {
+          "name": "UIN, VID, AID",
+          "logo": {
+            "url": "https://api.dev1.mosip.net/inji/digit-icon.png",
+            "alt_text": "digits-logo"
+          },
+          "language": "en"
+        }
+      ],
+      "protocol": "OTP"
+    },
+    {
       "credential_issuer": "ESignet",
       "display": [
         {
@@ -9,11 +23,11 @@
             "url": "https://esignet.dev1.mosip.net/logo.png",
             "alt_text": "esignet-logo"
           },
-          "language": "eng"
+          "language": "en"
         }
       ],
       "protocol": "OpenId4VCI",
-      "client_id": "7-j3xRzU3SODdoNgSGvO_cD8UijH3AIWRDAg1x-M",
+      "client_id": "7-*****************IWRDAg1x-M",
       "scopes_supported": ["mosip_identity_vc_ldp"],
       "additional_headers": { "Accept": "application/json" },
       ".well-known": null,
@@ -23,5 +37,6 @@
       "credential_endpoint": "https://api-internal.dev1.mosip.net/v1/esignet/vci/credential",
       "credential_audience": "https://esignet.dev1.mosip.net/v1/esignet"
     }
+
   ]
 }

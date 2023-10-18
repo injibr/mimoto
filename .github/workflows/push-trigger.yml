@@ -20,7 +20,6 @@ on:
       - 1.*
       - develop*
       - MOSIP*
-      - inji-*
 
 jobs:
   build-mimoto:
