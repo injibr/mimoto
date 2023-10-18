@@ -3,7 +3,8 @@ package io.mosip.mimoto.service;
 import com.google.gson.Gson;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
-import io.mosip.mimoto.dto.ServiceConfiguration;
+import io.mosip.mimoto.dto.DisplayDTO;
+import io.mosip.mimoto.dto.LogoDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.service.impl.IssuersServiceImpl;
 import io.mosip.mimoto.util.Utilities;
@@ -35,27 +36,33 @@ public class IssuersServiceTest {
     @Mock
     Utilities utilities;
 
-    List<String> issuerConfigRelatedFields = List.of("additionalHeaders", "serviceConfiguration", "redirectionUri");
+    List<String> issuerConfigRelatedFields = List.of("additional_headers", "authorization_endpoint", "token_endpoint", "credential_endpoint", "credential_audience", "redirect_uri");
 
 
     static IssuerDTO getIssuerDTO(String issuerName, List<String> nullFields) {
+        LogoDTO logo = new LogoDTO();
+        logo.setUrl("/logo");
+        logo.setAlt_text("logo-url");
+        DisplayDTO display = new DisplayDTO();
+        display.setName(issuerName);
+        display.setLanguage("en");
+        display.setLogo(logo);
         IssuerDTO issuer = new IssuerDTO();
-        issuer.setId(issuerName + "id");
-        issuer.setDisplayName(issuerName);
-        issuer.setLogoUrl("/logo");
-        issuer.setClientId("123");
+        issuer.setCredential_issuer(issuerName + "id");
+        issuer.setDisplay(Collections.singletonList(display));
+        issuer.setClient_id("123");
         if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
         else {
-            if (!nullFields.contains("redirectionUri"))
-                issuer.setRedirectUrl("/redirection");
-            if (!nullFields.contains("serviceConfiguration")) {
-                ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
-                serviceConfiguration.setAuthorizationEndpoint("/authorization");
-                serviceConfiguration.setTokenEndpoint("/token");
-                issuer.setServiceConfiguration(serviceConfiguration);
-            }
-            if (!nullFields.contains("additionalHeaders"))
-                issuer.setAdditionalHeaders(Map.of("Content-Type", "application/json"));
+            if (!nullFields.contains("redirect_uri"))
+                issuer.setRedirect_uri("/redirection");
+            if (!nullFields.contains("authorization_endpoint"))
+                issuer.setAuthorization_endpoint("/authorization_endpoint");
+            if (!nullFields.contains("token_endpoint"))
+                issuer.setAuthorization_endpoint("/token_endpoint");
+            if (!nullFields.contains("credential_endpoint"))
+                issuer.setAuthorization_endpoint("/credential_endpoint");
+            if (!nullFields.contains("additional_headers"))
+                issuer.setAdditional_headers(Map.of("Content-Type", "application/json"));
         }
         return issuer;
     }
