@@ -112,7 +112,7 @@ public class Utilities {
     private String issuersConfigJsonString = null;
 
 //    uncomment for running mimoto Locally to populate the issuers json
-//    public Utilities(@Value("classpath:openid-issuers-config.json") Resource resource) throws IOException {
+//    public Utilities(@Value("classpath:mimoto-issuers-config.json") Resource resource) throws IOException {
 //        issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
 //    }
 

@@ -8,8 +8,10 @@ import io.mosip.kernel.core.util.JsonUtils;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeResponse;
 import io.mosip.mimoto.TestBootApplication;
 import io.mosip.mimoto.core.http.ResponseWrapper;
+import io.mosip.mimoto.dto.DisplayDTO;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
+import io.mosip.mimoto.dto.LogoDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
@@ -124,17 +126,24 @@ public class InjiControllerTest {
     }
 
     static IssuerDTO getIssuerDTO(String issuerName) {
+        LogoDTO logo = new LogoDTO();
+        logo.setUrl("/logo");
+        logo.setAlt_text("logo-url");
+        DisplayDTO display = new DisplayDTO();
+        display.setName(issuerName);
+        display.setLanguage("en");
+        display.setLogo(logo);
         IssuerDTO issuer = new IssuerDTO();
-        issuer.setId(issuerName + "id");
-        issuer.setDisplayName(issuerName);
-        issuer.setLogoUrl("/logo");
-        issuer.setClientId("123");
+        issuer.setCredential_issuer(issuerName + "id");
+        issuer.setDisplay(Collections.singletonList(display));
+        issuer.setClient_id("123");
         if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
         else {
-            issuer.setRedirectUrl(null);
-            issuer.setServiceConfiguration(null);
-            issuer.setAdditionalHeaders(null);
-            issuer.setScopes(null);
+            issuer.setRedirect_uri(null);
+            issuer.setAuthorization_endpoint(null);
+            issuer.setCredential_endpoint(null);
+            issuer.setToken_endpoint(null);
+            issuer.setScopes_supported(null);
         }
         return issuer;
     }
@@ -151,15 +160,17 @@ public class InjiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
                         Matchers.allOf(
-                                Matchers.hasKey("id"),
-                                Matchers.hasKey("displayName"),
-                                Matchers.hasKey("logoUrl"),
-                                Matchers.hasKey("clientId"),
-                                Matchers.hasKey("wellKnownEndpoint"),
-                                Matchers.not(Matchers.hasKey("redirectUrl")),
-                                Matchers.not(Matchers.hasKey("serviceConfiguration")),
-                                Matchers.not(Matchers.hasKey("additionalHeaders")),
-                                Matchers.not(Matchers.hasKey("scopes"))
+                                Matchers.hasKey("credential_issuer"),
+                                Matchers.hasKey("display"),
+                                Matchers.hasKey("client_id"),
+                                Matchers.hasKey(".well-known"),
+                                Matchers.not(Matchers.hasKey("redirect_url")),
+                                Matchers.not(Matchers.hasKey("authorization_endpoint")),
+                                Matchers.not(Matchers.hasKey("token_endpoint")),
+                                Matchers.not(Matchers.hasKey("credential_endpoint")),
+                                Matchers.not(Matchers.hasKey("credential_audience")),
+                                Matchers.not(Matchers.hasKey("additional_headers")),
+                                Matchers.not(Matchers.hasKey("scopes_supported"))
                         )
                 )));
 
