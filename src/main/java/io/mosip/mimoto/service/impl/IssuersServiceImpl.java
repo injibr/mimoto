@@ -41,7 +41,7 @@ public class IssuersServiceImpl implements IssuersService {
         }
         IssuersDTO issuers = new Gson().fromJson(issuersConfigJsonValue, IssuersDTO.class);
         Optional<IssuerDTO> issuerConfigResp = issuers.getIssuers().stream()
-                .filter(issuer -> issuer.getId().equals(issuerId))
+                .filter(issuer -> issuer.getCredential_issuer().equals(issuerId))
                 .findFirst();
         if (issuerConfigResp.isPresent())
             issuerDTO = issuerConfigResp.get();
