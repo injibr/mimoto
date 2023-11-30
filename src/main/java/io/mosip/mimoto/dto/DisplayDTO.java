@@ -11,5 +11,9 @@ public class DisplayDTO {
     @Expose
     LogoDTO logo;
     @Expose
+    String title;
+    @Expose
+    String description;
+    @Expose
     String language;
 }
