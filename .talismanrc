@@ -62,7 +62,7 @@ fileignoreconfig:
 - filename: src/main/java/io/mosip/mimoto/util/RestApiClient.java
   checksum: 77b8afdefbb1f8ff56e140836e6713d150ac48f99c6778e43bc2854e5fcd4732
 - filename: src/main/java/io/mosip/mimoto/util/JoseUtil.java
-  checksum: 1a9b48b950b17c14c32c2ee0c8ad0448d63da887dfb7eb82f4f0bf0b71fdeafa
+  checksum: 65c4d7f9d4f28e7e4e5376e4f6cdce8b49b485c3ea2ab214f72d018d5d73b6aa
 - filename: src/main/java/io/mosip/mimoto/util/CryptoUtil.java
   checksum: fc4b7bd41ca63b2060854e218eb50689f77162dc51c45e95f51ec0272bd3585a
 - filename: src/main/java/io/mosip/mimoto/util/CryptoCoreUtil.java
