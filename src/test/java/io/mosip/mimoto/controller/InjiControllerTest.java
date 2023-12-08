@@ -17,7 +17,6 @@ import io.mosip.mimoto.dto.resident.*;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.ApisResourceAccessException;
 import io.mosip.mimoto.exception.BaseUncheckedException;
-import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.model.Event;
 import io.mosip.mimoto.model.EventModel;
 import io.mosip.mimoto.service.RestClientService;
@@ -131,6 +130,8 @@ public class InjiControllerTest {
         logo.setAlt_text("logo-url");
         DisplayDTO display = new DisplayDTO();
         display.setName(issuerName);
+        display.setTitle("Download via " + issuerName);
+        display.setDescription(issuerName + " description");
         display.setLanguage("en");
         display.setLogo(logo);
         IssuerDTO issuer = new IssuerDTO();

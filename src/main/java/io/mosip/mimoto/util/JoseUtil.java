@@ -153,13 +153,13 @@ public class JoseUtil {
         String keyStorePathWithFileName = keyStorePath + fileName;
         Date issuedAt = Date.from(Instant.now());
         Date expiresAt = Date.from(Instant.now().plusMillis(120000));
-        KeyStore.PrivateKeyEntry privateKeyEntry= null;
+        RSAPrivateKey privateKey = null;
         try {
-            privateKeyEntry = cryptoCoreUtil.loadP12(keyStorePathWithFileName, alias, cyptoPassword);
+            KeyStore.PrivateKeyEntry privateKeyEntry = cryptoCoreUtil.loadP12(keyStorePathWithFileName, alias, cyptoPassword);
+            privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
         } catch (IOException e) {
            logger.error("Exception happened while loading the p12 file for invoking token call.");
         }
-        RSAPrivateKey privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
         return JWT.create()
                 .withHeader(header)
                 .withIssuer(clientId)
