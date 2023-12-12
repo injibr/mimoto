@@ -23,8 +23,6 @@ fileignoreconfig:
   checksum: 8245c8124920165b6d9f0696a17d7ae1e945bef0b0d79e8a325bfe3c8afac3f4
 - filename: docs/images/id_pass_logo.svg
   checksum: 81b14da4f42f335cf6a3094489844962b92fc629c89691487558c71c3d44a915
-- filename: README.md
-  checksum: b01438ae6897d9a2d311ca6f68cc839cb4d8252b29d9fa7d41a0362aaecf0065
 - filename: .github/workflows/push-trigger.yml
   checksum: 98fb3ab2510d2361cdca7cbd4a57afd88e9afa1ff5c4ee6d4b7930a8f565b1ab
 - filename: helm/mimoto/install.sh
@@ -67,4 +65,5 @@ fileignoreconfig:
   checksum: fc4b7bd41ca63b2060854e218eb50689f77162dc51c45e95f51ec0272bd3585a
 - filename: src/main/java/io/mosip/mimoto/util/CryptoCoreUtil.java
   checksum: 0ecab2033342fbbc7828c3eae63247c8c33f4faea3001582338819669cd9b904
-version: ""
+- filename: README.md
+  checksum: b01438ae6897d9a2d311ca6f68cc839cb4d8252b29d9fa7d41a0362aaecf0065
