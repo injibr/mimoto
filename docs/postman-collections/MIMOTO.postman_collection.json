@@ -1,0 +1,211 @@
+{
+	"info": {
+		"_postman_id": "3f372076-5eb8-45f3-8476-2a591301de8b",
+		"name": "MIMOTO",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "26539037"
+	},
+	"item": [
+		{
+			"name": "Issuers",
+			"item": [
+				{
+					"name": "get Issuers List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{HOST}}/issuers/"
+					},
+					"response": []
+				},
+				{
+					"name": "get Issuers Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{HOST}}/issuers/ESignet"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Download VC - OTP",
+			"item": [
+				{
+					"name": "Req OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"individualId\": \"{{VC_ID}}\",\n    \"otpChannel\": [\n        \"EMAIL\",\n        \"PHONE\"\n    ],\n    \"transactionID\": \"1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{HOST}}/req/otp"
+					},
+					"response": []
+				},
+				{
+					"name": "Credential Share Request",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individualId\":  \"{{VC_ID}}\",\n  \"otp\": \"111111\",\n  \"transactionID\": \"1234567890\",\n  \"user\": \"mono\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{HOST}}/credentialshare/request"
+					},
+					"response": []
+				},
+				{
+					"name": "Credential Share Status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{HOST}}/credentialshare/request/status/c0fc00ae-6fc7-4e9f-b818-f51827582c2f"
+					},
+					"response": []
+				},
+				{
+					"name": "Credential Share Download VC",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individualId\":  \"{{VC_ID}}\",\n  \"requestId\": \"61cedc07-e036-46f5-8c75-97d852406373\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{HOST}}/credentialshare/download"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wallet Binding",
+			"item": [
+				{
+					"name": "Binding OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestTime\": \"{{$isoTimestamp}}\",\n    \"request\": {\n        \"individualId\": \"4536710485\",\n        \"otpChannels\": [\n            \"EMAIL\",\n            \"PHONE\"\n        ]\n    }\n}"
+						},
+						"url": "{{HOST}}/binding-otp"
+					},
+					"response": []
+				},
+				{
+					"name": "Wallet Binding",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestTime\": \"{{$isoTimestamp}}\",\n    \"request\": {\n        \"individualId\": \"6148072053\",\n        \"challengeList\": [\n            {\n                \"authFactorType\": \"OTP\",\n                \"challenge\": \"111111\",\n                \"format\": \"alpha-numeric\"\n            }\n        ],\n        \"publicKey\": \"-----BEGIN RSA PUBLIC KEY-----\\nMIICCgKCAgEArk/N6Us8TkfH+r1UGCqTGWegJ3UzqHXmj49uE3l9ygIPrTB7Hee8\\ntiVnlNKcQR/7EipumAcNzOFzaysUUIX8rh/QSdlwYYXvC4OT9fLg5tmToYc5x3pN\\nO1k7qg9fnMb/Ksr4D95xUUxQjMLlbojBNWjLhvdP4da1gWUeAdfjIfyLjZGYiD8r\\nUqsVqOfmrec9Y0nLsIsUq735NVl2WIP9mMfjXuRId4MgEE3mN6x/Gj9Ov0AWfb48\\n22wLgybggTdIJZlCBAnPn/n+oiowqUdXADAB4CIaVH8hDJ1fz3Ag2RetriqwrcLF\\nVSK+PyVuLD261BhIeQrgyHdKC6qilVBOYIMqtXjazCdjGICNFoEa1nVP6mu85RN1\\ny8TTS+4ATUTm44++TFSNfsEEpagvd6O/BWlj6mJNGB9dmtEohowwR5fcSHgKbGtP\\ng5J49fKeSDapEln2A/xL7Ubk8KFzzgcQvPWttGaazs7tqdOE4iOMkI72XFbyvIVz\\nzwQEB7vOuRJRclP30SkcR81u694vCtXJ2t2pFUMQVJXat9ypg5BtiZMwBtAnc0Pz\\nDWdGCR5LIpJIaDISmPumHGAzeeRfREbsoVaCdi99vORoxBjuscpEOa5+MgYDKM3S\\nsJZWl2E2/7Kt9KCRVJoqeEkFFKq696zKVD3qbhbZJG3TjBcgYfbN2jMCAwEAAQ==\\n-----END RSA PUBLIC KEY-----\\n\",\n        \"authFactorType\": \"WLA\",\n        \"format\": \"jwt\"\n    }\n}"
+						},
+						"url": "{{HOST}}/wallet-binding"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "All properties",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{HOST}}/allProperties"
+			},
+			"response": []
+		},
+		{
+			"name": "IndividualId Req OTP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"mosip.identity.otp.internal\",\n    \"aid\": \"10011100600000220231011051701\",\n    \"metadata\": {},\n    \"requestTime\": \"{{$isoTimestamp}}\",\n    \"version\": \"1.0\",\n    \"otpChannel\": [\n        \"EMAIL\",\n        \"PHONE\"\n    ],\n    \"transactionID\": \"1234567890\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{HOST}}/req/individualId/otp"
+			},
+			"response": []
+		}
+	]
+}
