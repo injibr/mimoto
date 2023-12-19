@@ -9,8 +9,6 @@ fileignoreconfig:
   checksum: f07ea78ad10b25b8c7ebb78be365cf87b03d7ee2681265de9617f1aa54a912e9
 - filename: src/main/java/io/mosip/mimoto/exception/BiometricException.java
   checksum: e99050f4618224a32d378df776a177a1e0cf87089dfcc2ea542cb05c74c7d88b
-- filename: src/test/java/io/mosip/mimoto/controller/InjiControllerTest.java
-  checksum: c4e28436cb04004d9cb4e1492a1d013eac076936a3fa3a99d35bfb137f27c37b
 - filename: src/test/java/io/mosip/mimoto/util/JoseUtilTest.java
   checksum: 5c407e9011599fb6ff95820fff6a3a4b781c7b95875937c629893d1a8cb08fa0
 - filename: src/test/java/io/mosip/mimoto/service/CredentialShareServiceTest.java
@@ -23,26 +21,16 @@ fileignoreconfig:
   checksum: 8245c8124920165b6d9f0696a17d7ae1e945bef0b0d79e8a325bfe3c8afac3f4
 - filename: docs/images/id_pass_logo.svg
   checksum: 81b14da4f42f335cf6a3094489844962b92fc629c89691487558c71c3d44a915
-- filename: README.md
-  checksum: f3e7693f4f554640b93c82e438d28d015f8c09be622c22ac6847e528830968f6
-- filename: .github/workflows/push-trigger.yml
-  checksum: e809aa956d4d0cde78118bfa518e824f128aa67ef5b1e79983b8feaa40b3690d
-- filename: helm/mimoto/install.sh
-  checksum: d5f2e121664dc1b3d8769a36b481ddb44a4f41f410df8c55a5467f4fd53a8a99
 - filename: src/main/java/io/mosip/mimoto/controller/CredentialShareController.java
   checksum: 666c22ca63adb8770de901e220f8efeb5ec1d3f63064a58dea33ba49b8e15872
 - filename: src/main/java/io/mosip/mimoto/controller/IssuersController.java
   checksum: 856d860de2562fa019ac23bd724b84e1d67b834883b332c12415e6714de9bb05
 - filename: helm/mimoto/templates/deployment.yaml
   checksum: 6eee9c084a39881370a82d249c5f0ae42c99f752db93b59507f4e83b68e7ac26
-- filename: helm/mimoto/values.yaml
-  checksum: 3a851cd6ca92a0ec97faac8e771b834b92b226dc607681d2a936b067e3874e16
 - filename: src/main/java/io/mosip/mimoto/constant/DocumentGeneratorExceptionCodeConstant.java
   checksum: 329b8341fed7a8166fd1ba66af3d74810e4549b00b1d13e1216d097374c1ce52
 - filename: src/main/java/io/mosip/mimoto/dto/mimoto/AttestationStatement.java
   checksum: 50a8c075791999d3ffc6f5df0a06b790a69d922688c4c7498d8a6d415c8f046d
-- filename: partner-onboarder/install.sh
-  checksum: 0551b30d8c6634466602d6e7234a6aa580a46bdd72ed02a737c7c095d5e32edf
 - filename: src/main/java/io/mosip/mimoto/exception/ExceptionUtils.java
   checksum: 078d1e13d2c6787718f2bfd8320380e3aa4921c498cd05c9e445d78f08384c20
 - filename: src/main/java/io/mosip/mimoto/util/WebSubSubscriptionHelper.java
@@ -61,10 +49,25 @@ fileignoreconfig:
   checksum: 4b17319b2ec9e41c943798700d7bf382281f1dd752246e635991f398a9bc9234
 - filename: src/main/java/io/mosip/mimoto/util/RestApiClient.java
   checksum: 77b8afdefbb1f8ff56e140836e6713d150ac48f99c6778e43bc2854e5fcd4732
-- filename: src/main/java/io/mosip/mimoto/util/JoseUtil.java
-  checksum: 65c4d7f9d4f28e7e4e5376e4f6cdce8b49b485c3ea2ab214f72d018d5d73b6aa
 - filename: src/main/java/io/mosip/mimoto/util/CryptoUtil.java
   checksum: fc4b7bd41ca63b2060854e218eb50689f77162dc51c45e95f51ec0272bd3585a
 - filename: src/main/java/io/mosip/mimoto/util/CryptoCoreUtil.java
   checksum: 0ecab2033342fbbc7828c3eae63247c8c33f4faea3001582338819669cd9b904
-version: ""
+- filename: docs/postman-collections/Collab.postman_environment.json
+  checksum: 93662b305117d9ac73e9f8ace2bd8dc8b2de494908a8c69166d0c908cc80365c
+- filename: docs/postman-collections/MIMOTO.postman_collection.json
+  checksum: fd0eef9938e68389ec3f351cb3ec989e78007e89f38227bdd344afa92b74d462
+- filename: src/test/java/io/mosip/mimoto/controller/InjiControllerTest.java
+  checksum: c4e28436cb04004d9cb4e1492a1d013eac076936a3fa3a99d35bfb137f27c37b
+- filename: .github/workflows/push-trigger.yml
+  checksum: db107eeba72ab765725de47b071bcdc65a2addf6c178004032a8859aeaa4ebe0
+- filename: partner-onboarder/install.sh
+  checksum: 68931ea29cd2ab8bda88514a78e422946073bd4640ef4d3afdc7d7580b2d1cb5
+- filename: helm/mimoto/install.sh
+  checksum: b979d5180f2862a847455988b46408609edede52ddca7b3c0e229692d8aaa945
+- filename: helm/mimoto/values.yaml
+  checksum: 894215a6578dd6f27e22df1554ee87bfc7ef0f579d03c805f30d976546dfee35
+- filename: src/main/java/io/mosip/mimoto/util/JoseUtil.java
+  checksum: 65c4d7f9d4f28e7e4e5376e4f6cdce8b49b485c3ea2ab214f72d018d5d73b6aa
+- filename: README.md
+  checksum: f3e7693f4f554640b93c82e438d28d015f8c09be622c22ac6847e528830968f6
