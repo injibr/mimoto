@@ -59,4 +59,4 @@ jobs:
       LINTING_HEALTH_CHECK_SCHEMA_YAML_URL: "https://raw.githubusercontent.com/mosip/kattu/master/.github/helm-lint-configs/health-check-schema.yaml"
     secrets:
       TOKEN: ${{ secrets.ACTION_PAT }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
