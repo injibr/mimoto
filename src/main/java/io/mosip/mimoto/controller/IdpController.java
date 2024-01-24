@@ -1,22 +1,22 @@
 package io.mosip.mimoto.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.JsonUtils;
 import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
+import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.IdpService;
+import io.mosip.mimoto.service.IssuersService;
 import io.mosip.mimoto.service.RestClientService;
+import io.mosip.mimoto.service.impl.IdpServiceImpl;
 import io.mosip.mimoto.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
@@ -33,7 +33,6 @@ public class IdpController {
     private final Logger logger = LoggerUtil.getLogger(IdpController.class);
     private static final boolean USE_BEARER_TOKEN = true;
     private static final String ID = "mosip.mimoto.idp";
-    private Gson gson = new Gson();
 
     @Autowired
     private RestClientService<Object> restClientService;
@@ -42,17 +41,13 @@ public class IdpController {
     private JoseUtil joseUtil;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    RequestValidator requestValidator;
-
-    @Value("${mosip.oidc.esignet.token.endpoint}")
-    String tokenEndpoint;
+    IssuersService issuersService;
 
     @Autowired
     IdpService idpService;
 
+    @Autowired
+    RequestValidator requestValidator;
     @PostMapping("/binding-otp")
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@Valid @RequestBody BindingOtpRequestDto requestDTO, BindingResult result) throws Exception {
@@ -108,13 +103,15 @@ public class IdpController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(value = "/get-token", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity getToken(@RequestParam Map<String, String> params) {
+    @PostMapping(value = {"/get-token/{issuer}"}, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseEntity getToken(@RequestParam Map<String, String> params, @PathVariable(required = false) String issuer) {
         logger.debug("Started Token Call get-token-> " + params.toString());
         RestTemplate restTemplate = new RestTemplate();
         try {
-            HttpEntity<MultiValueMap<String, String>> request = idpService.constructGetTokenRequest(params);
-            TokenResponseDTO response = restTemplate.postForObject(tokenEndpoint, request, TokenResponseDTO.class);
+            IssuerDTO issuerDTO = issuersService.getIssuerConfig(issuer);
+            logger.info("Issuer DTO is > " + issuerDTO);
+            HttpEntity<MultiValueMap<String, String>> request = idpService.constructGetTokenRequest(params, issuerDTO);
+            TokenResponseDTO response = restTemplate.postForObject(idpService.getTokenEndpoint(issuerDTO), request, TokenResponseDTO.class);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception ex){
             logger.error("Exception Occured while invoking the get-token endpoint", ex);
