@@ -308,13 +308,13 @@ public class InjiControllerTest {
                 )));
 
         mockMvc.perform(get("/issuers").accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
                 .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
 
 
         mockMvc.perform(get("/issuers?search=Issuer1").accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
                 .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
     }
@@ -335,7 +335,7 @@ public class InjiControllerTest {
                 .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(INVALID_ISSUER_ID_EXCEPTION.getMessage())));
 
         mockMvc.perform(get("/issuers/id1").accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
                 .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
     }
@@ -488,7 +488,7 @@ public class InjiControllerTest {
 
         this.mockMvc.perform(post("/binding-otp").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(JsonUtils.javaObjectToJsonString(requestDTO)))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -511,7 +511,7 @@ public class InjiControllerTest {
 
         this.mockMvc.perform(post("/wallet-binding").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(JsonUtils.javaObjectToJsonString(requestDTO)))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

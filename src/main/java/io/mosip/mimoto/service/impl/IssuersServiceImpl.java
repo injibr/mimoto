@@ -18,6 +18,7 @@ import io.mosip.mimoto.dto.mimoto.VCCredentialRequest;
 import io.mosip.mimoto.dto.mimoto.VCCredentialRequestProof;
 import io.mosip.mimoto.dto.mimoto.VCCredentialResponse;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
+import io.mosip.mimoto.exception.InvalidIssuerIdException;
 import io.mosip.mimoto.service.IssuersService;
 import io.mosip.mimoto.util.JoseUtil;
 import io.mosip.mimoto.util.LoggerUtil;
@@ -41,8 +42,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,6 +81,10 @@ public class IssuersServiceImpl implements IssuersService {
         }
         Gson gsonWithIssuerDataOnlyFilter = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         issuers = gsonWithIssuerDataOnlyFilter.fromJson(issuersConfigJsonValue, IssuersDTO.class);
+        List<IssuerDTO> enabledIssuers = issuers.getIssuers().stream()
+                .filter(issuer -> "true".equals(issuer.getEnabled()))
+                .collect(Collectors.toList());
+        issuers.setIssuers(enabledIssuers);
 
         // Filter issuers list with search string
         if (!StringUtils.isEmpty(search)) {
@@ -119,6 +126,8 @@ public class IssuersServiceImpl implements IssuersService {
                 .findFirst();
         if (issuerConfigResp.isPresent())
             issuerDTO = issuerConfigResp.get();
+        else
+            throw new InvalidIssuerIdException();
         return issuerDTO;
     }
 

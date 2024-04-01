@@ -1,25 +1,9 @@
 package io.mosip.mimoto.util;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
-
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.mimoto.constant.ApiName;
 import io.mosip.mimoto.constant.LoggerFileConstant;
@@ -34,6 +18,23 @@ import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
 import lombok.Data;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import static io.mosip.mimoto.constant.LoggerFileConstant.DELIMITER;
+import static io.mosip.mimoto.controller.IdpController.getErrorResponse;
 
 @Component
 @Data
@@ -296,6 +297,18 @@ public class Utilities {
     public String getIssuersConfigJsonValue() throws IOException {
         return  (issuersConfigJsonString != null && !issuersConfigJsonString.isEmpty()) ?
                 issuersConfigJsonString : getJson(configServerFileStorageURL, getIssuersConfigJson);
+    }
+
+    public static ResponseWrapper<Object> handleExceptionWithErrorCode(Exception exception) {
+        String errorMessage = exception.getMessage();
+        String errorCode = PlatformErrorMessages.MIMOTO_IDP_GENERIC_EXCEPTION.getCode();
+
+        if(errorMessage.contains(DELIMITER)){
+            String[] errorSections = errorMessage.split(DELIMITER);
+            errorCode = errorSections[0];
+            errorMessage = errorSections[1];
+        }
+        return getErrorResponse(errorCode, errorMessage);
     }
 
     public String getCredentialsSupportedConfigJsonValue() throws IOException{

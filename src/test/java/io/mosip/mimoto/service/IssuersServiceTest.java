@@ -1,18 +1,13 @@
 package io.mosip.mimoto.service;
 
 import com.google.gson.Gson;
+import io.mosip.mimoto.dto.DisplayDTO;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
-import io.mosip.mimoto.dto.DisplayDTO;
 import io.mosip.mimoto.dto.LogoDTO;
-import io.mosip.mimoto.dto.mimoto.CredentialDefinitionResponseDto;
-import io.mosip.mimoto.dto.mimoto.CredentialDisplayResponseDto;
-import io.mosip.mimoto.dto.mimoto.CredentialIssuerDisplayResponse;
-import io.mosip.mimoto.dto.mimoto.CredentialIssuerWellKnownResponse;
-import io.mosip.mimoto.dto.mimoto.CredentialSupportedDisplayResponse;
-import io.mosip.mimoto.dto.mimoto.CredentialsSupportedResponse;
-import io.mosip.mimoto.dto.mimoto.IssuerSupportedCredentialsResponse;
+import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
+import io.mosip.mimoto.exception.InvalidIssuerIdException;
 import io.mosip.mimoto.service.impl.IssuersServiceImpl;
 import io.mosip.mimoto.util.RestApiClient;
 import io.mosip.mimoto.util.Utilities;
@@ -32,9 +27,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
@@ -64,6 +57,7 @@ public class IssuersServiceTest {
         issuer.setCredential_issuer(issuerName + "id");
         issuer.setDisplay(Collections.singletonList(display));
         issuer.setClient_id("123");
+        issuer.setEnabled("true");
         if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
         else {
             if (!nullFields.contains("redirect_uri"))
@@ -158,7 +152,7 @@ public class IssuersServiceTest {
     }
 
     @Test
-    public void shouldReturnIssuerDataAndConfigForTheIssuerIdIfExist() throws ApiNotAccessibleException, IOException {
+    public void shouldReturnIssuerDataAndConfigForTheIssuerIdIfExist() throws ApiNotAccessibleException, IOException, InvalidIssuerIdException {
         IssuerDTO expectedIssuer = getIssuerDTO("Issuer1", issuerConfigRelatedFields);
 
         IssuerDTO issuer = issuersService.getIssuerConfig("Issuer1id");
@@ -177,18 +171,33 @@ public class IssuersServiceTest {
         assertEquals(expectedIssuers, issuersDTO);
     }
 
-    @Test
-    public void shouldReturnNullIfTheIssuerIdNotExists() throws ApiNotAccessibleException, IOException {
+    @Test(expected = InvalidIssuerIdException.class)
+    public void shouldThrowExceptionIfTheIssuerIdNotExists() throws ApiNotAccessibleException, IOException, InvalidIssuerIdException {
         IssuerDTO issuer = issuersService.getIssuerConfig("Issuer3id");
-
-        assertNull(issuer);
     }
 
     @Test(expected = ApiNotAccessibleException.class)
-    public void shouldThrowApiNotAccessibleExceptionWhenIssuersJsonStringIsNullForGettingIssuerConfig() throws IOException, ApiNotAccessibleException {
+    public void shouldThrowApiNotAccessibleExceptionWhenIssuersJsonStringIsNullForGettingIssuerConfig() throws IOException, ApiNotAccessibleException, InvalidIssuerIdException {
         Mockito.when(utilities.getIssuersConfigJsonValue()).thenReturn(null);
 
         issuersService.getIssuerConfig("Issuers1id");
+    }
+    @Test
+    public void shouldReturnOnlyEnabledIssuers() throws IOException, ApiNotAccessibleException {
+        IssuersDTO issuers = new IssuersDTO();
+        IssuerDTO enabledIssuer = getIssuerDTO("Issuer1", Collections.emptyList());
+        IssuerDTO disbaledIssuer = getIssuerDTO("Issuer2", Collections.emptyList());
+        disbaledIssuer.setEnabled("false");
+        issuers.setIssuers(List.of(enabledIssuer, disbaledIssuer));
+        Mockito.when(utilities.getIssuersConfigJsonValue()).thenReturn(new Gson().toJson(issuers));
+
+        IssuersDTO expectedIssuersDTO = new IssuersDTO();
+        expectedIssuersDTO.setIssuers(List.of(enabledIssuer));
+
+        IssuersDTO actualIssuersDTO = issuersService.getAllIssuers("");
+        assertEquals(expectedIssuersDTO, actualIssuersDTO);
+        assertEquals(actualIssuersDTO.getIssuers().get(0).getEnabled(), "true");
+        assertEquals(actualIssuersDTO.getIssuers().size(), 1);
     }
 
     @Test(expected = ApiNotAccessibleException.class)

@@ -20,22 +20,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static io.mosip.mimoto.exception.PlatformErrorMessages.API_NOT_ACCESSIBLE_EXCEPTION;
-import static io.mosip.mimoto.exception.PlatformErrorMessages.INVALID_CREDENTIAL_TYPE_EXCEPTION;
-import static io.mosip.mimoto.exception.PlatformErrorMessages.INVALID_ISSUER_ID_EXCEPTION;
-import static io.mosip.mimoto.exception.PlatformErrorMessages.MIMOTO_PDF_SIGN_EXCEPTION;
+import static io.mosip.mimoto.exception.PlatformErrorMessages.*;
+import static io.mosip.mimoto.util.Utilities.handleExceptionWithErrorCode;
 
 @RestController
 @RequestMapping(value = "/issuers")
@@ -60,7 +53,7 @@ public class IssuersController {
         } catch (ApiNotAccessibleException | IOException e) {
             logger.error("Exception occurred while fetching issuers ", e);
             responseWrapper.setErrors(List.of(new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
@@ -73,14 +66,13 @@ public class IssuersController {
         responseWrapper.setVersion("v1");
         responseWrapper.setResponsetime(DateUtils.getRequestTimeString());
 
-
         IssuerDTO issuerConfig;
         try {
             issuerConfig = issuersService.getIssuerConfig(issuerId);
-        } catch (ApiNotAccessibleException | IOException exception) {
+        } catch (Exception exception ) {
             logger.error("Exception occurred while fetching issuers ", exception);
-            responseWrapper.setErrors(List.of(new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
+            responseWrapper = handleExceptionWithErrorCode(exception);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         }
 
         responseWrapper.setResponse(issuerConfig);
