@@ -144,9 +144,9 @@ public class IssuersServiceImpl implements IssuersService {
             IssuerDTO issuerDto = issuerConfigResp.get();
 
             // Get credential supported types from well known endpoint
-            CredentialIssuerWellKnownResponse response = restApiClient.getApi(issuerDto.getCredential_issuer(), CredentialIssuerWellKnownResponse.class);
+            CredentialIssuerWellKnownResponse response = restApiClient.getApi(issuerDto.getWellKnownEndpoint(), CredentialIssuerWellKnownResponse.class);
             if (response == null) {
-                response = getCredentialWellKnownFromJson();
+                throw new ApiNotAccessibleException();
             }
             List<CredentialsSupportedResponse> issuerCredentialsSupported = response.getCredentialsSupported();
             credentialTypesWithAuthorizationEndpoint.setAuthorizationEndPoint(issuerDto.getAuthorization_endpoint());
@@ -163,15 +163,6 @@ public class IssuersServiceImpl implements IssuersService {
             return credentialTypesWithAuthorizationEndpoint;
         }
         return credentialTypesWithAuthorizationEndpoint;
-    }
-
-    @Override
-    public CredentialIssuerWellKnownResponse getCredentialWellKnownFromJson() throws IOException, ApiNotAccessibleException {
-        String credentialsSupportedResponseJson = utilities.getCredentialsSupportedConfigJsonValue();
-        if (credentialsSupportedResponseJson == null){
-            throw new ApiNotAccessibleException();
-        }
-        return new Gson().fromJson(credentialsSupportedResponseJson, CredentialIssuerWellKnownResponse.class);
     }
 
     @Override
