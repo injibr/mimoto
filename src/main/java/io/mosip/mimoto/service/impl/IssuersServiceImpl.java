@@ -211,26 +211,25 @@ public class IssuersServiceImpl implements IssuersService {
                                                                 String backgroundColor,
                                                                 String credentialSupportedType, String issuerLogoUrl) throws IOException {
         Map<String, Object> data = new HashMap<>();
-        LinkedHashMap<String, Object> headerProperties = new LinkedHashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
 
-        //Assigning two properties at the top of pdf and the rest dynamically below them
         displayProperties.entrySet().stream()
                 .forEachOrdered(entry -> {
-                    if (headerProperties.size() < 2) {
-                        headerProperties.put(entry.getKey(), entry.getValue());
+                    if(entry.getValue() instanceof Map) {
+                        rowProperties.put(entry.getKey(), ((Map<?, ?>) entry.getValue()).get("value"));
+                    } else if(entry.getValue() instanceof List) {
+                        String value = (String) ((Map<?, ?>)((List<?>) entry.getValue()).get(0)).get("value");
+                        rowProperties.put(entry.getKey(), value  );
                     } else {
                         rowProperties.put(entry.getKey(), entry.getValue());
                     }
                 });
 
-        int rowPropertiesCount =  rowProperties.size();
         data.put("logoUrl", issuerLogoUrl);
-        data.put("headerProperties", headerProperties);
+        data.put("actorImg", issuerLogoUrl);
         data.put("rowProperties", rowProperties);
-        data.put("keyFontColor", textColor);
-        data.put("bgColor", backgroundColor);
-        data.put("rowPropertiesMargin", rowPropertiesCount % 2 == 0 ? (rowPropertiesCount/2 -1)*40 : (rowPropertiesCount/2)*40); //for adjusting the height in pdf for dynamic properties
+        data.put("textColor", textColor);
+        data.put("backgroundColor", backgroundColor);
         data.put("titleName", credentialSupportedType);
 
         String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
