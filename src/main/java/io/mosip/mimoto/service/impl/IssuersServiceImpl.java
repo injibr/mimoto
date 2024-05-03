@@ -218,15 +218,19 @@ public class IssuersServiceImpl implements IssuersService {
                     if(entry.getValue() instanceof Map) {
                         rowProperties.put(entry.getKey(), ((Map<?, ?>) entry.getValue()).get("value"));
                     } else if(entry.getValue() instanceof List) {
-                        String value = (String) ((Map<?, ?>)((List<?>) entry.getValue()).get(0)).get("value");
-                        rowProperties.put(entry.getKey(), value  );
+                        String value = "";
+                        if( ((List<?>) entry.getValue()).get(0) instanceof String) {
+                            value = ((List<String>) entry.getValue()).stream().reduce((field1, field2) -> field1 + ", " + field2 ).get();
+                        } else {
+                            value = (String) ((Map<?, ?>) ((List<?>) entry.getValue()).get(0)).get("value");
+                        }
+                        rowProperties.put(entry.getKey(), value);
                     } else {
                         rowProperties.put(entry.getKey(), entry.getValue());
                     }
                 });
 
         data.put("logoUrl", issuerLogoUrl);
-        data.put("actorImg", issuerLogoUrl);
         data.put("rowProperties", rowProperties);
         data.put("textColor", textColor);
         data.put("backgroundColor", backgroundColor);
