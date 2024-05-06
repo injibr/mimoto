@@ -18,8 +18,8 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/mosip/mosip-functional-tests.git</connection>
-		<developerConnection>scm:git:ssh://github.com:mosip/mosip-functional-tests.git</developerConnection>
+		<connection>scm:git:git://github.com/mosip/mimoto.git</connection>
+		<developerConnection>scm:git:ssh://github.com:mosip/mimoto.git</developerConnection>
 		<url>https://github.com/mosip/mimoto</url>
 		<tag>HEAD</tag>
 	</scm>
