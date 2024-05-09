@@ -182,9 +182,13 @@ public class IssuersServiceImpl implements IssuersService {
         if (vcCredentialResponse == null) throw new RuntimeException("VC Credential Issue API not accessible");
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
-        vcPropertiesFromWellKnown.keySet().forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
-        return getPdfResourceFromVcProperties(displayProperties, textColor, backgroundColor,
-                credentialsSupportedResponse.getDisplay().get(0).getName(),
+        List<String> orderProperty = credentialsSupportedResponse.getOrder();
+        if(orderProperty == null) {
+            vcPropertiesFromWellKnown.keySet().forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
+        } else {
+            orderProperty.forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
+        }
+        return getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse,
                 issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
     }
 
@@ -207,11 +211,13 @@ public class IssuersServiceImpl implements IssuersService {
                 .build();
     }
 
-    private ByteArrayInputStream getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, String textColor,
-                                                                String backgroundColor,
-                                                                String credentialSupportedType, String issuerLogoUrl) throws IOException {
+    private ByteArrayInputStream getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponse credentialsSupportedResponse, VCCredentialResponse  vcCredentialResponse, String issuerLogoUrl) throws IOException {
         Map<String, Object> data = new HashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
+        String backgroundColor = credentialsSupportedResponse.getDisplay().get(0).getBackgroundColor();
+        String textColor = credentialsSupportedResponse.getDisplay().get(0).getTextColor();
+        String credentialSupportedType = credentialsSupportedResponse.getDisplay().get(0).getName();
+        String face = vcCredentialResponse.getCredential().getCredentialSubject().get("face") != null ? (String) vcCredentialResponse.getCredential().getCredentialSubject().get("face") : null;
 
         displayProperties.entrySet().stream()
                 .forEachOrdered(entry -> {
@@ -235,6 +241,8 @@ public class IssuersServiceImpl implements IssuersService {
         data.put("textColor", textColor);
         data.put("backgroundColor", backgroundColor);
         data.put("titleName", credentialSupportedType);
+        data.put("face", face);
+
 
         String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
 
