@@ -182,9 +182,13 @@ public class IssuersServiceImpl implements IssuersService {
         if (vcCredentialResponse == null) throw new RuntimeException("VC Credential Issue API not accessible");
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
-        vcPropertiesFromWellKnown.keySet().forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
-        return getPdfResourceFromVcProperties(displayProperties, textColor, backgroundColor,
-                credentialsSupportedResponse.getDisplay().get(0).getName(),
+        List<String> orderProperty = credentialsSupportedResponse.getOrder();
+        if(orderProperty == null) {
+            vcPropertiesFromWellKnown.keySet().forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
+        } else {
+            orderProperty.forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
+        }
+        return getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse,
                 issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
     }
 
@@ -207,31 +211,38 @@ public class IssuersServiceImpl implements IssuersService {
                 .build();
     }
 
-    private ByteArrayInputStream getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, String textColor,
-                                                                String backgroundColor,
-                                                                String credentialSupportedType, String issuerLogoUrl) throws IOException {
+    private ByteArrayInputStream getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponse credentialsSupportedResponse, VCCredentialResponse  vcCredentialResponse, String issuerLogoUrl) throws IOException {
         Map<String, Object> data = new HashMap<>();
-        LinkedHashMap<String, Object> headerProperties = new LinkedHashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
+        String backgroundColor = credentialsSupportedResponse.getDisplay().get(0).getBackgroundColor();
+        String textColor = credentialsSupportedResponse.getDisplay().get(0).getTextColor();
+        String credentialSupportedType = credentialsSupportedResponse.getDisplay().get(0).getName();
+        String face = vcCredentialResponse.getCredential().getCredentialSubject().get("face") != null ? (String) vcCredentialResponse.getCredential().getCredentialSubject().get("face") : null;
 
-        //Assigning two properties at the top of pdf and the rest dynamically below them
         displayProperties.entrySet().stream()
                 .forEachOrdered(entry -> {
-                    if (headerProperties.size() < 2) {
-                        headerProperties.put(entry.getKey(), entry.getValue());
+                    if(entry.getValue() instanceof Map) {
+                        rowProperties.put(entry.getKey(), ((Map<?, ?>) entry.getValue()).get("value"));
+                    } else if(entry.getValue() instanceof List) {
+                        String value = "";
+                        if( ((List<?>) entry.getValue()).get(0) instanceof String) {
+                            value = ((List<String>) entry.getValue()).stream().reduce((field1, field2) -> field1 + ", " + field2 ).get();
+                        } else {
+                            value = (String) ((Map<?, ?>) ((List<?>) entry.getValue()).get(0)).get("value");
+                        }
+                        rowProperties.put(entry.getKey(), value);
                     } else {
                         rowProperties.put(entry.getKey(), entry.getValue());
                     }
                 });
 
-        int rowPropertiesCount =  rowProperties.size();
         data.put("logoUrl", issuerLogoUrl);
-        data.put("headerProperties", headerProperties);
         data.put("rowProperties", rowProperties);
-        data.put("keyFontColor", textColor);
-        data.put("bgColor", backgroundColor);
-        data.put("rowPropertiesMargin", rowPropertiesCount % 2 == 0 ? (rowPropertiesCount/2 -1)*40 : (rowPropertiesCount/2)*40); //for adjusting the height in pdf for dynamic properties
+        data.put("textColor", textColor);
+        data.put("backgroundColor", backgroundColor);
         data.put("titleName", credentialSupportedType);
+        data.put("face", face);
+
 
         String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
 
