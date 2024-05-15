@@ -28,7 +28,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -36,16 +35,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.PublicKey;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,14 +58,6 @@ public class IssuersServiceImpl implements IssuersService {
     @Autowired
     private JoseUtil joseUtil;
 
-    @Value("${mosip.oidc.p12.filename}")
-    private String fileName;
-
-    @Value("${mosip.oidc.p12.password}")
-    private String cyptoPassword;
-
-    @Value("${mosip.oidc.p12.path}")
-    String keyStorePath;
 
     @Override
     public IssuersDTO getAllIssuers(String search) throws ApiNotAccessibleException, IOException {
@@ -169,13 +156,11 @@ public class IssuersServiceImpl implements IssuersService {
     public ByteArrayInputStream generatePdfForVerifiableCredentials(String accessToken, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String credentialEndPoint) throws Exception {
         LinkedHashMap<String, String> vcPropertiesFromWellKnown = new LinkedHashMap<>();
         Map<String, CredentialDisplayResponseDto> credentialSubject = credentialsSupportedResponse.getCredentialDefinition().getCredentialSubject();
-        //populating display properties from credential Types json for pdf
+
         credentialSubject.keySet().forEach(VCProperty -> vcPropertiesFromWellKnown.put(VCProperty, credentialSubject.get(VCProperty).getDisplay().get(0).getName()));
-        String backgroundColor = credentialsSupportedResponse.getDisplay().get(0).getBackgroundColor();
-        String textColor = credentialsSupportedResponse.getDisplay().get(0).getTextColor();
         VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerDTO, credentialsSupportedResponse, accessToken);
         logger.debug("VC Credential Request is -> " + vcCredentialRequest);
-        //Esignet API call for credential issue
+
         VCCredentialResponse vcCredentialResponse = restApiClient.postApi(credentialEndPoint, MediaType.APPLICATION_JSON,
                 vcCredentialRequest, VCCredentialResponse.class, accessToken);
         logger.debug("VC Credential Response is -> " + vcCredentialResponse);
@@ -192,12 +177,8 @@ public class IssuersServiceImpl implements IssuersService {
                 issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
     }
 
-    private VCCredentialRequest generateVCCredentialRequest(IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String accessToken) throws ParseException {
-        //Getting public key from the p12 file
-        PublicKey publicKeyString = joseUtil.getPublicKeyString(keyStorePath, fileName, issuerDTO.getClient_alias(), cyptoPassword);
-        //Generating proof from the public key with custom header
-        String jwt = joseUtil.generateJwt(publicKeyString, keyStorePath, fileName, issuerDTO.getClient_alias(),
-                cyptoPassword, issuerDTO.getCredential_audience(), issuerDTO.getClient_id(), accessToken);
+    private VCCredentialRequest generateVCCredentialRequest(IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String accessToken) throws Exception {
+        String jwt = joseUtil.generateJwt(issuerDTO.getCredential_audience(), issuerDTO.getClient_id(), accessToken);
         return VCCredentialRequest.builder()
                 .format(credentialsSupportedResponse.getFormat())
                 .proof(VCCredentialRequestProof.builder()
