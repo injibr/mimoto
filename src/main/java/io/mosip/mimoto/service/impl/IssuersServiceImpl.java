@@ -35,12 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -167,12 +162,13 @@ public class IssuersServiceImpl implements IssuersService {
         if (vcCredentialResponse == null) throw new RuntimeException("VC Credential Issue API not accessible");
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
-        List<String> orderProperty = credentialsSupportedResponse.getOrder();
-        if(orderProperty == null) {
-            vcPropertiesFromWellKnown.keySet().forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
-        } else {
-            orderProperty.forEach(vcProperty -> displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty)));
-        }
+        Set<String> orderProperty = credentialsSupportedResponse.getOrder();
+        Set<String> fieldProperty = orderProperty != null ? orderProperty : vcPropertiesFromWellKnown.keySet();
+        fieldProperty.forEach(vcProperty -> {
+            if(credentialProperties.get(vcProperty) != null && !"".equals(credentialProperties.get(vcProperty))) {
+                displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty));
+            }
+        });
         return getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse,
                 issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
     }

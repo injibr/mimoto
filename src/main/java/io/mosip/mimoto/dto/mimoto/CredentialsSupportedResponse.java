@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class CredentialsSupportedResponse {
@@ -21,5 +22,5 @@ public class CredentialsSupportedResponse {
     private CredentialDefinitionResponseDto credentialDefinition;
 
     private List<CredentialSupportedDisplayResponse> display;
-    private List<String> order;
+    private Set<String> order;
 }
