@@ -165,7 +165,7 @@ public class IssuersServiceImpl implements IssuersService {
         Set<String> orderProperty = credentialsSupportedResponse.getOrder();
         Set<String> fieldProperty = orderProperty != null ? orderProperty : vcPropertiesFromWellKnown.keySet();
         fieldProperty.forEach(vcProperty -> {
-            if(credentialProperties.get(vcProperty) != null && !credentialProperties.get(vcProperty).toString().contains("${") ) {
+            if(credentialProperties.get(vcProperty) != null) {
                 displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty));
             }
         });
