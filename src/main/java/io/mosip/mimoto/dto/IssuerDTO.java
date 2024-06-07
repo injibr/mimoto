@@ -76,6 +76,8 @@ public class IssuerDTO {
 class SupportedCredential {
     @NotEmpty
     String format;
+    @NotEmpty
+    String id;
     Map<String, Object> credential_definition;
     String scope;
     @JsonInclude(NON_NULL)
