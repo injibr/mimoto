@@ -12,7 +12,7 @@ This is the docker-compose setup to run mimoto which act as BFF for Inji mobile 
 
 ## How to run this setup?
 
-1. Create loader_path folder in the same directory and Download the kernel auth adapter from [here](https://repo1.maven.org/maven2/io/mosip/kernel/kernel-auth-adapter/1.2.0.1/kernel-auth-adapter-1.2.0.1.jar).  Copy the downloaded jar under loader_path directory.
+1. Create loader_path folder in the same directory and Download the kernel auth adapter from [here](https://repo1.maven.org/maven2/io/mosip/kernel/kernel-auth-adapter/1.2.0.1/kernel-auth-adapter-1.2.0.1.jar). Copy the downloaded jar under loader_path directory and rename it to kernel-auth-adapter.jar
 
 2. Add Id providers as an issuer in mimoto-issuers-config.json
 
@@ -20,7 +20,9 @@ This is the docker-compose setup to run mimoto which act as BFF for Inji mobile 
 
 4. Create certs folder in the same directory and create OIDC client. Add key in oidckeystore.p12 and copy this file under certs folder.
 Refer [here](https://docs.mosip.io/inji/inji-mobile-wallet/customization-overview/credential_providers) to create client
-* Update client_id and client_alias as per onboarding in mimoto-issuers-config.json file.
+* Update client_id and client_alias in mimoto-issuers-config.json file.
+* update p12 file password `mosip.oidc.p12.password` in mimoto-default.properties file.
+
 
 5. Start the docker-compose file
 
@@ -34,4 +36,7 @@ Refer [here](https://docs.mosip.io/inji/inji-mobile-wallet/customization-overvie
 
 
 Note:
-- Replace mosipbox.public.url, mosip.api.public.url with your public accessible domain. For dev or local env [ngrok](https://ngrok.com/docs/getting-started/) is recommended.
+- For local env use [ngrok](https://ngrok.com/docs/getting-started/).
+- Replace http://localhost:8099 by ngrok public domain at following places
+  - token_endpoint in mimoto-issuers-config.json
+  - mosipbox.public.url, mosip.api.public.url in mimoto-default.properties
