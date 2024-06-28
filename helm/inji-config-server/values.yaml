@@ -27,8 +27,3 @@ envVariables:
         name: global
         key: mosip-injiweb-host
     enabled: true
-
-
-
-
-
