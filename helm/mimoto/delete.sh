@@ -1,12 +1,12 @@
 #!/bin/bash
 # Uninstalls mimoto
 function deleting_mimoto() {
-  NS=mimoto
+  NS=mimoto-test
   while true; do
       read -p "Are you sure you want to delete mimoto helm chart?(Y/n) " yn
       if [ $yn = "Y" ]
         then
-          helm -n $NS delete mimoto
+          helm -n $NS delete mimoto-test
           break
         else
           break

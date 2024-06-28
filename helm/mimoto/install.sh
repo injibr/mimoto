@@ -6,7 +6,7 @@ if [ $# -ge 1 ] ; then
   export KUBECONFIG=$1
 fi
 
-NS=mimoto
+NS=mimoto-test
 MIMOTO_CHART_VERSION=0.0.1-develop
 
 echo Create $NS namespace
@@ -40,22 +40,22 @@ function installing_mimoto() {
     ENABLE_INSECURE='--set enable_insecure=true';
   fi
 
-  echo  "Copy secrets to inji-config-server namespace"
-  ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto inji-config-server
-  ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto inji-config-server
+  echo  "Copy secrets to config-server namespace"
+  ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto-test config-server
+  ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto-test config-server
 
   echo Updating mimoto-oidc-keystore-password value
-  ./copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto inji-config-server
+  ./copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto-test config-server
 
-  kubectl -n inji-config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
-  kubectl -n inji-config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
-  kubectl -n inji-config-server set env --keys=mimoto-oidc-keystore-password --from secret/mimoto-oidc-keystore-password deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+  kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+  kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
+  kubectl -n config-server set env --keys=mimoto-oidc-keystore-password --from secret/mimoto-oidc-keystore-password deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
 
-  kubectl -n inji-config-server rollout restart deployment inji-config-server
-  kubectl -n inji-config-server rollout status deployment inji-config-server
+  kubectl -n config-server rollout restart deployment inji-config-server
+  kubectl -n config-server rollout status deployment inji-config-server
 
   echo Installing mimoto
-  helm -n $NS install mimoto mosip/mimoto --version $MIMOTO_CHART_VERSION $ENABLE_INSECURE
+  helm -n $NS install mimoto-test mosip/mimoto --version $MIMOTO_CHART_VERSION $ENABLE_INSECURE
 
   kubectl -n $NS  get deploy -o name |  xargs -n1 -t  kubectl -n $NS rollout status
 
