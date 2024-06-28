@@ -3,7 +3,7 @@
 
 function copying_cm() {
   COPY_UTIL=./copy_cm_func.sh
-  DST_NS=inji-config-server # DST_NS: Destination namespace
+  DST_NS=config-server # DST_NS: Destination namespace
   $COPY_UTIL configmap global default $DST_NS
   return 0
 }

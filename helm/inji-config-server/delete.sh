@@ -7,7 +7,7 @@ if [ $# -ge 1 ] ; then
 fi
 
 function inji_config_server() {
-  NS=inji-config-server
+  NS=config-server
   while true; do
       read -p "Are you sure you want to delete inji-config-server helm charts?(Y/n) " yn
       if [ $yn = "Y" ]
