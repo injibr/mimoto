@@ -1,6 +1,7 @@
 AuthenticateUser:
    Mimoto_ESignet_AuthenticateUserIDP_uin_Otp_Valid_Smoke:
       endPoint: /v1/esignet/authorization/authenticate
+      description : trying to retrive OTP authenticate the esignet page
       role: resident
       restMethod: post
       checkErrorsOnlyInResponse: true

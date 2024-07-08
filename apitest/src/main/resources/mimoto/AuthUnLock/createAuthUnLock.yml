@@ -1,6 +1,7 @@
 AuthUnlock:
    Mimoto_AuthUnLock_Valid_UIN_All:
       endPoint: /residentmobileapp/req/auth/unlock
+      description : Trying to uloack a locked UIN credential with valid request
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -29,6 +30,7 @@ AuthUnlock:
 }'
    Mimoto_AuthUnLock_Valid_UIN_With_VID_All:
       endPoint: /residentmobileapp/req/auth/unlock
+      description : Trying to uloack a locked VID credential with valid request
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -57,6 +59,7 @@ AuthUnlock:
 }'
    Mimoto_AuthUnLock_With_InValid_OTP_All:
       endPoint: /residentmobileapp/req/auth/unlock
+      description : Trying to uloack a locked UIN credential with invalid
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -90,6 +93,7 @@ AuthUnlock:
 }'
    Mimoto_AuthUnLock_InValid_OTP_With_VID_All:
       endPoint: /residentmobileapp/req/auth/unlock
+      description : Trying to uloack a locked VID credential with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post

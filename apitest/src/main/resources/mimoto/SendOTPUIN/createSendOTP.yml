@@ -1,6 +1,7 @@
 individualOTP:
    Mimoto_individualOTP_All_Valid_Smoke:
       endPoint: /residentmobileapp/req/individualId/otp
+      description : Tring to get individual OTP with valid request
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post

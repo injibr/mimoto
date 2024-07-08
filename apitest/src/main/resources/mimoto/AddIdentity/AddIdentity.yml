@@ -1,6 +1,7 @@
 AddIdentity:
    Mimoto_AddIdentity_withValidParameters_smoke_Pos:
       endPoint: /idrepository/v1/identity/
+      description : Tring to addidentity with all valid parameters
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/AddIdentity/addIdentity_$LANGNUMBER$
@@ -28,6 +29,7 @@ AddIdentity:
 
    Mimoto_AddIdentity_Binding_smoke_Pos:
       endPoint: /idrepository/v1/identity/
+      description : Tring to addidentity for binding with all valid parameters
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/AddIdentity/addIdentity_$LANGNUMBER$
@@ -55,6 +57,7 @@ AddIdentity:
 
    Mimoto_AddIdentity_without_FaceDate_CBEFF_smoke_Pos:
       endPoint: /idrepository/v1/identity/
+      description : Tring to addidentity without FaceDate
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/AddIdentity/addIdentity_$LANGNUMBER$
@@ -86,6 +89,7 @@ AddIdentity:
 
    Mimoto_AddIdentity_downloadIssuerCredential_smoke_Pos:
       endPoint: /idrepository/v1/identity/
+      description : Tring to addidentity for downloading issuer credential
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/AddIdentity/addIdentity_$LANGNUMBER$

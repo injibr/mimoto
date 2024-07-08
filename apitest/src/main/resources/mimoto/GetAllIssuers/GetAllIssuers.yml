@@ -1,6 +1,7 @@
 GetAllIssuers:
    Mimoto_GetAllIssuers_All_Valid_Smoke:
       endPoint: /residentmobileapp/issuers
+      description : trying to get all issuers with all valid request
       role: resident
       restMethod: get
       checkErrorsOnlyInResponse: true
@@ -13,6 +14,7 @@ GetAllIssuers:
 
    Mimoto_GetAllIssuers_Specific_Issuer_All_Valid_Smoke:
       endPoint: /residentmobileapp/issuers/ESignet
+      description : trying to get specific issuer with all valid request
       role: resident
       restMethod: get
       checkErrorsOnlyInResponse: true
@@ -25,6 +27,7 @@ GetAllIssuers:
 
    Mimoto_GetAllIssuers_Invalid_Issuer_Neg:
       endPoint: /residentmobileapp/issuers/invalid
+      description : trying to get invalid issuer
       role: resident
       restMethod: get
       checkErrorsOnlyInResponse: true
