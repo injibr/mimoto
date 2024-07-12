@@ -70,7 +70,7 @@ fileignoreconfig:
 - filename: src/main/java/io/mosip/mimoto/util/JoseUtil.java
   checksum: 65c4d7f9d4f28e7e4e5376e4f6cdce8b49b485c3ea2ab214f72d018d5d73b6aa
 - filename: README.md
-  checksum: f3e7693f4f554640b93c82e438d28d015f8c09be622c22ac6847e528830968f6
+  checksum: ccfebbf4082121107dea75ca7484f43d4e789398c3f661c0d5675ef08985ef83
 - filename: docker-compose/docker-compose.yml
   checksum: 857f5dcebdef810161b9ef09ad078c091c7d9969035bc45132975b296675dac9
 - filename: docker-compose/config/mimoto-default.properties
