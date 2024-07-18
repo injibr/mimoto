@@ -5,23 +5,18 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
-public class CredentialIssuerWellKnownResponse {
+public class CredentialIssuerWellKnownResponseDraft11 {
     @SerializedName("credential_issuer")
     @JsonProperty("credential_issuer")
     private String credentialIssuer;
-
-    @SerializedName("authorization_servers")
-    @JsonProperty("authorization_servers")
-    private List<String> authorizationServers;
 
     @SerializedName("credential_endpoint")
     @JsonProperty("credential_endpoint")
     private String credentialEndPoint;
 
-    @SerializedName("credential_configurations_supported")
-    @JsonProperty("credential_configurations_supported")
-    private Map<String,CredentialsSupportedResponse> credentialConfigurationsSupported;
+    @SerializedName("credentials_supported")
+    @JsonProperty("credentials_supported")
+    private List<CredentialsSupportedResponseDraft11> credentialsSupported;
 }
