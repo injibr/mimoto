@@ -47,7 +47,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.mosip.mimoto.exception.PlatformErrorMessages.API_NOT_ACCESSIBLE_EXCEPTION;
@@ -57,7 +59,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestBootApplication.class)
@@ -194,7 +197,7 @@ public class InjiControllerTest {
 
         Mockito.when(credentialService.generatePdfForVerifiableCredentials(new VCCredentialResponse(),
                         getIssuerDTO("Issuer1"), getCredentialSupportedResponseDraft11("CredentialType1"),
-                        "credential_endpoint"))
+                        "dataShareUrl"))
                 .thenReturn(new ByteArrayInputStream("Mock Pdf".getBytes()))
                 .thenThrow(new Exception());
 

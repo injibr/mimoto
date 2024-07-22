@@ -1,5 +1,6 @@
 package io.mosip.mimoto.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -15,6 +16,10 @@ import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
 import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
+import io.mosip.mimoto.dto.openid.presentation.Format;
+import io.mosip.mimoto.dto.openid.presentation.InputDescriptorDTO;
+import io.mosip.mimoto.dto.openid.presentation.LDPVc;
+import io.mosip.mimoto.dto.openid.presentation.PresentationDefinitionDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.service.CredentialService;
@@ -29,7 +34,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.auth.InvalidCredentialsException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -42,6 +49,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +74,19 @@ public class CredentialServiceImpl implements CredentialService {
     IssuersService issuerService;
 
     @Autowired
+    DataShareServiceImpl dataShareService;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
     IdpService idpService;
+
+    @Value("${mosip.inji.web.authorize.url}")
+    String injiWebAuthorizeUrl;
+
+    @Autowired
+    PresentationServiceImpl presentationService;
 
     @Override
     public TokenResponseDTO getTokenResponse(Map<String, String> params, String issuerId) throws ApiNotAccessibleException, IOException {
@@ -86,7 +107,8 @@ public class CredentialServiceImpl implements CredentialService {
         CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11 = getCredentialSupported(credentialIssuerWellKnownResponseDraft11, credentialType);
         VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerConfig, credentialsSupportedResponseDraft11, response.getAccess_token());
         VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponseDraft11.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
-        return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponseDraft11, credentialIssuerWellKnownResponseDraft11.getCredentialEndPoint());
+        String dataShareUrl = dataShareService.storeDataInDataShare(objectMapper.writeValueAsString(vcCredentialResponse));
+        return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponseDraft11, dataShareUrl);
     }
 
     public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws ApiNotAccessibleException, IOException, InvalidCredentialsException {
@@ -112,8 +134,14 @@ public class CredentialServiceImpl implements CredentialService {
                 .build();
     }
 
-    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, String credentialEndPoint) throws Exception {
+    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, String dataShareUrl) throws Exception {
+        LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponseDraft11);
+        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponseDraft11,  vcCredentialResponse, issuerDTO, dataShareUrl);
+        return renderVCInCredentialTemplate(data);
+    }
 
+    @NotNull
+    private static LinkedHashMap<String, Object> loadDisplayPropertiesFromWellknown(VCCredentialResponse vcCredentialResponse, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11) {
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
 
@@ -129,12 +157,11 @@ public class CredentialServiceImpl implements CredentialService {
                 displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty));
             }
         });
-        return getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponseDraft11,  vcCredentialResponse,
-                issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
+        return displayProperties;
     }
 
 
-    private ByteArrayInputStream getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, VCCredentialResponse  vcCredentialResponse, String issuerLogoUrl) throws IOException, WriterException {
+    private Map<String, Object> getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, VCCredentialResponse  vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl) throws IOException, WriterException {
         Map<String, Object> data = new HashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
         String backgroundColor = credentialsSupportedResponseDraft11.getDisplay().get(0).getBackgroundColor();
@@ -159,27 +186,21 @@ public class CredentialServiceImpl implements CredentialService {
                     }
                 });
 
-        if(!credentialsSupportedResponseDraft11.getId().equals("MOSIPVerifiableCredential")) {
-            PixelPass pixelPass = new PixelPass();
-            ObjectMapper objectMapper = new ObjectMapper();
-            logger.info("Credential That is converted to PDF" + objectMapper.writeValueAsString(vcCredentialResponse.getCredential()));
-            String qrData = pixelPass.generateQRData(objectMapper.writeValueAsString(vcCredentialResponse.getCredential()), "");
-            logger.info("QR Data => " + qrData);
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 650, 650);
-            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-            String base64Image = encodeToString(qrImage, "png");
-            data.put("qrCodeImage", base64Image);
-        }
-
-
-        data.put("logoUrl", issuerLogoUrl);
+        String qrCodeImage = !"false".equals(issuerDTO.getOvp_qr_enabled()) ?
+                constructQRCodeWithAuthorizeRequest(vcCredentialResponse, dataShareUrl) :
+                constructQRCodeWithVCData(credentialsSupportedResponseDraft11, vcCredentialResponse) ;
+        data.put("qrCodeImage", qrCodeImage);
+        data.put("logoUrl", issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
         data.put("rowProperties", rowProperties);
         data.put("textColor", textColor);
         data.put("backgroundColor", backgroundColor);
         data.put("titleName", credentialSupportedType);
         data.put("face", face);
+        return data;
+    }
 
+    @NotNull
+    private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data) throws IOException {
         String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
 
         Properties props = new Properties();
@@ -203,6 +224,31 @@ public class CredentialServiceImpl implements CredentialService {
         HtmlConverter.convertToPdf(mergedHtml, pdfwriter, converterProperties);
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
+
+    private String constructQRCode(String qrData) throws WriterException {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 650, 650);
+        BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+        return encodeToString(qrImage, "png");
+    }
+
+    private String constructQRCodeWithVCData(CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, VCCredentialResponse vcCredentialResponse) throws JsonProcessingException, WriterException {
+        if(!credentialsSupportedResponseDraft11.getId().equals("MOSIPVerifiableCredential")) {
+            PixelPass pixelPass = new PixelPass();
+            ObjectMapper objectMapper = new ObjectMapper();
+            String qrData = pixelPass.generateQRData(objectMapper.writeValueAsString(vcCredentialResponse.getCredential()), "");
+            return constructQRCode(qrData);
+        }
+        return "";
+    }
+    private String constructQRCodeWithAuthorizeRequest(VCCredentialResponse vcCredentialResponse, String dataShareUrl) throws WriterException, JsonProcessingException {
+        PresentationDefinitionDTO presentationDefinitionDTO = presentationService.constructPresentationDefinition(vcCredentialResponse);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String presentationString = objectMapper.writeValueAsString(presentationDefinitionDTO);
+        String qrData = String.format(injiWebAuthorizeUrl, URLEncoder.encode(dataShareUrl, StandardCharsets.UTF_8), URLEncoder.encode(presentationString, StandardCharsets.UTF_8));
+        return constructQRCode(qrData);
+    }
+
     public static String encodeToString(BufferedImage image, String type) {
         String imageString = null;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
