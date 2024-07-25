@@ -308,7 +308,7 @@ public class InjiControllerTest {
         Mockito.when(issuersService.getIssuerWellknown(issuerId)).thenReturn(credentialIssuerWellKnownResponse);
 
 
-        String actualResponse=mockMvc.perform(get("/issuers/" + issuerId + "/wellknown").accept(MediaType.APPLICATION_JSON_VALUE))
+        String actualResponse=mockMvc.perform(get("/issuers/" + issuerId + "/.well-known").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

@@ -57,20 +57,14 @@ public class IssuersController {
         return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
     }
 
-    @GetMapping("/{issuer-id}/wellknown")
+    @GetMapping("/{issuer-id}/.well-known")
     public ResponseEntity<Object> getIssuerWellknown(@PathVariable("issuer-id") String issuerId) {
-        ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
-        responseWrapper.setId(ID);
-        responseWrapper.setVersion("v1");
-        responseWrapper.setResponsetime(DateUtils.getRequestTimeString());
         try {
             CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuersService.getIssuerWellknown(issuerId);
-            responseWrapper.setResponse(credentialIssuerWellKnownResponse);
-            return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
+            return ResponseEntity.status(HttpStatus.OK).body(credentialIssuerWellKnownResponse);
         } catch (Exception exception) {
             logger.error("Exception occurred while fetching issuers wellknown ", exception);
-            responseWrapper = handleExceptionWithErrorCode(exception);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

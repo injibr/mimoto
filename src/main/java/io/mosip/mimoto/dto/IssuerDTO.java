@@ -34,6 +34,7 @@ public class IssuerDTO {
     @JsonProperty(".well-known")
     @Expose
     String wellKnownEndpoint;
+    @Expose
     @JsonInclude(NON_NULL)
     @NotBlank
     String redirect_uri;
@@ -46,8 +47,10 @@ public class IssuerDTO {
     @JsonInclude(NON_NULL)
     @NotBlank
     String authorization_audience;
+    @Expose
     @JsonInclude(NON_NULL)
     String token_endpoint;
+    @Expose
     @JsonInclude(NON_NULL)
     @NotBlank
     String proxy_token_endpoint;
@@ -58,6 +61,7 @@ public class IssuerDTO {
     List<String> credential_type;
     @JsonInclude(NON_NULL)
     String credential_audience;
+    @Expose
     @JsonInclude(NON_NULL)
     @NotBlank
     String client_alias;
