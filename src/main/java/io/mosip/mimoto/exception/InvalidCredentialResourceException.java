@@ -15,6 +15,6 @@ public class InvalidCredentialResourceException extends BaseUncheckedException {
     }
 
     public InvalidCredentialResourceException(String errorMessage) {
-        super(PlatformErrorMessages.MIMOTO_PGS_INVALID_INPUT_PARAMETER.getCode(), errorMessage);
+        super(ErrorConstants.RESOURCE_NOT_FOUND.getErrorCode(), errorMessage);
     }
 }
