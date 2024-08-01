@@ -1,23 +1,25 @@
 package io.mosip.mimoto.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.mimoto.dto.openid.VerifierDTO;
 import io.mosip.mimoto.dto.openid.VerifiersDTO;
 import io.mosip.mimoto.dto.openid.presentation.PresentationRequestDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.InvalidVerifierException;
-import io.mosip.mimoto.exception.PlatformErrorMessages;
-import io.mosip.mimoto.service.VerifiersService;
+import io.mosip.mimoto.exception.ErrorConstants;
+import io.mosip.mimoto.service.VerifierService;
 import io.mosip.mimoto.util.Utilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class VerifiersServiceImpl implements VerifiersService {
+public class VerifierServiceImpl implements VerifierService {
 
     @Autowired
     Utilities utilities;
@@ -25,8 +27,9 @@ public class VerifiersServiceImpl implements VerifiersService {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Override
-    public Optional<VerifierDTO> getVerifiersByClientId(String clientId) throws ApiNotAccessibleException, IOException {
+    private final Logger logger = LoggerFactory.getLogger(VerifierServiceImpl.class);
+
+    public Optional<VerifierDTO> getVerifierByClientId(String clientId) throws ApiNotAccessibleException, JsonProcessingException {
         String trustedVerifiersJsonValue = utilities.getTrustedVerifiersJsonValue();
         if (trustedVerifiersJsonValue == null) {
             throw new ApiNotAccessibleException();
@@ -35,16 +38,21 @@ public class VerifiersServiceImpl implements VerifiersService {
         return verifiersDTO.getVerifiers().stream().filter(verifier -> verifier.getClientId().equals(clientId)).findFirst();
     }
     @Override
-    public void validateVerifier(PresentationRequestDTO presentationRequestDTO) throws ApiNotAccessibleException, IOException {
-        getVerifiersByClientId(presentationRequestDTO.getClient_id()).ifPresentOrElse(
+    public void validateVerifier(PresentationRequestDTO presentationRequestDTO) throws ApiNotAccessibleException, JsonProcessingException {
+        logger.info("Started the presentation Validation");
+        getVerifierByClientId(presentationRequestDTO.getClient_id()).ifPresentOrElse(
             (verifierDTO) -> {
                 List<String> registeredRedirectUri = verifierDTO.getRedirectUri();
                 if(!registeredRedirectUri.contains(presentationRequestDTO.getRedirect_uri())){
-                    throw new InvalidVerifierException(PlatformErrorMessages.INVALID_VERIFIER_REDIRECT_URI_EXCEPTION.getMessage());
+                    throw new InvalidVerifierException(
+                            ErrorConstants.INVALID_REDIRECT_URI.getErrorCode(),
+                            ErrorConstants.INVALID_REDIRECT_URI.getErrorMessage());
                 }
             },
             () -> {
-                throw new InvalidVerifierException(PlatformErrorMessages.INVALID_VERIFIER_ID_EXCEPTION.getMessage());
+                throw new InvalidVerifierException(
+                        ErrorConstants.INVALID_CLIENT.getErrorCode(),
+                        ErrorConstants.INVALID_CLIENT.getErrorMessage());
             }
         );
     }

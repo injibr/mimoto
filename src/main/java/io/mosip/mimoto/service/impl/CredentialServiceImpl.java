@@ -16,12 +16,11 @@ import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
 import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
-import io.mosip.mimoto.dto.openid.presentation.Format;
-import io.mosip.mimoto.dto.openid.presentation.InputDescriptorDTO;
-import io.mosip.mimoto.dto.openid.presentation.LDPVc;
 import io.mosip.mimoto.dto.openid.presentation.PresentationDefinitionDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.IdpException;
+import io.mosip.mimoto.exception.InvalidCredentialResourceException;
+import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.service.CredentialService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.service.IssuersService;
@@ -31,7 +30,6 @@ import io.mosip.mimoto.util.RestApiClient;
 import io.mosip.mimoto.util.Utilities;
 import io.mosip.pixelpass.PixelPass;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.auth.InvalidCredentialsException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.jetbrains.annotations.NotNull;
@@ -53,8 +51,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static io.mosip.mimoto.exception.PlatformErrorMessages.INVALID_CREDENTIAL_TYPE_EXCEPTION;
 
 @Service
 public class CredentialServiceImpl implements CredentialService {
@@ -111,7 +107,7 @@ public class CredentialServiceImpl implements CredentialService {
         return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponseDraft11, dataShareUrl);
     }
 
-    public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws ApiNotAccessibleException, IOException, InvalidCredentialsException {
+    public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws InvalidCredentialResourceException {
         VCCredentialResponse vcCredentialResponse = restApiClient.postApi(credentialEndpoint, MediaType.APPLICATION_JSON,
                 vcCredentialRequest, VCCredentialResponse.class, accessToken);
         logger.debug("VC Credential Response is -> " + vcCredentialResponse);
@@ -312,13 +308,13 @@ public class CredentialServiceImpl implements CredentialService {
         return credentialIssuerWellKnownResponseDraft11;
     }
 
-    public CredentialsSupportedResponseDraft11 getCredentialSupported(CredentialIssuerWellKnownResponseDraft11 credentialIssuerWellKnownResponseDraft11, String credentialType) throws ApiNotAccessibleException, IOException, InvalidCredentialsException {
+    public CredentialsSupportedResponseDraft11 getCredentialSupported(CredentialIssuerWellKnownResponseDraft11 credentialIssuerWellKnownResponseDraft11, String credentialType) throws InvalidCredentialResourceException {
         Optional<CredentialsSupportedResponseDraft11> credentialsSupportedResponse = credentialIssuerWellKnownResponseDraft11.getCredentialsSupported().stream()
                 .filter(credentialsSupported -> credentialsSupported.getId().equals(credentialType))
                 .findFirst();
         if (credentialsSupportedResponse.isEmpty()){
             logger.error("Invalid credential Type passed - {}", credentialType);
-            throw new InvalidCredentialsException(INVALID_CREDENTIAL_TYPE_EXCEPTION.getMessage());
+            throw new InvalidCredentialResourceException(ErrorConstants.RESOURCE_NOT_FOUND.getErrorMessage());
         }
         return credentialsSupportedResponse.get();
     }
