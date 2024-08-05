@@ -8,7 +8,7 @@ This repository contains source code for backend service of Inji Mobile and Inji
 
 
 ## Build & run (for developers)
-The project requires JDK 11
+The project requires JDK 21
 ### Build & install
 ```
     mvn clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true -DskipTests=true

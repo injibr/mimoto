@@ -11,14 +11,19 @@ import lombok.Data;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import static io.mosip.mimoto.constant.LoggerFileConstant.DELIMITER;
@@ -82,6 +87,22 @@ public class Utilities {
 //        trustedVerifiersJsonString = (Files.readString(trustedVerifiersResource.getFile().toPath()));
 //        credentialTemplateHtmlString = (Files.readString(credentialTemplateResource.getFile().toPath()));
 //    }
+
+    public static String encodeToString(BufferedImage image, String type) {
+        String imageString = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            ImageIO.write(image, type, bos);
+            byte[] imageBytes = bos.toByteArray();
+            Base64.Encoder encoder = Base64.getEncoder();
+            imageString = encoder.encodeToString(imageBytes);
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return imageString;
+    }
 
     public JSONObject getTemplate() throws IOException {
         return objectMapper.readValue(classLoader.getResourceAsStream(defaultTemplate), JSONObject.class);
