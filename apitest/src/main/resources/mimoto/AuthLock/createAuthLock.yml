@@ -1,7 +1,7 @@
 AuthLock:
    Mimoto_AuthLock_Valid_UIN_All:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a credential with valid UIN
+      description: Auth lock a particular UIN with valid parameters
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -29,7 +29,7 @@ AuthLock:
 }'
    Mimoto_AuthLock_InValid_Otp_All:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a credential with invalid OTP
+      description: Auth Lock a particular UIN with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -62,7 +62,7 @@ AuthLock:
 }'
    Mimoto_AuthLock_with_invalidUIN_Valid_Otp_sid:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a credential with valid OTP
+      description: Auth Lock a particular UIN with valid OTP
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -95,7 +95,7 @@ AuthLock:
 }'
    Mimoto_AuthLock_Valid_VID_All:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a VID credential with valid VID
+      description: Auth lock a particular VID with valid VID
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -123,7 +123,7 @@ AuthLock:
 }'
    Mimoto_AuthLock_with_invalidVID_Valid_Otp:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a VID credential with invalid OTP
+      description: Auth lock a particular VID with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -156,7 +156,7 @@ AuthLock:
 }'
    Mimoto_AuthLock_invalidVID_Valid_Otp:
       endPoint: /residentmobileapp/req/auth/lock
-      description : Tring to lock a VID credential with invalid VID
+      description : Auth lock a particular VID with invalid VID
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post

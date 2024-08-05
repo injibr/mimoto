@@ -1,7 +1,7 @@
 SendOTP:
    Resident_SendOTP_Valid_UIN_All_Smoke:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with valid UIN
+      description: Generating OTP with valid UIN
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -17,7 +17,7 @@ SendOTP:
     }'
    Resident_SendOTP_Valid_UIN_Phone_Smoke:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with OTP channel as phone
+      description: Generating OTP with OTP channel as phone
       role: resident
       checkErrorsOnlyInResponse: true
       restMethod: post
@@ -35,7 +35,7 @@ SendOTP:
     }'
    Resident_SendOTP_Valid_UIN_Email_Smoke:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with OTP channel as email
+      description: Generating OTP with OTP channel as email
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP2
@@ -52,7 +52,7 @@ SendOTP:
     }'
    Resident_SendOTP_RevokedVID_Invalid:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with revoked VID
+      description: Generating OTP with revoked VID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -68,7 +68,7 @@ SendOTP:
     }'
    Resident_SendOTP_Valid_UIN_Invalid_empty_otpChannel:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with empty OTP channel
+      description: Generating OTP with empty OTP channel
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP2
@@ -85,7 +85,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_individualId:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with invalid individualID
+      description: Generating OTP with invalid individualID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -101,7 +101,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_Missing_individualId:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with missing individualID
+      description: Generating OTP with missing individualID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -117,7 +117,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_Empty_transactionID:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with empty transactionID
+      description: Generating OTP with empty transactionID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -133,7 +133,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_transactionID:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with invalid transactionID
+      description: Generating OTP with invalid transactionID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -149,7 +149,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_Missing_transactionID:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with missing transactionID
+      description: Generating OTP with missing transactionID
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -165,7 +165,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_Empty_requestTime:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with empty request time
+      description: Generating OTP with empty request time
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
@@ -181,7 +181,7 @@ SendOTP:
     }'
    Resident_SendOTP_InValid_requestTime:
       endPoint: /resident/v1/req/otp
-      description : resident request OTP with invalid request time
+      description: Generating OTP with invalid request time
       role: resident
       restMethod: post
       inputTemplate: resident/SendOTP/createSendOTP
