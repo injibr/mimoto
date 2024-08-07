@@ -1,6 +1,6 @@
 AuthLock:
    Mimoto_AuthLock_Valid_UIN_All:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: /v1/mimoto/req/auth/lock
       description: Auth lock a particular UIN with valid parameters
       role: resident
       checkErrorsOnlyInResponse: true
@@ -19,7 +19,7 @@ AuthLock:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -28,7 +28,7 @@ AuthLock:
     }
 }'
    Mimoto_AuthLock_InValid_Otp_All:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: /v1/mimoto/req/auth/lock
       description: Auth Lock a particular UIN with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
@@ -47,7 +47,7 @@ AuthLock:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -61,7 +61,7 @@ AuthLock:
     }
 }'
    Mimoto_AuthLock_with_invalidUIN_Valid_Otp_sid:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: //v1/mimoto/req/auth/lock
       description: Auth Lock a particular UIN with valid OTP
       role: resident
       checkErrorsOnlyInResponse: true
@@ -80,7 +80,7 @@ AuthLock:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -94,7 +94,7 @@ AuthLock:
     }
 }'
    Mimoto_AuthLock_Valid_VID_All:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: /v1/mimoto/req/auth/lock
       description: Auth lock a particular VID with valid VID
       role: resident
       checkErrorsOnlyInResponse: true
@@ -113,7 +113,7 @@ AuthLock:
     "individualId": "$ID:Generate_Perpetual_VID_Valid_Smoke_sid_vid$",
     "individualIdType": "VID",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -122,7 +122,7 @@ AuthLock:
     }
 }'
    Mimoto_AuthLock_with_invalidVID_Valid_Otp:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: /v1/mimoto/req/auth/lock
       description: Auth lock a particular VID with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
@@ -141,7 +141,7 @@ AuthLock:
     "individualId": "$ID:Generate_Perpetual_VID_Valid_Smoke_sid_vid$",
     "individualIdType": "VID",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -155,7 +155,7 @@ AuthLock:
     }
 }'
    Mimoto_AuthLock_invalidVID_Valid_Otp:
-      endPoint: /residentmobileapp/req/auth/lock
+      endPoint: mimoto/AuthLock/createAuthLock
       description : Auth lock a particular VID with invalid VID
       role: resident
       checkErrorsOnlyInResponse: true
@@ -174,7 +174,7 @@ AuthLock:
     "individualId": "$ID:Generate_Perpetual_VID_Valid_Smoke_sid_vid$",
     "individualIdType": "VID",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{

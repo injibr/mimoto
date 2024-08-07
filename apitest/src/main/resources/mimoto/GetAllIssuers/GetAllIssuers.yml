@@ -1,6 +1,6 @@
 GetAllIssuers:
    Mimoto_GetAllIssuers_All_Valid_Smoke:
-      endPoint: /residentmobileapp/issuers
+      endPoint: /v1/mimoto/issuers
       description: Retrieving issuers with all valid parameters
       role: resident
       restMethod: get
@@ -13,7 +13,7 @@ GetAllIssuers:
 }'
 
    Mimoto_GetAllIssuers_Specific_Issuer_All_Valid_Smoke:
-      endPoint: /residentmobileapp/issuers/ESignet
+      endPoint: /residentmobileapp/issuers/Mosip
       description: Retrieving all specific issuer with all valid parameters
       role: resident
       restMethod: get
@@ -26,7 +26,7 @@ GetAllIssuers:
 }'
 
    Mimoto_GetAllIssuers_Invalid_Issuer_Neg:
-      endPoint: /residentmobileapp/issuers/invalid
+      endPoint: /v1/mimoto/issuers/invalid
       description : Retrieving invalid issuer
       role: resident
       restMethod: get

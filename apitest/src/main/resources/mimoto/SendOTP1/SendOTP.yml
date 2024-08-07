@@ -38,7 +38,7 @@ SendOTP:
 }'
 
    Mimoto_SendOTP_InValid_UIN_All:
-      endPoint: /residentmobileapp/req/otp
+      endPoint: /v1/mimoto/req/otp
       description: Send OTP to invalid UIN
       role: resident
       restMethod: post

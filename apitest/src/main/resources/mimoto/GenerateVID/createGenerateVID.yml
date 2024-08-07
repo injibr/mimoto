@@ -1,6 +1,6 @@
 GenerateVID:
    Mimoto_Generate_Perpetual_VID_Valid_Smoke_sid:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating Perpetual VID with all valid parameters
       role: resident
       checkErrorsOnlyInResponse: true
@@ -19,7 +19,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -28,7 +28,7 @@ GenerateVID:
     }
 }'
    Mimoto_Generate_Perpetual_VID_InValid_Otp_sid:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating Perpetual VID with invalid OTP
       role: resident
       checkErrorsOnlyInResponse: true
@@ -47,7 +47,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -61,7 +61,7 @@ GenerateVID:
     }
 }'
    Mimoto_Generate_Perpetual_VID_with_InvalidUIN_Valid_Otp_sid:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating Perpetual VID with invalid UIN
       role: resident
       checkErrorsOnlyInResponse: true
@@ -80,7 +80,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -95,7 +95,7 @@ GenerateVID:
 }'
 
    mimoto_Generate_Temporary_VID_Valid_Smoke_sid:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating temporary VID with all valid request
       role: resident
       checkErrorsOnlyInResponse: true
@@ -114,7 +114,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -124,7 +124,7 @@ GenerateVID:
 }'
 
    Mimoto_Generate_Perpetual_VID_Invalid_TransactionId_Neg:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating perpetual VID with invalid transactionID
       role: resident
       checkErrorsOnlyInResponse: true
@@ -143,7 +143,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_withValidParameters_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{
@@ -158,7 +158,7 @@ GenerateVID:
 }'
 
    Mimoto_Generate_Perpetual_VID_Binding_Valid_Smoke_sid:
-      endPoint: /residentmobileapp/vid
+      endPoint: /v1/mimoto/vid
       description: Creating perpetual VID with binding valid request
       role: resident
       checkErrorsOnlyInResponse: true
@@ -177,7 +177,7 @@ GenerateVID:
     "individualId": "$ID:AddIdentity_Binding_smoke_Pos_UIN$",
     "individualIdType": "UIN",
     "sendOtpReqTemplate": "mimoto/SendOTP/createSendOTP",
-    "sendOtpEndPoint": "/residentmobileapp/req/otp"
+    "sendOtpEndPoint": "/v1/mimoto/req/otp"
     }
     }'
       output: '{

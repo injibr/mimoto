@@ -8,10 +8,7 @@ import io.mosip.kernel.core.util.JsonUtils;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeResponse;
 import io.mosip.mimoto.TestBootApplication;
 import io.mosip.mimoto.core.http.ResponseWrapper;
-import io.mosip.mimoto.dto.DisplayDTO;
-import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
-import io.mosip.mimoto.dto.LogoDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.resident.*;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
@@ -25,50 +22,49 @@ import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
 import io.mosip.mimoto.service.impl.IssuersServiceImpl;
 import io.mosip.mimoto.util.*;
 import org.hamcrest.Matchers;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ResourceUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.mosip.mimoto.exception.PlatformErrorMessages.API_NOT_ACCESSIBLE_EXCEPTION;
 import static io.mosip.mimoto.exception.PlatformErrorMessages.INVALID_ISSUER_ID_EXCEPTION;
 import static io.mosip.mimoto.util.TestUtilities.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestBootApplication.class)
 @AutoConfigureMockMvc
-@PrepareForTest({Files.class})
 public class InjiControllerTest {
-
-    @InjectMocks
-    private CommonInjiController commonInjiController = new CommonInjiController();
-
-    @InjectMocks
-    private CredentialShareController credentialShareController = new CredentialShareController();
-
-    @MockBean
-    private Map<String, String> injiConfig;
 
     @MockBean
     private CbeffUtil cbeffUtil;
@@ -94,6 +90,9 @@ public class InjiControllerTest {
     @MockBean
     Utilities utilities;
 
+    @Autowired
+    IssuersController issuersController;
+
     @MockBean
     private AttestationOfflineVerify attestationOfflineVerify;
 
@@ -107,19 +106,7 @@ public class InjiControllerTest {
     public CryptoCoreUtil cryptoCoreUtil;
 
     @Before
-    public void setup() throws IOException {
-        //PowerMockito.mockStatic(Files.class);
-        //PowerMockito.doNothing().when(Files.write(Mockito.any(Path.class), Mockito.any(byte[].class)));
-
-        Map<String, String> injiConfig = new HashMap<>();
-        injiConfig.put("datashareUrl", "http://www.mosipdatashare.com");
-
-        ReflectionTestUtils.setField(commonInjiController, "injiConfig", injiConfig);
-        ReflectionTestUtils.setField(credentialShareController, "partnerEncryptionKey", "partnerkey");
-        ReflectionTestUtils.setField(credentialShareController, "partnerId", "partnerId");
-        ReflectionTestUtils.setField(credentialShareController, "topic", "topic");
-
-
+    public void setup() {
         Mockito.when(utilities.getDataPath()).thenReturn("target");
 
         Mockito.when(webSubSubscriptionHelper.subscribeEvent(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new SubscriptionChangeResponse());
@@ -130,22 +117,32 @@ public class InjiControllerTest {
 
     @Test
     public void getAllPropertiesTest() throws Exception {
-        this.mockMvc.perform(get("/allProperties").accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+        File file = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "responses/InjiConfig.json");
+        String expectedResponse = new String(Files.readAllBytes(file.toPath()));
+
+        String actualResponse = this.mockMvc.perform(get("/allProperties")
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+
     }
 
 
     @Test
-    public void getCredentialTypesTest() throws Exception{
+    public void getCredentialTypesTest() throws Exception {
         IssuerSupportedCredentialsResponse credentialTypesResponse = new IssuerSupportedCredentialsResponse();
-        credentialTypesResponse.setSupportedCredentials(List.of(getCredentialSupportedResponse("credentialType1"),
-                getCredentialSupportedResponse("credentialType2")));
+        credentialTypesResponse.setSupportedCredentials(List.of(getCredentialSupportedResponseDraft11("credentialType1"),
+                getCredentialSupportedResponseDraft11("credentialType2")));
         credentialTypesResponse.setAuthorizationEndPoint("authorization-endpoint");
         Mockito.when(credentialService.getCredentialsSupported("Issuer1", null))
                 .thenReturn(credentialTypesResponse)
                 .thenThrow(new ApiNotAccessibleException());
         Mockito.when(credentialService.getCredentialsSupported("invalidId", null))
-                        .thenReturn(new IssuerSupportedCredentialsResponse());
+                .thenReturn(new IssuerSupportedCredentialsResponse());
 
         mockMvc.perform(get("/issuers/{issuer-id}/credentialTypes", "Issuer1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -182,13 +179,13 @@ public class InjiControllerTest {
                 .thenThrow(new ApiNotAccessibleException());
 
         Mockito.when(restApiClient.getApi(ArgumentMatchers.any(String.class), ArgumentMatchers.any()))
-                .thenReturn(getCredentialIssuerWellKnownResponseDto("Issuer1",
-                        List.of(getCredentialSupportedResponse("CredentialType1"))));
+                .thenReturn(getCredentialIssuerWellKnownResponseDtoDraft11("Issuer1",
+                        List.of(getCredentialSupportedResponseDraft11("CredentialType1"))));
 
 
         Mockito.when(credentialService.generatePdfForVerifiableCredentials(new VCCredentialResponse(),
-                        getIssuerDTO("Issuer1"), getCredentialSupportedResponse("CredentialType1"),
-                        "credential_endpoint"))
+                        getIssuerDTO("Issuer1"), getCredentialSupportedResponseDraft11("CredentialType1"),
+                        "dataShareUrl"))
                 .thenReturn(new ByteArrayInputStream("Mock Pdf".getBytes()))
                 .thenThrow(new Exception());
 
@@ -289,6 +286,27 @@ public class InjiControllerTest {
                 .andExpect(jsonPath("$.errors[0].errorCode", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getCode())))
                 .andExpect(jsonPath("$.errors[0].errorMessage", Matchers.is(API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
     }
+
+    @Test
+    public void getIssuerWellknownTest() throws Exception {
+        String issuerId = "id1";
+        File file = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "responses/expectedWellknown.json");
+        String expectedCredentialIssuerWellknownResponse = new String(Files.readAllBytes(file.toPath()));
+        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = getCredentialIssuerWellKnownResponseDto(issuerId, Map.of("CredentialType1", getCredentialSupportedResponse("Credential1")));
+        Mockito.when(issuersService.getIssuerWellknown(issuerId)).thenReturn(credentialIssuerWellKnownResponse);
+
+
+        String actualResponse=mockMvc.perform(get("/issuers/" + issuerId + "/.well-known").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+
+        JSONAssert.assertEquals(new JSONObject(expectedCredentialIssuerWellknownResponse),new JSONObject(actualResponse),JSONCompareMode.LENIENT);
+
+    }
+
 
     @Test
     public void processOfflineTest() throws Exception {

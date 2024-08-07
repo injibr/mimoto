@@ -6,8 +6,9 @@ import com.google.gson.annotations.SerializedName;
 import io.mosip.mimoto.dto.LogoDTO;
 import lombok.Data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import java.util.Map;
 
 @Data
 public class CredentialSupportedDisplayResponse {
@@ -17,12 +18,18 @@ public class CredentialSupportedDisplayResponse {
     String name;
 
     @Expose
+    @NotBlank
+    String locale;
+
+    @Expose
     @Valid
     LogoDTO logo;
 
+    @JsonProperty("background_image")
+    @SerializedName("background_image")
     @Expose
     @NotBlank
-    String locale;
+    Map <String,String> backgroundImage;
 
     @JsonProperty("background_color")
     @SerializedName("background_color")

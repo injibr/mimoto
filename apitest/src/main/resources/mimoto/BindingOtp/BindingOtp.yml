@@ -1,6 +1,6 @@
 BindingOtp:
    Mimoto_BindingOtp_Valid_UIN_All_Smoke:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       role: resident
       description: Creating OTP for binding a individualID with valid UIN
       checkErrorsOnlyInResponse: true
@@ -18,7 +18,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_Valid_vid_All_Smoke:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with valid VID
       role: resident
       checkErrorsOnlyInResponse: true
@@ -36,7 +36,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Invalid_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with invalid UIN
       role: resident
       restMethod: post
@@ -57,7 +57,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Missing_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID without individualId attribute
       role: resident
       restMethod: post
@@ -78,7 +78,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Empty_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with individualId missing
       role: resident
       restMethod: post
@@ -99,7 +99,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Null_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with individualId value as null
       role: resident
       restMethod: post
@@ -120,7 +120,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_SpaceSeparated_otpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel value been spaced in between
       role: resident
       restMethod: post
@@ -141,7 +141,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Invalid_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with invalid OTP channel
       role: resident
       restMethod: post
@@ -162,7 +162,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Missing_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel missing
       role: resident
       restMethod: post
@@ -183,7 +183,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Empty_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel being empty
       role: resident
       restMethod: post
@@ -204,7 +204,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Null_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel value being null
       role: resident
       restMethod: post
@@ -225,7 +225,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Missing_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel missing
       role: resident
       restMethod: post
@@ -246,7 +246,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Empty_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel being empty
       role: resident
       restMethod: post
@@ -267,7 +267,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Null_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with OTP channel being empty
       role: resident
       restMethod: post
@@ -288,7 +288,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Invalid_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with invalid request time
       role: resident
       restMethod: post
@@ -309,7 +309,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Past_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with past request time
       role: resident
       restMethod: post
@@ -330,7 +330,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Future_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-ot
       description: Creating OTP for binding a individualID with future request time
       role: resident
       restMethod: post
@@ -351,7 +351,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Missing_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with missing request time
       role: resident
       restMethod: post
@@ -372,7 +372,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_UIN_Empty_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with empty request time
       role: resident
       restMethod: post
@@ -393,7 +393,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Invalid_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with invalid VID
       role: resident
       restMethod: post
@@ -414,7 +414,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Missing_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with missing VID
       role: resident
       restMethod: post
@@ -435,7 +435,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Empty_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with empty VID
       role: resident
       restMethod: post
@@ -456,7 +456,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Null_individualId_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a individualID with invalid VID
       role: resident
       restMethod: post
@@ -477,7 +477,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_SpaceSeparated_otpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with OTP channel value been spaced in between
       role: resident
       restMethod: post
@@ -498,7 +498,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Invalid_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with invalid OTP channel
       role: resident
       restMethod: post
@@ -519,7 +519,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Missing_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with missing OTP channel values
       role: resident
       restMethod: post
@@ -540,7 +540,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Empty_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with empty OTP channel values
       role: resident
       restMethod: post
@@ -561,7 +561,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Null_OtpChannels_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with OTP channel values as null
       role: resident
       restMethod: post
@@ -582,7 +582,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Missing_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with OTP channel values missing
       role: resident
       restMethod: post
@@ -603,7 +603,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Empty_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with OTP channel values empty
       role: resident
       restMethod: post
@@ -624,7 +624,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Null_OtpChannel_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with OTP channel values as null
       role: resident
       restMethod: post
@@ -645,7 +645,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Invalid_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with invalid request time
       role: resident
       restMethod: post
@@ -666,7 +666,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Past_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with past request time
       role: resident
       restMethod: post
@@ -687,7 +687,7 @@ BindingOtp:
 }'
 
    Mimoto_BindingOtp_vid_Future_RequestTime_Neg:
-      endPoint: /residentmobileapp/binding-otp
+      endPoint: /v1/mimoto/binding-otp
       description: Creating OTP for binding a VID with future request time
       role: resident
       restMethod: post
