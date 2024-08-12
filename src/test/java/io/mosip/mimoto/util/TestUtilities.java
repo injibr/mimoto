@@ -78,42 +78,6 @@ public class TestUtilities {
         }
         return issuer;
     }
-
-    public static String getExpectedWellKnownJson() {
-        return "{"
-                + "\"credential_issuer\": \"Issuer1\","
-                + "\"credential_endpoint\": \"/credential_endpoint\","
-                + "\"credential_configurations_supported\": {"
-                + "\"CredentialType1\": {"
-                + "\"format\": \"ldp_vc\","
-                + "\"scope\": \"CredentialType1_vc_ldp\","
-                + "\"display\": [{"
-                + "\"logo\": {"
-                + "\"url\": \"/logo\","
-                + "\"alt_text\": \"logo-url\""
-                + "},"
-                + "\"name\": \"CredentialType1\","
-                + "\"locale\": \"en\","
-                + "\"text_color\": \"#FFFFFF\","
-                + "\"background_color\": \"#B34622\""
-                + "}],"
-                + "\"proof_types_supported\": {},"
-                + "\"credential_definition\": {"
-                + "\"type\": [\"VerifiableCredential\", \"CredentialType1\"],"
-                + "\"credentialSubject\": {"
-                + "\"name\": {"
-                + "\"display\": [{"
-                + "\"name\": \"Given Name\","
-                + "\"locale\": \"en\""
-                + "}]"
-                + "}"
-                + "}"
-                + "}"
-                + "}"
-                + "}"
-                + "}";
-    }
-
     public static IssuerDTO getIssuerConfigDTO(String issuerName, List<String> nullFields) {
         LogoDTO logo = new LogoDTO();
         logo.setUrl("/logo");
@@ -147,7 +111,7 @@ public class TestUtilities {
 
     public static PresentationRequestDTO getPresentationRequestDTO(){
         return PresentationRequestDTO.builder()
-                .presentationDefinition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}},\"constraints\":{\"fields\":[{\"path\":[\"$.type\"],\"filter\":{\"type\":\"String\",\"pattern\":\"InsuranceCredential\"}}]}}]}")
+                .presentationDefinition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}},\"constraints\":{\"fields\":[{\"path\":[\"$.type\"],\"filter\":{\"type\":\"String\",\"pattern\":\"test-credential\"}}]}}]}")
                 .clientId("test_client_id")
                 .resource("test_resource")
                 .responseType("test_response_type")
