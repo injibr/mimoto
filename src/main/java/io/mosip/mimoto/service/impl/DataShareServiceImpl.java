@@ -8,6 +8,8 @@ import io.mosip.mimoto.dto.openid.presentation.PresentationRequestDTO;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
 import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.util.RestApiClient;
+import jakarta.annotation.PostConstruct;
+import org.apache.oro.text.regex.PatternMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.PathMatcher;
 
 import java.net.URL;
 
@@ -33,6 +37,9 @@ public class DataShareServiceImpl {
     @Value("${mosip.data.share.create.url}")
     String dataShareCreateUrl;
 
+    @Value("${mosip.data.share.get.url.pattern}")
+    String dataShareGetUrlPattern;
+
     @Value("${mosip.data.share.create.retry.count}")
     Integer maxRetryCount;
 
@@ -40,6 +47,13 @@ public class DataShareServiceImpl {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    PathMatcher pathMatcher ;
+
+    @PostConstruct
+    public void setUp(){
+        pathMatcher = new AntPathMatcher();
+    }
 
     public String storeDataInDataShare(String data) throws Exception {
         ByteArrayResource contentsAsResource = new ByteArrayResource(data.getBytes()) {
@@ -79,8 +93,12 @@ public class DataShareServiceImpl {
     public  VCCredentialResponse downloadCredentialFromDataShare(PresentationRequestDTO presentationRequestDTO) throws JsonProcessingException {
         logger.info("Started the Credential Download From DataShare");
         String credentialsResourceUri = presentationRequestDTO.getResource();
+        if(!pathMatcher.match(dataShareGetUrlPattern, credentialsResourceUri)){
+            throw new InvalidCredentialResourceException(
+                    ErrorConstants.RESOURCE_INVALID.getErrorCode(),
+                    ErrorConstants.RESOURCE_INVALID.getErrorMessage());
+        }
         String vcCredentialResponseString = restApiClient.getApi(credentialsResourceUri, String.class);
-        logger.info("Completed Downloading the Credential => " + vcCredentialResponseString );
         if (vcCredentialResponseString == null) {
             throw new InvalidCredentialResourceException(
                     ErrorConstants.SERVER_UNAVAILABLE.getErrorCode(),
