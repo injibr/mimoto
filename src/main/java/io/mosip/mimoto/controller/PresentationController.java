@@ -51,16 +51,16 @@ public class PresentationController {
             logger.info("Completed Presentation Authorization in the controller.");
             response.sendRedirect(redirectString);
         } catch( InvalidVerifierException exception){
-            sendRedirect(response, injiWebRedirectUrl, exception.getErrorCode(), exception.getErrorText());
+            sendRedirect(response, injiWebRedirectUrl, exception.getErrorCode(), exception.getErrorText(), exception);
         } catch(VPNotCreatedException | InvalidCredentialResourceException exception){
-            sendRedirect(response, redirectUri, exception.getErrorCode(), exception.getErrorText());
+            sendRedirect(response, redirectUri, exception.getErrorCode(), exception.getErrorText(), exception);
         } catch (Exception exception){
-            sendRedirect(response, redirectUri, ErrorConstants.INTERNAL_SERVER_ERROR.getErrorCode(), ErrorConstants.INTERNAL_SERVER_ERROR.getErrorMessage());
+            sendRedirect(response, redirectUri, ErrorConstants.INTERNAL_SERVER_ERROR.getErrorCode(), ErrorConstants.INTERNAL_SERVER_ERROR.getErrorMessage(), exception);
         }
     }
 
-    private void sendRedirect(HttpServletResponse response, String domain, String code, String message) throws IOException {
-        logger.error("Exception Occurred in Authorizing the presentation");
+    private void sendRedirect(HttpServletResponse response, String domain, String code, String message, Exception exception) throws IOException {
+        logger.error("Exception Occurred in Authorizing the presentation : code - " + code + " message - " + message + exception);
         String injiVerifyRedirectString = String.format(injiOvpErrorRedirectUrlPattern,
                 domain,
                 code,
