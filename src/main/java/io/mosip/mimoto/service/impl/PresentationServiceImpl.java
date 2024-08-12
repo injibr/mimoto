@@ -61,7 +61,9 @@ public class PresentationServiceImpl implements PresentationService {
 
         PresentationDefinitionDTO presentationDefinitionDTO;
         try {
+            logger.info("Started the Mapping Presentation Definition " + presentationRequestDTO.getPresentationDefinition());
             presentationDefinitionDTO = objectMapper.readValue(presentationRequestDTO.getPresentationDefinition(), PresentationDefinitionDTO.class);
+            logger.info("Completed the Mapping Presentation Definition " + presentationDefinitionDTO);
             if (presentationDefinitionDTO == null) {
                 throw new VPNotCreatedException(ErrorConstants.INVALID_REQUEST.getErrorMessage());
             }
@@ -129,7 +131,7 @@ public class PresentationServiceImpl implements PresentationService {
         FilterDTO filterDTO = FilterDTO.builder().type("String").pattern(vcCredentialResponse.getCredential().getType().getLast()).build();
         FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
         ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
-        IFormat ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
+        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
         Format format = Format.builder().ldpVc(ldpVc).build();
         InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder()
                 .id(UUID.randomUUID().toString())
