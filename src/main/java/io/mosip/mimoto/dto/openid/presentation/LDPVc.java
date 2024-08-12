@@ -11,6 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LDPVc {
+public class LDPVc implements IFormat{
     List<String> proofTypes;
 }

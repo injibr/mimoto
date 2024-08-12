@@ -76,6 +76,9 @@ public class CredentialServiceImpl implements CredentialService {
     @Autowired
     IdpService idpService;
 
+    @Autowired
+    RestTemplate restTemplate;
+
     @Value("${mosip.inji.ovp.qrdata.pattern}")
     String ovpQRDataPattern;
 
@@ -99,7 +102,6 @@ public class CredentialServiceImpl implements CredentialService {
 
     @Override
     public TokenResponseDTO getTokenResponse(Map<String, String> params, String issuerId) throws ApiNotAccessibleException, IOException {
-        RestTemplate restTemplate = new RestTemplate();
         IssuerDTO issuerDTO = issuerService.getIssuerConfig(issuerId);
         HttpEntity<MultiValueMap<String, String>> request = idpService.constructGetTokenRequest(params, issuerDTO);
         TokenResponseDTO response = restTemplate.postForObject(idpService.getTokenEndpoint(issuerDTO), request, TokenResponseDTO.class);

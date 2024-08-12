@@ -81,7 +81,7 @@ public class PresentationServiceImpl implements PresentationService {
                         logger.info("Started the Construction of VP token");
                         try {
                             VerifiablePresentationDTO verifiablePresentationDTO = constructVerifiablePresentationString(vcCredentialResponse.getCredential());
-                            String presentationSubmission = constructPresentationSubmission(verifiablePresentationDTO);
+                            String presentationSubmission = constructPresentationSubmission(verifiablePresentationDTO, presentationDefinitionDTO, inputDescriptorDTO);
                             String vpToken = objectMapper.writeValueAsString(verifiablePresentationDTO);
                             return String.format(injiOvpRedirectURLPattern,
                                     presentationRequestDTO.getRedirectUri(),
@@ -110,25 +110,31 @@ public class PresentationServiceImpl implements PresentationService {
                 .build();
     }
 
-    private String constructPresentationSubmission(VerifiablePresentationDTO verifiablePresentationDTO) throws JsonProcessingException {
+    private String constructPresentationSubmission(VerifiablePresentationDTO verifiablePresentationDTO, PresentationDefinitionDTO presentationDefinitionDTO, InputDescriptorDTO inputDescriptorDTO) throws JsonProcessingException {
         AtomicInteger atomicInteger = new AtomicInteger(0);
         List<SubmissionDescriptorDTO> submissionDescriptorDTOList = verifiablePresentationDTO.getVerifiableCredential()
                 .stream().map(verifiableCredential -> SubmissionDescriptorDTO.builder()
-                    .id(UUID.randomUUID().toString())
+                    .id(inputDescriptorDTO.getId())
                     .format("ldp_vc")
                     .path("$.verifiableCredential[" + atomicInteger.getAndIncrement() + "]").build()).collect(Collectors.toList());
 
         PresentationSubmissionDTO presentationSubmissionDTO = PresentationSubmissionDTO.builder()
                 .id(UUID.randomUUID().toString())
-                .definition_id(UUID.randomUUID().toString())
+                .definition_id(presentationDefinitionDTO.getId())
                 .descriptorMap(submissionDescriptorDTOList).build();
         return objectMapper.writeValueAsString(presentationSubmissionDTO);
     }
 
     PresentationDefinitionDTO constructPresentationDefinition(VCCredentialResponse vcCredentialResponse){
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
+        FilterDTO filterDTO = FilterDTO.builder().type("String").pattern(vcCredentialResponse.getCredential().getType().getLast()).build();
+        FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
+        ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
+        IFormat ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
         Format format = Format.builder().ldpVc(ldpVc).build();
-        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id(UUID.randomUUID().toString()).format(format).build();
+        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder()
+                .id(UUID.randomUUID().toString())
+                .constraints(constraintsDTO)
+                .format(format).build();
 
         return PresentationDefinitionDTO.builder()
                 .inputDescriptors(Collections.singletonList(inputDescriptorDTO))

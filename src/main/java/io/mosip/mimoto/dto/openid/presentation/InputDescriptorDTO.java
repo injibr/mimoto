@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class InputDescriptorDTO {
     String id;
     Format format;
+    ConstraintsDTO constraints;
 }
