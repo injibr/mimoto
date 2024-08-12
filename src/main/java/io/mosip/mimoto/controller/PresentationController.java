@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @RestController
 public class PresentationController {
@@ -60,7 +61,7 @@ public class PresentationController {
     }
 
     private void sendRedirect(HttpServletResponse response, String domain, String code, String message, Exception exception) throws IOException {
-        logger.error("Exception Occurred in Authorizing the presentation : code - " + code + " message - " + message + exception);
+        logger.error("Exception Occurred in Authorizing the presentation : \n\t code - " + code + "\n\t message - " + message + "\n\t Trace - " + Arrays.toString(exception.getStackTrace()));
         String injiVerifyRedirectString = String.format(injiOvpErrorRedirectUrlPattern,
                 domain,
                 code,
