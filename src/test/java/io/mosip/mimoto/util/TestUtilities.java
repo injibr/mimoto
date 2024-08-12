@@ -2,16 +2,18 @@ package io.mosip.mimoto.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mosip.mimoto.dto.DisplayDTO;
-import io.mosip.mimoto.dto.ErrorDTO;
-import io.mosip.mimoto.dto.IssuerDTO;
-import io.mosip.mimoto.dto.LogoDTO;
+import io.mosip.mimoto.dto.*;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.openid.VerifierDTO;
 import io.mosip.mimoto.dto.openid.VerifiersDTO;
 import io.mosip.mimoto.dto.openid.datashare.DataShareResponseDTO;
 import io.mosip.mimoto.dto.openid.datashare.DataShareResponseWrapperDTO;
 import io.mosip.mimoto.dto.openid.presentation.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 import java.util.Collections;
@@ -145,7 +147,7 @@ public class TestUtilities {
 
     public static PresentationRequestDTO getPresentationRequestDTO(){
         return PresentationRequestDTO.builder()
-                .presentationDefinition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}}}]}")
+                .presentationDefinition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}},\"constraints\":{\"fields\":[{\"path\":[\"$.type\"],\"filter\":{\"type\":\"String\",\"pattern\":\"InsuranceCredential\"}}]}}]}")
                 .clientId("test_client_id")
                 .resource("test_resource")
                 .responseType("test_response_type")
@@ -191,9 +193,12 @@ public class TestUtilities {
     }
 
     public static PresentationDefinitionDTO getPresentationDefinitionDTO(){
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList("Ed25519Signature2020")).build();
+        FilterDTO filterDTO = FilterDTO.builder().type("String").pattern("test-credential").build();
+        FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
+        ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
+        IFormat ldpVc = LDPVc.builder().proofTypes(Collections.singletonList("Ed25519Signature2020")).build();
         Format format = Format.builder().ldpVc(ldpVc).build();
-        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id("test-input-id").format(format).build();
+        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id("test-input-id").format(format).constraints(constraintsDTO).build();
 
         return PresentationDefinitionDTO.builder()
                 .inputDescriptors(Collections.singletonList(inputDescriptorDTO))

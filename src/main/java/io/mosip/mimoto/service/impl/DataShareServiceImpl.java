@@ -55,8 +55,7 @@ public class DataShareServiceImpl {
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity);
-        URL dataShareUrl = new URL(dataShareResponseWrapperDTO.getDataShare().getUrl());
-        return dataShareHostUrl + dataShareUrl.getPath();
+        return dataShareResponseWrapperDTO.getDataShare().getUrl();
     }
 
     private DataShareResponseWrapperDTO pushCredentialIntoDataShare(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) throws Exception {
