@@ -80,12 +80,14 @@ public class DataShareServiceImpl {
         logger.info("Started the Credential Download From DataShare");
         String credentialsResourceUri = presentationRequestDTO.getResource();
         String vcCredentialResponseString = restApiClient.getApi(credentialsResourceUri, String.class);
+        logger.info("Completed Downloading the Credential => " + vcCredentialResponseString );
         if (vcCredentialResponseString == null) {
             throw new InvalidCredentialResourceException(
                     ErrorConstants.SERVER_UNAVAILABLE.getErrorCode(),
                     ErrorConstants.SERVER_UNAVAILABLE.getErrorMessage());
         }
         VCCredentialResponse vcCredentialResponse = objectMapper.readValue(vcCredentialResponseString, VCCredentialResponse.class);
+        logger.info("Completed Mapping the Credential to Oject => " + vcCredentialResponse );
         if(vcCredentialResponse.getCredential() == null){
             throw new InvalidCredentialResourceException(ErrorConstants.RESOURCE_EXPIRED.getErrorMessage());
         }
