@@ -108,7 +108,7 @@ public class TestUtilities {
         return PresentationRequestDTO.builder()
                 .presentationDefinition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}},\"constraints\":{\"fields\":[{\"path\":[\"$.type\"],\"filter\":{\"type\":\"String\",\"pattern\":\"test-credential\"}}]}}]}")
                 .clientId("test_client_id")
-                .resource("test_resource")
+                .resource("http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/test")
                 .responseType("test_response_type")
                 .redirectUri("test_redirect_uri").build();
     }

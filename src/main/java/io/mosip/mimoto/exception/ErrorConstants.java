@@ -12,6 +12,7 @@ public enum ErrorConstants {
     RESOURCE_NOT_FOUND("resource_not_found", "The requested resource doesn’t exist."),
     SERVER_UNAVAILABLE("server_unavailable", "The server is not reachable right now."),
     RESOURCE_EXPIRED("resource_expired", "The requested resource expired."),
+    RESOURCE_INVALID("invalid_resource", "The requested resource is invalid."),
     REQUEST_TIMED_OUT("request_timed_out", "We are unable to process your request right now"),
     URI_TOO_LONG("uri_too_long", "Resource URI is too long to be handled"),
     INVALID_CLIENT("invalid_client", "The requested client doesn’t match."),
