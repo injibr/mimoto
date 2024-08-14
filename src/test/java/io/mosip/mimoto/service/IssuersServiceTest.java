@@ -1,5 +1,6 @@
 package io.mosip.mimoto.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +45,9 @@ public class IssuersServiceTest {
 
     @Mock
     Utilities utilities;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     List<String> issuerConfigRelatedFields11 = List.of("additional_headers", "authorization_endpoint","authorization_audience", "token_endpoint", "proxy_token_endpoint", "credential_endpoint", "credential_audience", "redirect_uri");
     List<String> issuerConfigRelatedFields=List.of("additional_headers", "authorization_endpoint","authorization_audience","credential_endpoint", "credential_audience");
@@ -93,12 +98,13 @@ public class IssuersServiceTest {
         CredentialIssuerWellKnownResponse expextedCredentialIssuerWellKnownResponse=getCredentialIssuerWellKnownResponseDto("Issuer1",
                Map.of("CredentialType1",getCredentialSupportedResponse("CredentialType1")));
 
-        Mockito.when(restApiClient.getApi(wellKnownUrl , CredentialIssuerWellKnownResponse.class))
-                .thenReturn(expextedCredentialIssuerWellKnownResponse);
+        Mockito.when(restApiClient.getApi(wellKnownUrl , String.class))
+                .thenReturn(getExpectedWellKnownJson());
+        Mockito.when(objectMapper.readValue(getExpectedWellKnownJson(), CredentialIssuerWellKnownResponse.class)).thenReturn(expextedCredentialIssuerWellKnownResponse);
 
         CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse=issuersService.getIssuerWellknown(issuerId);
         assertEquals(expextedCredentialIssuerWellKnownResponse,credentialIssuerWellKnownResponse);
-        verify(restApiClient, times(1)).getApi(wellKnownUrl, CredentialIssuerWellKnownResponse.class);
+        verify(restApiClient, times(1)).getApi(wellKnownUrl, String.class);
     }
 
     @Test

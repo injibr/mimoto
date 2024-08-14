@@ -1,6 +1,8 @@
 package io.mosip.mimoto.service.impl;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.mosip.kernel.core.logger.spi.Logger;
@@ -35,9 +37,12 @@ public class IssuersServiceImpl implements IssuersService {
     @Autowired
     private RestApiClient restApiClient;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     @Override
-    public IssuersDTO getAllIssuers(String search) throws ApiNotAccessibleException, IOException {
+    public IssuersDTO getAllIssuers(String search) throws ApiNotAccessibleException{
         IssuersDTO issuers;
         String issuersConfigJsonValue = utilities.getIssuersConfigJsonValue();
         if (issuersConfigJsonValue == null) {
@@ -96,10 +101,17 @@ public class IssuersServiceImpl implements IssuersService {
 
     @Override
     public CredentialIssuerWellKnownResponse getIssuerWellknown(String issuerId) throws ApiNotAccessibleException, IOException {
-        return (CredentialIssuerWellKnownResponse) getAllIssuersWithAllFields().getIssuers().stream()
+        return getAllIssuersWithAllFields().getIssuers().stream()
                 .filter(issuer -> issuer.getCredential_issuer().equals(issuerId))
                 .findFirst()
-                .map(issuerDTO -> restApiClient.getApi(issuerDTO.getWellKnownEndpoint(), CredentialIssuerWellKnownResponse.class))
+                .map(issuerDTO -> {
+                    String wellknownResponse = restApiClient.getApi(issuerDTO.getWellKnownEndpoint(), String.class);
+                    try {
+                        return objectMapper.readValue(wellknownResponse,CredentialIssuerWellKnownResponse.class);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .orElseThrow(ApiNotAccessibleException::new);
     }
 
