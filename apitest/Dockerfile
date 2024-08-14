@@ -28,9 +28,12 @@ WORKDIR /home/${container_user}
 
 ENV work_dir=/home/${container_user}
 
-ADD ./apitest/target/ $work_dir
-
-ADD entrypoint.sh $work_dir/entrypoint.sh
+# Combine all necessary files into a single COPY command
+COPY ./apitest/target $work_dir/
+COPY application.properties $work_dir/
+COPY ["Biometric Devices", "$work_dir/Biometric Devices"]
+COPY ["resource", "$work_dir/resource"]
+COPY entrypoint.sh $work_dir
 
 # install packages and create user
 RUN apt-get -y update \

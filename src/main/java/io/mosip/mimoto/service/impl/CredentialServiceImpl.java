@@ -20,7 +20,6 @@ import io.mosip.mimoto.dto.openid.presentation.PresentationDefinitionDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
-import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.service.CredentialService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.service.IssuersService;
@@ -41,7 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -99,12 +97,12 @@ public class CredentialServiceImpl implements CredentialService {
     @Override
     public ByteArrayInputStream downloadCredentialAsPDF(String issuerId, String credentialType, TokenResponseDTO response) throws Exception {
         IssuerDTO issuerConfig = issuerService.getIssuerConfig(issuerId);
-        CredentialIssuerWellKnownResponseDraft11 credentialIssuerWellKnownResponseDraft11 = getCredentialIssuerWellknown(issuerId, credentialType);
-        CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11 = getCredentialSupported(credentialIssuerWellKnownResponseDraft11, credentialType);
-        VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerConfig, credentialsSupportedResponseDraft11, response.getAccess_token());
-        VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponseDraft11.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
+        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuerService.getIssuerWellknown(issuerId);
+        CredentialsSupportedResponse credentialsSupportedResponse = issuerService.getIssuerWellknownForCredentialType(issuerId, credentialType);
+        VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerConfig, credentialIssuerWellKnownResponse,  credentialsSupportedResponse, response.getAccess_token());
+        VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponse.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
         String dataShareUrl = dataShareService.storeDataInDataShare(objectMapper.writeValueAsString(vcCredentialResponse));
-        return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponseDraft11, dataShareUrl);
+        return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponse, dataShareUrl);
     }
 
     public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws InvalidCredentialResourceException {
@@ -115,39 +113,39 @@ public class CredentialServiceImpl implements CredentialService {
         return vcCredentialResponse;
     }
 
-    public VCCredentialRequest generateVCCredentialRequest(IssuerDTO issuerDTO, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, String accessToken) throws Exception {
-        String jwt = joseUtil.generateJwt(issuerDTO.getCredential_audience(), issuerDTO.getClient_id(), accessToken);
+    public VCCredentialRequest generateVCCredentialRequest(IssuerDTO issuerDTO, CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse, CredentialsSupportedResponse credentialsSupportedResponse, String accessToken) throws Exception {
+        String jwt = joseUtil.generateJwt(credentialIssuerWellKnownResponse.getCredentialIssuer(), issuerDTO.getClient_id(), accessToken);
         return VCCredentialRequest.builder()
-                .format(credentialsSupportedResponseDraft11.getFormat())
+                .format(credentialsSupportedResponse.getFormat())
                 .proof(VCCredentialRequestProof.builder()
-                        .proofType(credentialsSupportedResponseDraft11.getProofTypesSupported().get(0))
+                        .proofType(credentialsSupportedResponse.getProofTypesSupported().keySet().stream().findFirst().get())
                         .jwt(jwt)
                         .build())
                 .credentialDefinition(VCCredentialDefinition.builder()
-                        .type(credentialsSupportedResponseDraft11.getCredentialDefinition().getType())
+                        .type(credentialsSupportedResponse.getCredentialDefinition().getType())
                         .context(List.of("https://www.w3.org/2018/credentials/v1"))
                         .build())
                 .build();
     }
 
-    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, String dataShareUrl) throws Exception {
-        LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponseDraft11);
-        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponseDraft11,  vcCredentialResponse, issuerDTO, dataShareUrl);
+    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl) throws Exception {
+        LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponse);
+        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse, issuerDTO, dataShareUrl);
         return renderVCInCredentialTemplate(data);
     }
 
     @NotNull
-    private static LinkedHashMap<String, Object> loadDisplayPropertiesFromWellknown(VCCredentialResponse vcCredentialResponse, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11) {
+    private static LinkedHashMap<String, Object> loadDisplayPropertiesFromWellknown(VCCredentialResponse vcCredentialResponse, CredentialsSupportedResponse credentialsSupportedResponse) {
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
 
         LinkedHashMap<String, String> vcPropertiesFromWellKnown = new LinkedHashMap<>();
-        Map<String, CredentialDisplayResponseDto> credentialSubject = credentialsSupportedResponseDraft11.getCredentialDefinition().getCredentialSubject();
+        Map<String, CredentialDisplayResponseDto> credentialSubject = credentialsSupportedResponse.getCredentialDefinition().getCredentialSubject();
         credentialSubject.keySet().forEach(VCProperty -> vcPropertiesFromWellKnown.put(VCProperty, credentialSubject.get(VCProperty).getDisplay().get(0).getName()));
 
-        Set<String> orderProperty = credentialsSupportedResponseDraft11.getOrder();
+        List<String> orderProperty = credentialsSupportedResponse.getOrder();
 
-        Set<String> fieldProperties = orderProperty == null ? vcPropertiesFromWellKnown.keySet() : orderProperty;
+        List<String> fieldProperties = orderProperty == null ? new ArrayList<>(vcPropertiesFromWellKnown.keySet()) : orderProperty;
         fieldProperties.forEach(vcProperty -> {
             if(credentialProperties.get(vcProperty) != null) {
                 displayProperties.put(vcPropertiesFromWellKnown.get(vcProperty), credentialProperties.get(vcProperty));
@@ -157,12 +155,13 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
 
-    private Map<String, Object> getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, VCCredentialResponse  vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl) throws IOException, WriterException {
+    private Map<String, Object> getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponse credentialsSupportedResponse, VCCredentialResponse  vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl) throws IOException, WriterException {
         Map<String, Object> data = new HashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
-        String backgroundColor = credentialsSupportedResponseDraft11.getDisplay().get(0).getBackgroundColor();
-        String textColor = credentialsSupportedResponseDraft11.getDisplay().get(0).getTextColor();
-        String credentialSupportedType = credentialsSupportedResponseDraft11.getDisplay().get(0).getName();
+        String backgroundColor = credentialsSupportedResponse.getDisplay().get(0).getBackgroundColor();
+        String backgroundImage = credentialsSupportedResponse.getDisplay().get(0).getBackgroundImage().getUri();
+        String textColor = credentialsSupportedResponse.getDisplay().get(0).getTextColor();
+        String credentialSupportedType = credentialsSupportedResponse.getDisplay().get(0).getName();
         String face = vcCredentialResponse.getCredential().getCredentialSubject().get("face") != null ? (String) vcCredentialResponse.getCredential().getCredentialSubject().get("face") : null;
 
         displayProperties.entrySet().stream()
@@ -184,12 +183,13 @@ public class CredentialServiceImpl implements CredentialService {
 
         String qrCodeImage = !"false".equals(issuerDTO.getOvp_qr_enabled()) ?
                 constructQRCodeWithAuthorizeRequest(vcCredentialResponse, dataShareUrl) :
-                constructQRCodeWithVCData(credentialsSupportedResponseDraft11, vcCredentialResponse) ;
+                constructQRCodeWithVCData(vcCredentialResponse) ;
         data.put("qrCodeImage", qrCodeImage);
         data.put("logoUrl", issuerDTO.getDisplay().stream().map(d -> d.getLogo().getUrl()).findFirst().orElse(""));
         data.put("rowProperties", rowProperties);
         data.put("textColor", textColor);
         data.put("backgroundColor", backgroundColor);
+        data.put("backgroundImage", backgroundImage);
         data.put("titleName", credentialSupportedType);
         data.put("face", face);
         return data;
@@ -225,11 +225,11 @@ public class CredentialServiceImpl implements CredentialService {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 650, 650);
         BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-        return encodeToString(qrImage, "png");
+        return Utilities.encodeToString(qrImage, "png");
     }
 
-    private String constructQRCodeWithVCData(CredentialsSupportedResponseDraft11 credentialsSupportedResponseDraft11, VCCredentialResponse vcCredentialResponse) throws JsonProcessingException, WriterException {
-        if(!credentialsSupportedResponseDraft11.getId().equals("MOSIPVerifiableCredential")) {
+    private String constructQRCodeWithVCData(VCCredentialResponse vcCredentialResponse) throws JsonProcessingException, WriterException {
+        if(!vcCredentialResponse.getCredential().getType().contains("MOSIPVerifiableCredential")) {
             PixelPass pixelPass = new PixelPass();
             ObjectMapper objectMapper = new ObjectMapper();
             String qrData = pixelPass.generateQRData(objectMapper.writeValueAsString(vcCredentialResponse.getCredential()), "");
@@ -244,80 +244,4 @@ public class CredentialServiceImpl implements CredentialService {
         String qrData = String.format(injiWebAuthorizeUrl, URLEncoder.encode(dataShareUrl, StandardCharsets.UTF_8), URLEncoder.encode(presentationString, StandardCharsets.UTF_8));
         return constructQRCode(qrData);
     }
-
-    public static String encodeToString(BufferedImage image, String type) {
-        String imageString = null;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        try {
-            ImageIO.write(image, type, bos);
-            byte[] imageBytes = bos.toByteArray();
-            Base64.Encoder encoder = Base64.getEncoder();
-            imageString = encoder.encodeToString(imageBytes);
-            bos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return imageString;
-    }
-
-    @Override
-    public IssuerSupportedCredentialsResponse getCredentialsSupported(String issuerId, String search) throws ApiNotAccessibleException, IOException {
-        IssuerSupportedCredentialsResponse credentialTypesWithAuthorizationEndpoint = new IssuerSupportedCredentialsResponse();
-
-        IssuersDTO issuersDto = issuerService.getAllIssuersWithAllFields();
-
-        Optional<IssuerDTO> issuerConfigResp = issuersDto.getIssuers().stream()
-                .filter(issuer -> issuer.getCredential_issuer().equals(issuerId))
-                .findFirst();
-        if (issuerConfigResp.isPresent()) {
-            IssuerDTO issuerDto = issuerConfigResp.get();
-
-            CredentialIssuerWellKnownResponseDraft11 response = restApiClient.getApi(issuerDto.getWellKnownEndpoint(), CredentialIssuerWellKnownResponseDraft11.class);
-            if (response == null) {
-                throw new ApiNotAccessibleException();
-            }
-            List<CredentialsSupportedResponseDraft11> issuerCredentialsSupported = response.getCredentialsSupported();
-            credentialTypesWithAuthorizationEndpoint.setAuthorizationEndPoint(issuerDto.getAuthorization_endpoint());
-            credentialTypesWithAuthorizationEndpoint.setSupportedCredentials(issuerCredentialsSupported);
-
-            if (!StringUtils.isEmpty(search)){
-                credentialTypesWithAuthorizationEndpoint.setSupportedCredentials(issuerCredentialsSupported
-                        .stream()
-                        .filter(credentialsSupportedResponse -> credentialsSupportedResponse.getDisplay().stream()
-                                .anyMatch(credDisplay -> credDisplay.getName().toLowerCase().contains(search.toLowerCase())))
-                        .collect(Collectors.toList()));
-            }
-            return credentialTypesWithAuthorizationEndpoint;
-        }
-        return credentialTypesWithAuthorizationEndpoint;
-    }
-    public CredentialIssuerWellKnownResponseDraft11 getCredentialIssuerWellknown(String issuerId, String search) throws ApiNotAccessibleException, IOException {
-        CredentialIssuerWellKnownResponseDraft11 credentialIssuerWellKnownResponseDraft11 = new CredentialIssuerWellKnownResponseDraft11();
-        IssuersDTO issuersDto = issuerService.getAllIssuersWithAllFields();
-        Optional<IssuerDTO> issuerConfigResp = issuersDto.getIssuers().stream()
-                .filter(issuer -> issuer.getCredential_issuer().equals(issuerId))
-                .findFirst();
-        if (issuerConfigResp.isPresent()) {
-            IssuerDTO issuerDto = issuerConfigResp.get();
-            credentialIssuerWellKnownResponseDraft11 = restApiClient.getApi(issuerDto.getWellKnownEndpoint(), CredentialIssuerWellKnownResponseDraft11.class);
-            if (credentialIssuerWellKnownResponseDraft11 == null) {
-                throw new ApiNotAccessibleException();
-            }
-        }
-        return credentialIssuerWellKnownResponseDraft11;
-    }
-
-    public CredentialsSupportedResponseDraft11 getCredentialSupported(CredentialIssuerWellKnownResponseDraft11 credentialIssuerWellKnownResponseDraft11, String credentialType) throws InvalidCredentialResourceException {
-        Optional<CredentialsSupportedResponseDraft11> credentialsSupportedResponse = credentialIssuerWellKnownResponseDraft11.getCredentialsSupported().stream()
-                .filter(credentialsSupported -> credentialsSupported.getId().equals(credentialType))
-                .findFirst();
-        if (credentialsSupportedResponse.isEmpty()){
-            logger.error("Invalid credential Type passed - {}", credentialType);
-            throw new InvalidCredentialResourceException(ErrorConstants.RESOURCE_NOT_FOUND.getErrorMessage());
-        }
-        return credentialsSupportedResponse.get();
-    }
-
-
 }

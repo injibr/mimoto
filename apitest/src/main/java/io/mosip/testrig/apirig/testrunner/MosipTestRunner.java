@@ -90,6 +90,7 @@ public class MosipTestRunner {
 			AdminTestUtil.createEditAndPublishPolicy();
 			PartnerRegistration.deviceGeneration();
 
+			// Generating biometric details with mock MDS
 			BiometricDataProvider.generateBiometricTestData("Registration");
 
 			startTestRunner();

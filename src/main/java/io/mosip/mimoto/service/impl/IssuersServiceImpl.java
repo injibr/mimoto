@@ -7,6 +7,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
 import io.mosip.mimoto.dto.mimoto.CredentialIssuerWellKnownResponse;
+import io.mosip.mimoto.dto.mimoto.CredentialsSupportedResponse;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.InvalidIssuerIdException;
 import io.mosip.mimoto.service.IssuersService;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -94,10 +96,21 @@ public class IssuersServiceImpl implements IssuersService {
 
     @Override
     public CredentialIssuerWellKnownResponse getIssuerWellknown(String issuerId) throws ApiNotAccessibleException, IOException {
-        IssuerDTO issuerConfig = getIssuerConfig(issuerId);
-        String wellknown = issuerConfig.getWellKnownEndpoint();
-        String wellknownJson = restApiClient.getApi(wellknown, String.class);
-        return new Gson().fromJson(wellknownJson, CredentialIssuerWellKnownResponse.class);
+        return (CredentialIssuerWellKnownResponse) getAllIssuersWithAllFields().getIssuers().stream()
+                .filter(issuer -> issuer.getCredential_issuer().equals(issuerId))
+                .findFirst()
+                .map(issuerDTO -> restApiClient.getApi(issuerDTO.getWellKnownEndpoint(), CredentialIssuerWellKnownResponse.class))
+                .orElseThrow(ApiNotAccessibleException::new);
+    }
+
+    @Override
+    public CredentialsSupportedResponse getIssuerWellknownForCredentialType(String issuerId, String credentialId) throws ApiNotAccessibleException, IOException {
+        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = getIssuerWellknown(issuerId);
+        CredentialsSupportedResponse credentialsSupportedResponse = credentialIssuerWellKnownResponse.getCredentialConfigurationsSupported().get(credentialId);
+        if(credentialsSupportedResponse == null){
+            throw new ApiNotAccessibleException();
+        }
+        return credentialsSupportedResponse;
     }
 }
 
