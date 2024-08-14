@@ -8,19 +8,27 @@
 		<listener class-name="io.mosip.testrig.apirig.report.EmailableReport" />
 	</listeners>
 		
-	<test name="AddIdentity">
-		<parameter name="ymlFile"
-			value="mimoto/AddIdentity/AddIdentity.yml" />
+	<test name="Adding Identity">
+		<parameter name="ymlFile" value="mimoto/AddIdentity/AddIdentity.yml" />
+		<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.AddIdentity" />
 		</classes>
 	</test>
 	<test name="GenerateVID">
-		<parameter name="ymlFile"
-			value="mimoto/GenerateVID/createGenerateVID.yml" />
-			<parameter name="idKeyName"	value="vid" />
+		<parameter name="ymlFile" value="mimoto/GenerateVID/createGenerateVID.yml" />
+		<parameter name="idKeyName" value="vid" />
+		<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="CreateVID">
+		<parameter name="ymlFile" value="mimoto/CreateVID/CreateVid.yml" />
+		<parameter name="idKeyName" value="VID" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
 	</test>
 
@@ -130,14 +138,7 @@
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePost" />
 		</classes>
 	</test>
-	<test name="SendOTP1">
-		<parameter name="ymlFile"
-			value="mimoto/SendOTP1/SendOTP.yml" />
-		<classes>
-			<class name="io.mosip.testrig.apirig.testscripts.SimplePost" />
-		</classes>
-	</test>
-	<test name="SendOTPUIN">
+	<test name="SendOTP">
 		<parameter name="ymlFile"
 			value="mimoto/SendOTPUIN/createSendOTP.yml" />
 		<classes>

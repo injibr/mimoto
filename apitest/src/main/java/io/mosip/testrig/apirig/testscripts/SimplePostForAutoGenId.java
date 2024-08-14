@@ -98,18 +98,6 @@ public class SimplePostForAutoGenId extends AdminTestUtil implements ITest {
 			}
 		}
 
-		if (BaseTestCase.isTargetEnvLTS()) {
-			if (!ConfigManager.isInServiceNotDeployedList(GlobalConstants.RESIDENT)) {
-				if ((BaseTestCase.currentModule.equals("esignet") && testCaseName.startsWith("ESignetIdR_Generate"))) {
-					throw new SkipException(
-							GlobalConstants.VID_GENERATED_USING_RESIDENT_API_SO_FEATURE_NOT_SUPPORTED_OR_NEEDED_MESSAGE);
-//					qa115 - f
-//					cam   - t f
-//					dev	  - t 
-				}
-			}
-		}
-
 		testCaseName = isTestCaseValidForExecution(testCaseDTO);
 		String[] templateFields = testCaseDTO.getTemplateFields();
 		String inputJson = "";
