@@ -12,7 +12,7 @@ GetAllIssuers:
 }'
 
    Mimoto_GetAllIssuers_Specific_Issuer_All_Valid_Smoke:
-      endPoint: /residentmobileapp/issuers/Mosip
+      endPoint: /mimoto/issuers/Mosip
       role: resident
       restMethod: get
       checkErrorsOnlyInResponse: true
