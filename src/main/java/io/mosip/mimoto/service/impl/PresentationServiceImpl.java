@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -76,7 +73,7 @@ public class PresentationServiceImpl implements PresentationService {
                 .stream()
                 .findFirst()
                 .map(inputDescriptorDTO -> {
-                    boolean matchingProofTypes = inputDescriptorDTO.getFormat().getLdpVc().getProofTypes()
+                    boolean matchingProofTypes = inputDescriptorDTO.getFormat().get("ldpVc").get("proofTypes")
                             .stream()
                             .anyMatch(proofType -> vcCredentialResponse.getCredential().getProof().getType().equals(proofType));
                     if (matchingProofTypes) {
@@ -131,8 +128,8 @@ public class PresentationServiceImpl implements PresentationService {
         FilterDTO filterDTO = FilterDTO.builder().type("String").pattern(vcCredentialResponse.getCredential().getType().getLast()).build();
         FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
         ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
-        Format format = Format.builder().ldpVc(ldpVc).build();
+        Map<String, List<String>> proofTypes = Map.of("proofTypes", Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType()));
+        Map<String, Map<String, List<String>>> format = Map.of("ldpVc", proofTypes );
         InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder()
                 .id(UUID.randomUUID().toString())
                 .constraints(constraintsDTO)

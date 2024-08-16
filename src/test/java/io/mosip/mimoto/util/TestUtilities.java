@@ -155,8 +155,8 @@ public class TestUtilities {
         FilterDTO filterDTO = FilterDTO.builder().type("String").pattern("test-credential").build();
         FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
         ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList("Ed25519Signature2020")).build();
-        Format format = Format.builder().ldpVc(ldpVc).build();
+        Map<String, List<String>> proofTypes = Map.of("proofTypes", Collections.singletonList("Ed25519Signature2020"));
+        Map<String, Map<String, List<String>>> format = Map.of("ldpVc", proofTypes );
         InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id("test-input-id").format(format).constraints(constraintsDTO).build();
 
         return PresentationDefinitionDTO.builder()
