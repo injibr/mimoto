@@ -56,15 +56,8 @@ public class PresentationServiceImpl implements PresentationService {
         verifierService.validateVerifier(presentationRequestDTO);
         VCCredentialResponse vcCredentialResponse = dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
 
-        PresentationDefinitionDTO presentationDefinitionDTO;
-        try {
-            logger.info("Started the Mapping Presentation Definition " + presentationRequestDTO.getPresentationDefinition());
-            presentationDefinitionDTO = objectMapper.readValue(presentationRequestDTO.getPresentationDefinition(), PresentationDefinitionDTO.class);
-            logger.info("Completed the Mapping Presentation Definition " + presentationDefinitionDTO);
-            if (presentationDefinitionDTO == null) {
-                throw new VPNotCreatedException(ErrorConstants.INVALID_REQUEST.getErrorMessage());
-            }
-        } catch (IOException ioException) {
+        PresentationDefinitionDTO presentationDefinitionDTO = presentationRequestDTO.getPresentationDefinition();
+        if (presentationDefinitionDTO == null) {
             throw new VPNotCreatedException(ErrorConstants.INVALID_REQUEST.getErrorMessage());
         }
 
