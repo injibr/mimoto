@@ -16,7 +16,7 @@ public class PresentationRequestDTO {
     String responseType;
     String resource;
     @JsonProperty("presentation_definition")
-    String presentationDefinition;
+    PresentationDefinitionDTO presentationDefinition;
     @JsonProperty("client_id")
     String clientId;
     @JsonProperty("redirect_uri")

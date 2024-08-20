@@ -1,5 +1,7 @@
 package io.mosip.mimoto.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.mosip.mimoto.dto.openid.presentation.PresentationDefinitionDTO;
 import io.mosip.mimoto.dto.openid.presentation.PresentationRequestDTO;
 import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
@@ -33,6 +35,9 @@ public class PresentationController {
     @Value("${mosip.inji.web.redirect.url}")
     String injiWebRedirectUrl;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @GetMapping("/authorize")
     public void performAuthorization(HttpServletResponse response,
                                      @RequestParam("response_type") String responseType,
@@ -42,10 +47,11 @@ public class PresentationController {
                                      @RequestParam("redirect_uri") String redirectUri ) throws IOException {
         try {
             logger.info("Started Presentation Authorization in the controller.");
+            PresentationDefinitionDTO presentationDefinitionDTO = objectMapper.readValue(presentationDefinition, PresentationDefinitionDTO.class);
             PresentationRequestDTO presentationRequestDTO = PresentationRequestDTO.builder()
                     .responseType(responseType)
                     .resource(resource)
-                    .presentationDefinition(presentationDefinition)
+                    .presentationDefinition(presentationDefinitionDTO)
                     .clientId(clientId)
                     .redirectUri(redirectUri).build();
             String redirectString = presentationService.authorizePresentation(presentationRequestDTO);

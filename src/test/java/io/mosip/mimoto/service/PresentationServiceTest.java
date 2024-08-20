@@ -41,13 +41,9 @@ public class PresentationServiceTest {
 
     @Before
     public void setup() throws JsonProcessingException {
-        PresentationDefinitionDTO presentationDefinitionDTO = TestUtilities.getPresentationDefinitionDTO();
         ReflectionTestUtils.setField(presentationService, "injiOvpRedirectURLPattern", "%s#vp_token=%s&presentation_submission=%s");
         ReflectionTestUtils.setField(presentationService, "dataShareUrl", "test_resource");
         ReflectionTestUtils.setField(presentationService, "maximumResponseHeaderSize", 65536);
-
-        String presentationDefitionString = TestUtilities.getObjectAsString(presentationDefinitionDTO);
-        when(objectMapper.readValue(eq(presentationDefitionString), eq(PresentationDefinitionDTO.class))).thenReturn(presentationDefinitionDTO);
         when(objectMapper.writeValueAsString(any())).thenReturn("test-data");
     }
     @Test(expected = InvalidVerifierException.class)
