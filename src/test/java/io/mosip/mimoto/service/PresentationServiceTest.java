@@ -46,20 +46,12 @@ public class PresentationServiceTest {
         ReflectionTestUtils.setField(presentationService, "maximumResponseHeaderSize", 65536);
         when(objectMapper.writeValueAsString(any())).thenReturn("test-data");
     }
-    @Test(expected = InvalidVerifierException.class)
-    public void throwInvalidVerifierExceptionWhenClientIdPassedIsIncorrect() throws ApiNotAccessibleException, IOException {
-        PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
-        doThrow(InvalidVerifierException.class).when(verifierService).validateVerifier(presentationRequestDTO);
-        presentationService.authorizePresentation(TestUtilities.getPresentationRequestDTO());
-    }
-
     @Test
     public void credentialProofMatchingWithVPRequest() throws Exception {
 
         VCCredentialResponse vcCredentialResponse = TestUtilities.getVCCredentialResponseDTO("Ed25519Signature2020");
         PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
 
-        doNothing().when(verifierService).validateVerifier(eq(presentationRequestDTO));
         when(dataShareService.downloadCredentialFromDataShare(eq(presentationRequestDTO))).thenReturn(vcCredentialResponse);
 
         String actualRedirectUrl = presentationService.authorizePresentation(TestUtilities.getPresentationRequestDTO());
@@ -73,7 +65,6 @@ public class PresentationServiceTest {
         VCCredentialResponse vcCredentialResponse = TestUtilities.getVCCredentialResponseDTO("RSASignature2020");
         PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
 
-        doNothing().when(verifierService).validateVerifier(eq(presentationRequestDTO));
         when(dataShareService.downloadCredentialFromDataShare(eq(presentationRequestDTO))).thenReturn(vcCredentialResponse);
 
         presentationService.authorizePresentation(TestUtilities.getPresentationRequestDTO());

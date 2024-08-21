@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.mimoto.dto.openid.VerifierDTO;
 import io.mosip.mimoto.dto.openid.VerifiersDTO;
-import io.mosip.mimoto.dto.openid.presentation.PresentationRequestDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.exception.InvalidVerifierException;
@@ -52,14 +51,14 @@ public class VerifierServiceImpl implements VerifierService {
         return verifiersDTO.getVerifiers().stream().filter(verifier -> verifier.getClientId().equals(clientId)).findFirst();
     }
     @Override
-    public void validateVerifier(PresentationRequestDTO presentationRequestDTO) throws ApiNotAccessibleException, JsonProcessingException {
+    public void validateVerifier(String clientId, String redirectUri) throws ApiNotAccessibleException, JsonProcessingException {
         logger.info("Started the presentation Validation");
-        getVerifierByClientId(presentationRequestDTO.getClientId()).ifPresentOrElse(
+        getVerifierByClientId(clientId).ifPresentOrElse(
             (verifierDTO) -> {
                 boolean isValidVerifier = verifierDTO.getRedirectUri().stream().anyMatch(registeredRedirectUri ->
                         urlValidator.isValid(registeredRedirectUri) &&
-                        urlValidator.isValid(presentationRequestDTO.getRedirectUri()) &&
-                        pathMatcher.match(registeredRedirectUri, presentationRequestDTO.getRedirectUri()));
+                        urlValidator.isValid(redirectUri) &&
+                        pathMatcher.match(registeredRedirectUri, redirectUri));
                 if(!isValidVerifier){
                     throw new InvalidVerifierException(
                             ErrorConstants.INVALID_REDIRECT_URI.getErrorCode(),

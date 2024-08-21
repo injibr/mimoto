@@ -58,18 +58,18 @@ public class VerifierServiceTest {
     @Test
     public void validateTrustedVerifiersAndDoNothing() throws ApiNotAccessibleException, IOException {
         PresentationRequestDTO presentationRequestDTO = PresentationRequestDTO.builder().clientId("test-clientId").redirectUri("https://test-redirectUri").build();
-        verifiersService.validateVerifier(presentationRequestDTO);
+        verifiersService.validateVerifier(presentationRequestDTO.getClientId(), presentationRequestDTO.getRedirectUri());
     }
 
     @Test(expected = InvalidVerifierException.class)
     public void validateTrustedVerifiersAndThrowInvalidVerifierExceptionWhenClientIdIsIncorrect() throws ApiNotAccessibleException, IOException {
         PresentationRequestDTO presentationRequestDTO = PresentationRequestDTO.builder().clientId("test-clientId2").redirectUri("https://test-redirectUri").build();
-        verifiersService.validateVerifier(presentationRequestDTO);
+        verifiersService.validateVerifier(presentationRequestDTO.getClientId(), presentationRequestDTO.getRedirectUri());
     }
 
     @Test(expected = InvalidVerifierException.class)
     public void validateTrustedVerifiersAndThrowInvalidVerifiersExceptionWhenRedirectUriIsIncorrect() throws ApiNotAccessibleException, IOException {
         PresentationRequestDTO presentationRequestDTO = PresentationRequestDTO.builder().clientId("test-clientId2").redirectUri("https://test-redirectUri").build();
-        verifiersService.validateVerifier(presentationRequestDTO);
+        verifiersService.validateVerifier(presentationRequestDTO.getClientId(), presentationRequestDTO.getRedirectUri());
     }
 }

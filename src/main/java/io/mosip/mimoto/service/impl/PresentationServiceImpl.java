@@ -9,7 +9,6 @@ import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.exception.VPNotCreatedException;
 import io.mosip.mimoto.service.PresentationService;
-import io.mosip.mimoto.service.VerifierService;
 import io.mosip.mimoto.util.RestApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +25,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PresentationServiceImpl implements PresentationService {
-
-    @Autowired
-    VerifierService verifierService;
 
     @Autowired
     DataShareServiceImpl dataShareService;
@@ -51,9 +47,7 @@ public class PresentationServiceImpl implements PresentationService {
     private final Logger logger = LoggerFactory.getLogger(PresentationServiceImpl.class);
 
     @Override
-    public String authorizePresentation(PresentationRequestDTO presentationRequestDTO) throws ApiNotAccessibleException, IOException {
-
-        verifierService.validateVerifier(presentationRequestDTO);
+    public String authorizePresentation(PresentationRequestDTO presentationRequestDTO) throws IOException {
         VCCredentialResponse vcCredentialResponse = dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
 
         PresentationDefinitionDTO presentationDefinitionDTO = presentationRequestDTO.getPresentationDefinition();
