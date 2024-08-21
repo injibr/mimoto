@@ -88,7 +88,7 @@ public class CredentialServiceImpl implements CredentialService {
     @Value("${mosip.inji.qr.code.width:500}")
     Integer qrCodeWidth;
 
-    @Value("${mosip.inji.qr.data.size.limit:10000}")
+    @Value("${mosip.inji.qr.data.size.limit:2000}")
     Integer allowedQRDataSizeLimit;
 
     @Autowired
