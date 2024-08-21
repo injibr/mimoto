@@ -8,6 +8,7 @@ import io.mosip.mimoto.exception.InvalidCredentialResourceException;
 import io.mosip.mimoto.exception.InvalidVerifierException;
 import io.mosip.mimoto.exception.VPNotCreatedException;
 import io.mosip.mimoto.service.PresentationService;
+import io.mosip.mimoto.service.VerifierService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,9 @@ public class PresentationController {
     String injiWebRedirectUrl;
 
     @Autowired
+    VerifierService verifierService;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @GetMapping("/authorize")
@@ -47,6 +51,7 @@ public class PresentationController {
                                      @RequestParam("redirect_uri") String redirectUri ) throws IOException {
         try {
             logger.info("Started Presentation Authorization in the controller.");
+            verifierService.validateVerifier(clientId, redirectUri);
             PresentationDefinitionDTO presentationDefinitionDTO = objectMapper.readValue(presentationDefinition, PresentationDefinitionDTO.class);
             PresentationRequestDTO presentationRequestDTO = PresentationRequestDTO.builder()
                     .responseType(responseType)
