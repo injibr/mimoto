@@ -2,10 +2,7 @@ package io.mosip.mimoto.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mosip.mimoto.dto.DisplayDTO;
-import io.mosip.mimoto.dto.ErrorDTO;
-import io.mosip.mimoto.dto.IssuerDTO;
-import io.mosip.mimoto.dto.LogoDTO;
+import io.mosip.mimoto.dto.*;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.dto.openid.VerifierDTO;
 import io.mosip.mimoto.dto.openid.VerifiersDTO;
@@ -76,6 +73,36 @@ public class TestUtilities {
         }
         return issuer;
     }
+    public static IssuerDTO getIssuerConfigDTO(String issuerName, List<String> nullFields) {
+        LogoDTO logo = new LogoDTO();
+        logo.setUrl("/logo");
+        logo.setAlt_text("logo-url");
+        DisplayDTO display = new DisplayDTO();
+        display.setName(issuerName);
+        display.setTitle("Download via " + issuerName);
+        display.setDescription(issuerName + " description");
+        display.setLanguage("en");
+        display.setLogo(logo);
+        IssuerDTO issuer = new IssuerDTO();
+        issuer.setCredential_issuer(issuerName + "id");
+        issuer.setDisplay(Collections.singletonList(display));
+        issuer.setClient_id("123");
+        issuer.setEnabled("true");
+        if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
+        else {
+            if (!nullFields.contains("redirect_uri"))
+                issuer.setRedirect_uri("/redirection");
+            if (!nullFields.contains("authorization_audience"))
+                issuer.setAuthorization_audience("/authorization_audience");
+            if (!nullFields.contains("redirect_uri"))
+                issuer.setRedirect_uri("/redirection");
+            if (!nullFields.contains("token_endpoint"))
+                issuer.setToken_endpoint("/token_endpoint");
+            if (!nullFields.contains("proxy_token_endpoint"))
+                issuer.setProxy_token_endpoint("/proxy_token_endpoint");
+        }
+        return issuer;
+    }
 
     public static String getExpectedWellKnownJson() {
         return "{"
@@ -112,44 +139,13 @@ public class TestUtilities {
                 + "}";
     }
 
-    public static IssuerDTO getIssuerConfigDTO(String issuerName, List<String> nullFields) {
-        LogoDTO logo = new LogoDTO();
-        logo.setUrl("/logo");
-        logo.setAlt_text("logo-url");
-        DisplayDTO display = new DisplayDTO();
-        display.setName(issuerName);
-        display.setTitle("Download via " + issuerName);
-        display.setDescription(issuerName + " description");
-        display.setLanguage("en");
-        display.setLogo(logo);
-        IssuerDTO issuer = new IssuerDTO();
-        issuer.setCredential_issuer(issuerName + "id");
-        issuer.setDisplay(Collections.singletonList(display));
-        issuer.setClient_id("123");
-        issuer.setEnabled("true");
-        if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
-        else {
-            if (!nullFields.contains("redirect_uri"))
-                issuer.setRedirect_uri("/redirection");
-            if (!nullFields.contains("authorization_audience"))
-                issuer.setAuthorization_audience("/authorization_audience");
-            if (!nullFields.contains("redirect_uri"))
-                issuer.setRedirect_uri("/redirection");
-            if (!nullFields.contains("token_endpoint"))
-                issuer.setToken_endpoint("/token_endpoint");
-            if (!nullFields.contains("proxy_token_endpoint"))
-                issuer.setProxy_token_endpoint("/proxy_token_endpoint");
-        }
-        return issuer;
-    }
-
     public static PresentationRequestDTO getPresentationRequestDTO(){
         return PresentationRequestDTO.builder()
-                .presentation_definition("{\"id\":\"test-id\",\"input_descriptors\":[{\"id\":\"test-input-id\",\"format\":{\"ldpVc\":{\"proofTypes\":[\"Ed25519Signature2020\"]}}}]}")
-                .client_id("test_client_id")
-                .resource("test_resource")
-                .response_type("test_response_type")
-                .redirect_uri("test_redirect_uri").build();
+                .presentationDefinition(getPresentationDefinitionDTO())
+                .clientId("test_client_id")
+                .resource("http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/test")
+                .responseType("test_response_type")
+                .redirectUri("test_redirect_uri").build();
     }
 
     public static VCCredentialProperties getVCCredentialPropertiesDTO(String type){
@@ -191,9 +187,12 @@ public class TestUtilities {
     }
 
     public static PresentationDefinitionDTO getPresentationDefinitionDTO(){
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList("Ed25519Signature2020")).build();
-        Format format = Format.builder().ldpVc(ldpVc).build();
-        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id("test-input-id").format(format).build();
+        FilterDTO filterDTO = FilterDTO.builder().type("String").pattern("test-credential").build();
+        FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
+        ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
+        Map<String, List<String>> proofTypes = Map.of("proofTypes", Collections.singletonList("Ed25519Signature2020"));
+        Map<String, Map<String, List<String>>> format = Map.of("ldpVc", proofTypes );
+        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id("test-input-id").format(format).constraints(constraintsDTO).build();
 
         return PresentationDefinitionDTO.builder()
                 .inputDescriptors(Collections.singletonList(inputDescriptorDTO))
@@ -216,7 +215,7 @@ public class TestUtilities {
     public static VerifiersDTO getTrustedVerifiers() {
         VerifierDTO verifierDTO = VerifierDTO.builder()
                 .clientId("test-clientId")
-                .redirectUri(Collections.singletonList("test-redirectUri")).build();
+                .redirectUri(Collections.singletonList("https://test-redirectUri")).build();
 
         return VerifiersDTO.builder()
                 .verifiers(Collections.singletonList(verifierDTO)).build();
