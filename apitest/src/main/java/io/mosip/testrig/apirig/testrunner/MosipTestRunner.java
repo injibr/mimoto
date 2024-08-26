@@ -83,9 +83,6 @@ public class MosipTestRunner {
 			KeycloakUserManager.removeUser();
 			KeycloakUserManager.createUsers();
 			KeycloakUserManager.closeKeycloakInstance();
-
-			List<String> localLanguageList = new ArrayList<>(BaseTestCase.getLanguageList());
-			AdminTestUtil.getLocationData();
 			
 			// Generate device certificates to be consumed by Mock-MDS
 			PartnerRegistration.deleteCertificates();
@@ -93,6 +90,7 @@ public class MosipTestRunner {
 			AdminTestUtil.createEditAndPublishPolicy();
 			PartnerRegistration.deviceGeneration();
 
+			// Generating biometric details with mock MDS
 			BiometricDataProvider.generateBiometricTestData("Registration");
 
 			startTestRunner();

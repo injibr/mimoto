@@ -1,14 +1,14 @@
 package io.mosip.mimoto.dto.idp;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Data
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class TokenResponseDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String id_token;

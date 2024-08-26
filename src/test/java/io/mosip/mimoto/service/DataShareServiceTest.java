@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.PathMatcher;
 
 @RunWith(MockitoJUnitRunner.class)
 
@@ -27,6 +28,8 @@ public class DataShareServiceTest {
     RestApiClient restApiClient;
     @Mock
     ObjectMapper objectMapper;
+    @Mock
+    PathMatcher pathMatcher;
     @InjectMocks
     DataShareServiceImpl dataShareService;
 
@@ -34,6 +37,7 @@ public class DataShareServiceTest {
     public void setUp(){
         ReflectionTestUtils.setField(dataShareService, "dataShareHostUrl", "https://test-url");
         ReflectionTestUtils.setField(dataShareService, "dataShareCreateUrl", "https://test-url");
+        ReflectionTestUtils.setField(dataShareService, "dataShareGetUrlPattern", "http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/*");
         ReflectionTestUtils.setField(dataShareService, "maxRetryCount", 1);
     }
 
@@ -66,10 +70,11 @@ public class DataShareServiceTest {
         PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
         VCCredentialResponse vcCredentialResponseDTO = TestUtilities.getVCCredentialResponseDTO("Ed25519Signature2020");
         String credentialString = TestUtilities.getObjectAsString(vcCredentialResponseDTO);
-        Mockito.when(restApiClient.getApi(Mockito.eq("test_resource"), Mockito.eq(String.class)))
+        Mockito.when(restApiClient.getApi(Mockito.eq("http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/test"), Mockito.eq(String.class)))
                 .thenReturn(credentialString);
         Mockito.when(objectMapper.readValue(Mockito.eq(credentialString), Mockito.eq(VCCredentialResponse.class)))
                         .thenReturn(vcCredentialResponseDTO);
+        Mockito.when(pathMatcher.match(Mockito.eq("http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/*"),Mockito.eq("http://datashare.datashare/v1/datashare/get/static-policyid/static-subscriberid/test"))).thenReturn(true);
         VCCredentialResponse actualVCCredentialResponse = dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
         Assert.assertEquals(vcCredentialResponseDTO, actualVCCredentialResponse);
     }
@@ -77,9 +82,6 @@ public class DataShareServiceTest {
     @Test(expected = InvalidCredentialResourceException.class)
     public void throwServiceUnavailableExceptionWhenCredentialIsNotFetched() throws Exception {
         PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
-        VCCredentialResponse vcCredentialResponseDTO = TestUtilities.getVCCredentialResponseDTO("Ed25519Signature2020");
-        Mockito.when(restApiClient.getApi(Mockito.eq("test_resource"), Mockito.eq(String.class)))
-                .thenReturn(null);
         dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
     }
 
@@ -87,12 +89,17 @@ public class DataShareServiceTest {
     public void throwResourceExpiredExceptionWhenCredentialIsExpired() throws Exception {
         PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
         VCCredentialResponse vcCredentialResponseDTO = TestUtilities.getVCCredentialResponseDTO("Ed25519Signature2020");
-        String credentialString = TestUtilities.getObjectAsString(vcCredentialResponseDTO);
-        Mockito.when(restApiClient.getApi(Mockito.eq("test_resource"), Mockito.eq(String.class)))
-                .thenReturn(credentialString);
         vcCredentialResponseDTO.setCredential(null);
-        Mockito.when(objectMapper.readValue(Mockito.eq(credentialString), Mockito.eq(VCCredentialResponse.class)))
-                .thenReturn(vcCredentialResponseDTO);
+        dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
+
+    }
+
+    @Test(expected = InvalidCredentialResourceException.class)
+    public void throwInvalidResourceExceptionWhenResourceURLDoesnotMatchPattern() throws Exception {
+        PresentationRequestDTO presentationRequestDTO = TestUtilities.getPresentationRequestDTO();
+        presentationRequestDTO.setResource("test-resource");
+        VCCredentialResponse vcCredentialResponseDTO = TestUtilities.getVCCredentialResponseDTO("Ed25519Signature2020");
+        vcCredentialResponseDTO.setCredential(null);
         dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
 
     }
