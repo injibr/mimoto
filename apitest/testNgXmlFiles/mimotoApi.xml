@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-	<suite name="MobileId Suite">
+	<suite name="Mimoto Suite">
 	<!-- Passing Group as parmeter unsing "testType" Possible Groups are: smoke 
 		regression smokeAndRegression -->
 	<listeners>
@@ -21,14 +21,6 @@
 		<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.PostWithAutogenIdWithOtpGenerate" />
-		</classes>
-	</test>
-	<test name="CreateVID">
-		<parameter name="ymlFile" value="mimoto/CreateVID/CreateVid.yml" />
-		<parameter name="idKeyName" value="VID" />
-		<parameter name="prerequisite" value="Yes" />
-		<classes>
-			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
 	</test>
 
