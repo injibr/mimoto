@@ -12,10 +12,8 @@ public class MimotoUtil extends AdminTestUtil {
 
 	private static final Logger logger = Logger.getLogger(MimotoUtil.class);
 	public static final String SEND_OTP_ENDPOINT = "mimoto/req/";
-	public static final String CREATE_VID_ENDPOINT = "/idrepository/v1/vid";
 	public static final String MIMOTO_CREDENTIAL_STATUS = "Mimoto_CredentialsStatus_";
 	public static final String OTP_FEATURE_NOT_SUPPORTED = "OTP feature not supported. Hence skipping the testcase";
-	
 	
 	
 	private static String otpEnabled = "true";
@@ -31,7 +29,8 @@ public class MimotoUtil extends AdminTestUtil {
 		String testCaseName = testCaseDTO.getTestCaseName();
 		if (isOTPEnabled().equals("false") && (testCaseDTO.getEndPoint().contains(SEND_OTP_ENDPOINT)
 				|| testCaseDTO.getInput().contains(SEND_OTP_ENDPOINT)
-				|| testCaseName.startsWith(MIMOTO_CREDENTIAL_STATUS) || testCaseName.contains("_vid"))) {
+				|| testCaseName.startsWith(MIMOTO_CREDENTIAL_STATUS) || testCaseName.contains("_vid")
+				|| testCaseName.contains("_VID"))) {
 			throw new SkipException(OTP_FEATURE_NOT_SUPPORTED);
 		}
 		return testCaseName;
