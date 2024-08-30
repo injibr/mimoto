@@ -1,6 +1,6 @@
 SendOTP:
    Resident_SendOTP_Valid_UIN_All_Smoke:
-      endPoint: /residentmobileapp/req/otp
+      endPoint: /resident/v1/req/otp
       description: Creating resident requesting OTP with valid UIN
       role: resident
       checkErrorsOnlyInResponse: true
