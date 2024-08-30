@@ -49,7 +49,7 @@ public class IdpController {
 
     @Autowired
     RequestValidator requestValidator;
-    @PostMapping("/binding-otp")
+    @PostMapping(value = "/binding-otp", produces = MediaType.APPLICATION_JSON_VALUE)
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> otpRequest(@Valid @RequestBody BindingOtpRequestDto requestDTO, BindingResult result) throws Exception {
         logger.debug("Received binding-otp request : " + JsonUtils.javaObjectToJsonString(requestDTO));
@@ -105,7 +105,7 @@ public class IdpController {
         }
     }
 
-    @PostMapping(value = {"/get-token/{issuer}"}, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PostMapping(value = {"/get-token/{issuer}"}, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getToken(@RequestParam Map<String, String> params, @PathVariable(required = true, name= "issuer") String issuer) {
 
         logger.info("Reached the getToken Controller for Issuer " + issuer);

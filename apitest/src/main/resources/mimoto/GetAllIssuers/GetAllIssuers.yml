@@ -13,7 +13,7 @@ GetAllIssuers:
 }'
 
    Mimoto_GetAllIssuers_Specific_Issuer_All_Valid_Smoke:
-      endPoint: /residentmobileapp/issuers/Mosip
+      endPoint: /v1/mimoto/issuers/Mosip
       description: Retrieving all specific issuer with all valid parameters
       role: resident
       restMethod: get

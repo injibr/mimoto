@@ -16,4 +16,6 @@ public interface IssuersService {
     IssuerDTO getIssuerConfig(String issuerId) throws ApiNotAccessibleException, IOException, InvalidIssuerIdException;
 
     CredentialIssuerWellKnownResponse getIssuerWellknown(String issuerId) throws ApiNotAccessibleException, IOException;
+
+    CredentialsSupportedResponse getIssuerWellknownForCredentialType(String issuerId, String credentialId) throws ApiNotAccessibleException, IOException;
 }

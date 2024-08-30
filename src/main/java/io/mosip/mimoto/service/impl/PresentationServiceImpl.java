@@ -9,7 +9,6 @@ import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.ErrorConstants;
 import io.mosip.mimoto.exception.VPNotCreatedException;
 import io.mosip.mimoto.service.PresentationService;
-import io.mosip.mimoto.service.VerifierService;
 import io.mosip.mimoto.util.RestApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +19,12 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
 public class PresentationServiceImpl implements PresentationService {
-
-    @Autowired
-    VerifierService verifierService;
 
     @Autowired
     DataShareServiceImpl dataShareService;
@@ -42,8 +35,8 @@ public class PresentationServiceImpl implements PresentationService {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Value("${mosip.inji.verify.redirect.url}")
-    String injiVerifyRedirectUrl;
+    @Value("${mosip.inji.ovp.redirect.url.pattern}")
+    String injiOvpRedirectURLPattern;
 
     @Value("${mosip.data.share.host}")
     String dataShareUrl;
@@ -54,18 +47,11 @@ public class PresentationServiceImpl implements PresentationService {
     private final Logger logger = LoggerFactory.getLogger(PresentationServiceImpl.class);
 
     @Override
-    public String authorizePresentation(PresentationRequestDTO presentationRequestDTO) throws ApiNotAccessibleException, IOException {
-
-        verifierService.validateVerifier(presentationRequestDTO);
+    public String authorizePresentation(PresentationRequestDTO presentationRequestDTO) throws IOException {
         VCCredentialResponse vcCredentialResponse = dataShareService.downloadCredentialFromDataShare(presentationRequestDTO);
 
-        PresentationDefinitionDTO presentationDefinitionDTO;
-        try {
-            presentationDefinitionDTO = objectMapper.readValue(presentationRequestDTO.getPresentation_definition(), PresentationDefinitionDTO.class);
-            if (presentationDefinitionDTO == null) {
-                throw new VPNotCreatedException(ErrorConstants.INVALID_REQUEST.getErrorMessage());
-            }
-        } catch (IOException ioException) {
+        PresentationDefinitionDTO presentationDefinitionDTO = presentationRequestDTO.getPresentationDefinition();
+        if (presentationDefinitionDTO == null) {
             throw new VPNotCreatedException(ErrorConstants.INVALID_REQUEST.getErrorMessage());
         }
 
@@ -74,16 +60,17 @@ public class PresentationServiceImpl implements PresentationService {
                 .stream()
                 .findFirst()
                 .map(inputDescriptorDTO -> {
-                    boolean matchingProofTypes = inputDescriptorDTO.getFormat().getLdpVc().getProofTypes()
+                    boolean matchingProofTypes = inputDescriptorDTO.getFormat().get("ldpVc").get("proofTypes")
                             .stream()
                             .anyMatch(proofType -> vcCredentialResponse.getCredential().getProof().getType().equals(proofType));
                     if (matchingProofTypes) {
                         logger.info("Started the Construction of VP token");
                         try {
-                            String vpToken = constructVerifiablePresentationString(vcCredentialResponse.getCredential());
-                            String presentationSubmission = constructPresentationSubmission(vpToken);
-                            return String.format(injiVerifyRedirectUrl,
-                                    presentationRequestDTO.getRedirect_uri(),
+                            VerifiablePresentationDTO verifiablePresentationDTO = constructVerifiablePresentationString(vcCredentialResponse.getCredential());
+                            String presentationSubmission = constructPresentationSubmission(verifiablePresentationDTO, presentationDefinitionDTO, inputDescriptorDTO);
+                            String vpToken = objectMapper.writeValueAsString(verifiablePresentationDTO);
+                            return String.format(injiOvpRedirectURLPattern,
+                                    presentationRequestDTO.getRedirectUri(),
                                     Base64.getUrlEncoder().encodeToString(vpToken.getBytes(StandardCharsets.UTF_8)),
                                     URLEncoder.encode(presentationSubmission, StandardCharsets.UTF_8));
                         } catch (JsonProcessingException e) {
@@ -101,36 +88,39 @@ public class PresentationServiceImpl implements PresentationService {
         return redirectionString;
     }
 
-    private String constructVerifiablePresentationString(VCCredentialProperties vcCredentialProperties) throws JsonProcessingException {
-        VerifiablePresentationDTO verifiablePresentationDTO = VerifiablePresentationDTO.builder()
+    private VerifiablePresentationDTO constructVerifiablePresentationString(VCCredentialProperties vcCredentialProperties) throws JsonProcessingException {
+        return VerifiablePresentationDTO.builder()
                 .verifiableCredential(Collections.singletonList(vcCredentialProperties))
                 .type(Collections.singletonList("VerifiablePresentation"))
                 .context(Collections.singletonList("https://www.w3.org/2018/credentials/v1"))
                 .build();
-        return objectMapper.writeValueAsString(verifiablePresentationDTO);
     }
 
-    private String constructPresentationSubmission(String vpToken) throws JsonProcessingException {
-        VerifiablePresentationDTO verifiablePresentationDTO = objectMapper.readValue(vpToken, VerifiablePresentationDTO.class);
-
+    private String constructPresentationSubmission(VerifiablePresentationDTO verifiablePresentationDTO, PresentationDefinitionDTO presentationDefinitionDTO, InputDescriptorDTO inputDescriptorDTO) throws JsonProcessingException {
         AtomicInteger atomicInteger = new AtomicInteger(0);
         List<SubmissionDescriptorDTO> submissionDescriptorDTOList = verifiablePresentationDTO.getVerifiableCredential()
                 .stream().map(verifiableCredential -> SubmissionDescriptorDTO.builder()
-                    .id(UUID.randomUUID().toString())
+                    .id(inputDescriptorDTO.getId())
                     .format("ldp_vc")
                     .path("$.verifiableCredential[" + atomicInteger.getAndIncrement() + "]").build()).collect(Collectors.toList());
 
         PresentationSubmissionDTO presentationSubmissionDTO = PresentationSubmissionDTO.builder()
                 .id(UUID.randomUUID().toString())
-                .definition_id(UUID.randomUUID().toString())
+                .definition_id(presentationDefinitionDTO.getId())
                 .descriptorMap(submissionDescriptorDTOList).build();
         return objectMapper.writeValueAsString(presentationSubmissionDTO);
     }
 
     PresentationDefinitionDTO constructPresentationDefinition(VCCredentialResponse vcCredentialResponse){
-        LDPVc ldpVc = LDPVc.builder().proofTypes(Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType())).build();
-        Format format = Format.builder().ldpVc(ldpVc).build();
-        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder().id(UUID.randomUUID().toString()).format(format).build();
+        FilterDTO filterDTO = FilterDTO.builder().type("String").pattern(vcCredentialResponse.getCredential().getType().getLast()).build();
+        FieldDTO fieldDTO = FieldDTO.builder().path(new String[]{"$.type"}).filter(filterDTO).build();
+        ConstraintsDTO constraintsDTO = ConstraintsDTO.builder().fields(new FieldDTO[]{fieldDTO}).build();
+        Map<String, List<String>> proofTypes = Map.of("proofTypes", Collections.singletonList(vcCredentialResponse.getCredential().getProof().getType()));
+        Map<String, Map<String, List<String>>> format = Map.of("ldpVc", proofTypes );
+        InputDescriptorDTO inputDescriptorDTO = InputDescriptorDTO.builder()
+                .id(UUID.randomUUID().toString())
+                .constraints(constraintsDTO)
+                .format(format).build();
 
         return PresentationDefinitionDTO.builder()
                 .inputDescriptors(Collections.singletonList(inputDescriptorDTO))
