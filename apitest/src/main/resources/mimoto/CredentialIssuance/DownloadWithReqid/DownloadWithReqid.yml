@@ -1,6 +1,6 @@
 DownloadCredential:
    Mimoto_CredentialsStatus_All_Valid_Smoke_euin:
-      endPoint: /v1/mimoto/credentialshare/download
+      endPoint: /residentmobileapp/credentialshare/download
       description: Checking credential status with all valid parameters
       role: resident
       checkErrorsOnlyInResponse: true
@@ -15,7 +15,7 @@ DownloadCredential:
         "Content-Type": "application/pdf"
 }'
    Mimoto_CredentialsStatus_StatusCode_InValid_Smoke_euin:
-      endPoint: /v1/mimoto/credentialshare/download
+      endPoint: /residentmobileapp/credentialshare/download
       description: Checking credential status with invalid StatusCode
       role: resident
       restMethod: get
