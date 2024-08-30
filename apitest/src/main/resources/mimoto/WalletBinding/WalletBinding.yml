@@ -1448,7 +1448,7 @@ WalletBinding:
 }'
 
    Mimoto_WalletBinding_uin_Invalid_publicKey_Neg:
-      endPoint: v1/mimoto/wallet-binding
+      endPoint: /v1/mimoto/wallet-binding
       description: generating OTP to bind VC with invalid publickey
       role: resident
       validityCheckRequired: true
@@ -1877,7 +1877,7 @@ WalletBinding:
 }'
 
    Mimoto_WalletBinding_vid_Missing_IndividualId_Neg:
-      endPoint: v1/mimoto/wallet-binding
+      endPoint: /v1/mimoto/wallet-binding
       description: generating OTP to bind vid VC with missing individualId
       role: resident
       validityCheckRequired: true
@@ -2551,7 +2551,7 @@ WalletBinding:
 }'
 
    Mimoto_WalletBinding_vid_Invalid_authFactorType1_Neg:
-      endPoint: v1/mimoto/wallet-binding
+      endPoint: /v1/mimoto/wallet-binding
       description: generating OTP to bind VID VC with invalid authFactorType1
       role: resident
       validityCheckRequired: true
