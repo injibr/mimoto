@@ -1,6 +1,7 @@
 CreateVID:
   Mimoto_Generate_Perpetual_VID_Valid_Smoke_sid:
       endPoint: /idrepository/v1/vid
+      description: Create perpetual VID with valid details
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/CreateVID/createVid
@@ -18,6 +19,7 @@ CreateVID:
 
   Mimoto_Generate_Temporary_VID_Valid_Smoke_sid:
       endPoint: /idrepository/v1/vid
+      description: Create temporary VID with valid details
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/CreateVID/createVid
@@ -35,6 +37,7 @@ CreateVID:
 
   Mimoto_Generate_Perpetual_VID_Binding_Valid_Smoke_sid:
       endPoint: /idrepository/v1/vid
+      description: Create perpetual VID for binding with valid details
       role: idrepo
       restMethod: post
       inputTemplate: mimoto/CreateVID/createVid
