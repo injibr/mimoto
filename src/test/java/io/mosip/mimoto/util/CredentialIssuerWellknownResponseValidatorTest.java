@@ -10,19 +10,20 @@ import io.mosip.mimoto.exception.InvalidWellknownResponseException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static io.mosip.mimoto.util.TestUtilities.getCredentialIssuerWellKnownResponseDto;
 import static io.mosip.mimoto.util.TestUtilities.getCredentialSupportedResponse;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CredentialIssuerWellknownResponseValidatorTest {
 
@@ -41,17 +42,20 @@ public class CredentialIssuerWellknownResponseValidatorTest {
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
 
         response.setCredentialIssuer("");
-        response.setCredentialEndPoint("http://example.com");
+        response.setCredentialEndPoint("http://example.com/credential");
 
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialIssuer: must not be blank"), "Exception message should indicate the missing 'credentialIssuer'");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialIssuer: must not be blank""", invalidWellknownResponseException.getMessage());
     }
 
     @Test
-    public void shouldThrowExceptionWhenCredentialEndpointIsIncorrectInCredentialIssuerWellknownResponse() throws ApiNotAccessibleException {
+    public void shouldThrowExceptionWhenCredentialEndpointIsIncorrectInCredentialIssuerWellknownResponse() {
         CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
 
@@ -61,7 +65,10 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialEndPoint: must match \"https?://.*?/credential$\""), "Exception message should indicate the incorrect 'credentialEndpoint'");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialEndPoint: must match "https?://.*?/credential$\"""", invalidWellknownResponseException.getMessage(), "Exception message should indicate the incorrect 'credentialEndpoint'");
     }
 
     @Test
@@ -76,34 +83,28 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("authorizationServers: must not be empty"), "Exception message should indicate 'authorizationServers' cannot be empty");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                authorizationServers: must not be empty""", invalidWellknownResponseException.getMessage(), "Exception message should indicate 'authorizationServers' cannot be empty");
     }
 
     @Test
     public void shouldThrowExceptionWhenFormatIsMissingInCredentialsSupported() {
+        CredentialsSupportedResponse credentialsSupportedResponse = getCredentialSupportedResponse("CredentialType1");
+        credentialsSupportedResponse.setFormat(null);
         CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
-                Map.of("CredentialType1", new CredentialsSupportedResponse()));  // `format` is not set, default is null
+                Map.of("CredentialType1", credentialsSupportedResponse));
 
-        response.getCredentialConfigurationsSupported().get("CredentialType1").setFormat(null);
 
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("format: Format must not be blank"), "Exception message should indicate 'format' must not be blank");
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenCredentialDefinitionTypeIsEmpty() {
-        CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
-                Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
-        response.getCredentialConfigurationsSupported().get("CredentialType1").getCredentialDefinition().setType(Collections.emptyList());  // Invalid empty list
-
-        CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
-        InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
-                credentialIssuerWellknownResponseValidator.validate(response, validator));
-        assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("type: must not be empty"), "Exception message should indicate 'type' must not be empty");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].format: Format must not be blank""", invalidWellknownResponseException.getMessage(), "Exception message should indicate 'format' must not be blank");
     }
 
     @Test
@@ -112,11 +113,14 @@ public class CredentialIssuerWellknownResponseValidatorTest {
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
         response.getCredentialConfigurationsSupported().get("CredentialType1").getDisplay().getFirst().getLogo().setUrl("ftp//invalid-url");  // Invalid URL
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        System.out.println(invalidWellknownResponseException.getMessage());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("logo.url: must be a valid URL"), "Exception message should indicate 'logo.url' must be a valid URL");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].display[0].logo.url: must be a valid URL""", invalidWellknownResponseException.getMessage(), "Exception message should indicate 'logo.url' must be a valid URL");
     }
 
     @Test
@@ -127,11 +131,14 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         response.getCredentialConfigurationsSupported().get("CredentialType1").getDisplay().getFirst().setBackgroundImage(new BackgroundImageDTO("local//imgbasebase64"));
 
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
-        System.out.println(invalidWellknownResponseException.getMessage());
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("backgroundImage.uri: must be a valid URL"), "Exception message should indicate 'background_image.uri' must be a valid URL");
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].display[0].backgroundImage.uri: must be a valid URL""", invalidWellknownResponseException.getMessage(), "Exception message should indicate 'background_image.uri' must be a valid URL");
     }
 
     @Test
@@ -144,19 +151,20 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         response.setAuthorizationServers(null);
         response.setCredentialIssuer(null);
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("authorizationServers: must not be empty"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialIssuer: must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialConfigurationsSupported: must not be empty"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialEndPoint: must not be blank"));
-
+        assertTrue(Arrays.stream(invalidWellknownResponseException.getMessage().split("\n")).collect(Collectors.toList()).containsAll(List.of("RESIDENT-APP-041 --> Invalid Wellknown from Issuer",
+                "Validation failed:",
+                "credentialIssuer: must not be blank",
+                "credentialConfigurationsSupported: must not be empty",
+                "authorizationServers: must not be empty",
+                "credentialEndPoint: must not be blank")));
     }
 
     @Test
     public void shouldDetectMissingMandatoryFieldsOfCredentialSupportedResponse() {
-
         CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
         response.getCredentialConfigurationsSupported().get("CredentialType1").setFormat(null);
@@ -165,26 +173,32 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         response.getCredentialConfigurationsSupported().get("CredentialType1").setProofTypesSupported(null);
         response.getCredentialConfigurationsSupported().get("CredentialType1").setCredentialDefinition(null);
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
         assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
-        assertTrue(invalidWellknownResponseException.getMessage().contains("format: Format must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("scope: Scope must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("proofTypesSupported: Proof types supported must not be empty"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialDefinition: must not be null"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("display: Display information must not be empty"));
-
+        assertTrue(Arrays.stream(invalidWellknownResponseException.getMessage().split("\n")).toList().containsAll(Arrays.stream("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].proofTypesSupported: Proof types supported must not be empty
+                credentialConfigurationsSupported[CredentialType1].scope: Scope must not be blank
+                credentialConfigurationsSupported[CredentialType1].format: Format must not be blank
+                credentialConfigurationsSupported[CredentialType1].display: Display information must not be empty""".split("\n")).toList()));
     }
 
     @Test
     public void shouldDetectMissingProofAlgorithmsSupported() {
         CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
-        response.getCredentialConfigurationsSupported().get("CredentialType1").getProofTypesSupported().get("jwt");
+        response.getCredentialConfigurationsSupported().get("CredentialType1").getProofTypesSupported().get("jwt").setProofSigningAlgValuesSupported(null);
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("proofSigningAlgValuesSupported: must not be null"));
+        assertEquals("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].proofTypesSupported[jwt].proofSigningAlgValuesSupported: must not be null""", invalidWellknownResponseException.getMessage());
     }
 
     @Test
@@ -202,32 +216,127 @@ public class CredentialIssuerWellknownResponseValidatorTest {
         credentialSupportedDisplayResponse.setBackgroundImage(null);
         credentialSupportedDisplayResponseList.add(credentialSupportedDisplayResponse);
         response.getCredentialConfigurationsSupported().get("CredentialType1").setDisplay(credentialSupportedDisplayResponseList);
-
         CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
         InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
                 credentialIssuerWellknownResponseValidator.validate(response, validator)
         );
-        assertTrue(invalidWellknownResponseException.getMessage().contains("name: must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("locale: must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("backgroundImage: must not be null"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("backgroundColor: must not be blank"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("textColor: must not be blank"));
+        assertTrue(Arrays.stream(invalidWellknownResponseException.getMessage().split("\n")).collect(Collectors.toList()).containsAll(Arrays.stream("""
+                RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                Validation failed:
+                credentialConfigurationsSupported[CredentialType1].display[0].backgroundColor: must not be blank
+                credentialConfigurationsSupported[CredentialType1].display[0].textColor: must not be blank
+                credentialConfigurationsSupported[CredentialType1].display[0].backgroundImage: must not be null
+                credentialConfigurationsSupported[CredentialType1].display[0].name: must not be blank
+                credentialConfigurationsSupported[CredentialType1].display[0].locale: must not be blank
+                credentialConfigurationsSupported[CredentialType1].display[0].logo: must not be null""".split("\n")).toList()));
     }
 
-    @Test
-    public void shouldDetectMissingMandatoryFieldsOfCredentialDefinitionResponseDtoResponse() {
-        CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
-                Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
-        CredentialDefinitionResponseDto credentialDefinitionResponseDto=new CredentialDefinitionResponseDto();
-        credentialDefinitionResponseDto.setCredentialSubject(null);
-        credentialDefinitionResponseDto.setType(null);
-        response.getCredentialConfigurationsSupported().get("CredentialType1").setCredentialDefinition(credentialDefinitionResponseDto);
 
-        CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
-        InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
-                credentialIssuerWellknownResponseValidator.validate(response, validator)
-        );
-        assertTrue(invalidWellknownResponseException.getMessage().contains("type: must not be empty"));
-        assertTrue(invalidWellknownResponseException.getMessage().contains("credentialSubject: must not be empty"));
+    @Nested
+    class LdpVcFormatWellKnownResponseValidationTest {
+        @Test
+        public void shouldDetectMissingMandatoryFieldsCredentialDefinitionOfCredentialSupportedResponse() {
+            CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
+            response.getCredentialConfigurationsSupported().get("CredentialType1").setCredentialDefinition(null);
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
+            InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
+                    credentialIssuerWellknownResponseValidator.validate(response, validator));
+            assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
+            assertEquals("""
+                    RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                    credentialDefinition: must not be null""", invalidWellknownResponseException.getMessage());
+        }
+
+        @Test
+        public void shouldDetectMissingMandatoryFieldsOfCredentialDefinitionInWellknownResponse() {
+            CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
+            CredentialDefinitionResponseDto credentialDefinitionResponseDto = new CredentialDefinitionResponseDto();
+            credentialDefinitionResponseDto.setCredentialSubject(null);
+            credentialDefinitionResponseDto.setType(null);
+            response.getCredentialConfigurationsSupported().get("CredentialType1").setCredentialDefinition(credentialDefinitionResponseDto);
+
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+            InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
+                    credentialIssuerWellknownResponseValidator.validate(response, validator)
+            );
+
+            assertTrue(Arrays.stream(invalidWellknownResponseException.getMessage().split("\n")).toList().containsAll(Arrays.stream("""
+                    RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                    Validation failed:
+                    type: must not be empty
+                    credentialSubject: must not be empty""".split("\n")).toList()));
+        }
+
+        @Test
+        public void shouldThrowExceptionWhenCredentialDefinitionTypeIsEmpty() {
+            CredentialIssuerWellKnownResponse response = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
+            response.getCredentialConfigurationsSupported().get("CredentialType1").getCredentialDefinition().setType(Collections.emptyList());  // Invalid empty list
+
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
+            InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
+                    credentialIssuerWellknownResponseValidator.validate(response, validator));
+            assertEquals("RESIDENT-APP-041", invalidWellknownResponseException.getErrorCode());
+            assertEquals("""
+                    RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                    Validation failed:
+                    type: must not be empty""", invalidWellknownResponseException.getMessage());
+        }
+    }
+
+    @Nested
+    class MsoMdocFormatWellKnownResponseValidationTest {
+
+        @Test
+        void shouldThrowInvalidWellKnownResponseExceptionWhenMandatoryFieldDocTypeIsNotPresent() {
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+            CredentialsSupportedResponse credentialSupportedResponse1 = getCredentialSupportedResponse("CredentialType1", "mso_mdoc");
+            credentialSupportedResponse1.setDoctype("");
+            CredentialIssuerWellKnownResponse wellKnownResponseWithoutDocType = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", credentialSupportedResponse1));
+
+            InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
+                    credentialIssuerWellknownResponseValidator.validate(wellKnownResponseWithoutDocType, validator)
+            );
+
+            assertEquals("""
+                    RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                    Mandatory field 'doctype' missing""", invalidWellknownResponseException.getMessage());
+        }
+
+        @Test
+        void shouldThrowInvalidWellKnownResponseExceptionWhenMandatoryFieldClaimIsNotPresent() {
+            CredentialsSupportedResponse credentialSupportedResponse = getCredentialSupportedResponse("CredentialType1", "mso_mdoc");
+            credentialSupportedResponse.setClaims(Map.of());
+            CredentialIssuerWellKnownResponse wellKnownResponseWithoutClaims = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", credentialSupportedResponse));
+
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+            InvalidWellknownResponseException invalidWellknownResponseException = assertThrows(InvalidWellknownResponseException.class, () ->
+                    credentialIssuerWellknownResponseValidator.validate(wellKnownResponseWithoutClaims, validator)
+            );
+
+            assertEquals("""
+                    RESIDENT-APP-041 --> Invalid Wellknown from Issuer
+                    Mandatory field 'claims' missing""", invalidWellknownResponseException.getMessage());
+        }
+
+
+        @Test
+        void shouldNotThrowInvalidWellKnownResponseExceptionWhenMandatoryFieldsAreNotPresentInMsoMdocVc() {
+            CredentialIssuerWellKnownResponse wellKnownResponseWithoutClaims = getCredentialIssuerWellKnownResponseDto("Issuer1",
+                    Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1", "mso_mdoc")));
+
+            CredentialIssuerWellknownResponseValidator credentialIssuerWellknownResponseValidator = new CredentialIssuerWellknownResponseValidator();
+
+            assertDoesNotThrow(() ->
+                    credentialIssuerWellknownResponseValidator.validate(wellKnownResponseWithoutClaims, validator));
+
+        }
     }
 }

@@ -3,10 +3,12 @@ package io.mosip.mimoto.dto.mimoto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
+@Data
 public class ProofTypesSupported {
 
     @NotEmpty
