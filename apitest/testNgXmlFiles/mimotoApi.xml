@@ -36,6 +36,7 @@
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdR/CreatePolicySunBirdR/CreatePolicySunBirdR.yml" />
 		<parameter name="idKeyName" value="osid" />
+		<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
@@ -43,6 +44,7 @@
 	<test name="GetPolicySunBirdR">
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdR/GetPolicySunBirdR/GetPolicySunBirdR.yml" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.GetWithParam" />
 		</classes>
@@ -50,6 +52,7 @@
 	<test name="SearchPolicySunBirdR">
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdR/SearchPolicySunBirdR/SearchPolicySunBirdR.yml" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePost" />
 		</classes>
@@ -58,6 +61,7 @@
 		<parameter name="ymlFile"
 			value="mimoto/OAuthDetailsRequest/OAuthDetailsRequest.yml" />
 			<parameter name="idKeyName"	value="transactionId,encodedResp" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
@@ -65,6 +69,7 @@
 	<test name="AuthenticateUser">
 		<parameter name="ymlFile"
 			value="mimoto/AuthenticateUser/AuthenticateUser.yml" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.PostWithAutogenIdWithOtpGenerate" />
 		</classes>
@@ -72,6 +77,7 @@
 	<test name="AuthorizationCode">
 		<parameter name="ymlFile"
 			value="mimoto/AuthorizationCode/AuthorizationCode.yml" />
+			<parameter name="prerequisite" value="Yes" />
 			<parameter name="idKeyName"	value="code" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
@@ -81,6 +87,7 @@
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdC/OAuthDetailsRequestSunBirdC/OAuthDetailsRequestSunBirdC.yml" />
 			<parameter name="idKeyName"	value="transactionId,encodedResp" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
@@ -88,6 +95,7 @@
 	<test name="AuthenticateUserSunBirdC">
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdC/AuthenticateUserSunBirdC/AuthenticateUserSunBirdC.yml" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePost" />
 		</classes>
@@ -96,6 +104,7 @@
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdC/AuthorizationCodeSunBirdC/AuthorizationCodeSunBirdC.yml" />
 			<parameter name="idKeyName"	value="code" />
+			<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
@@ -192,6 +201,7 @@
 		<parameter name="ymlFile"
 			value="mimoto/SunBirdR/DeletePolicySunBirdR/DeletePolicySunBirdR.yml" />
 		<parameter name="pathParams" value="insuranceid" />
+		<parameter name="prerequisite" value="Yes" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.DeleteWithParam" />
 		</classes>
