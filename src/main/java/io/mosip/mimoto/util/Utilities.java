@@ -11,7 +11,6 @@ import lombok.Data;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -77,7 +76,7 @@ public class Utilities {
 
     private String credentialTemplateHtmlString = null;
 
-//    uncomment for running mimoto Locally to populate the issuers json
+    //    uncomment for running mimoto Locally to populate the issuers json
 //    public Utilities(@Value("classpath:mimoto-issuers-config.json") Resource resource,
 //                     @Value("classpath:mimoto-trusted-verifiers.json") Resource trustedVerifiersResource,
 //                     @Value("classpath:/templates/credential-template.html") Resource credentialTemplateResource) throws IOException{

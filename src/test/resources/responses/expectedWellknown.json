@@ -1,7 +1,7 @@
 ﻿{
-  "credential_issuer": "id1",
-  "authorization_servers": null,
-  "credential_endpoint": "/credential_endpoint",
+  "credential_issuer": "https://dev/id1",
+  "authorization_servers": ["https://dev.net"],
+  "credential_endpoint": "https://dev/issuance/credential",
   "credential_configurations_supported": {
     "CredentialType1": {
       "format": "ldp_vc",
@@ -28,10 +28,12 @@
           "name": "Credential1",
           "locale": "en",
           "logo": {
-            "url": "/logo",
+            "url": "https://logo",
             "alt_text": "logo-url"
           },
-          "background_image": null,
+          "background_image": {
+            "uri": "https://bgimage"
+          },
           "background_color": "#B34622",
           "text_color": "#FFFFFF"
         }

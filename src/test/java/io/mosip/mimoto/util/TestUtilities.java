@@ -20,9 +20,10 @@ public class TestUtilities {
 
     public static CredentialsSupportedResponse getCredentialSupportedResponse(String credentialSupportedName){
         LogoDTO logo = new LogoDTO();
-        logo.setUrl("/logo");
+        logo.setUrl("https://logo");
         logo.setAlt_text("logo-url");
         CredentialSupportedDisplayResponse credentialSupportedDisplay = new CredentialSupportedDisplayResponse();
+        credentialSupportedDisplay.setBackgroundImage(new BackgroundImageDTO("https://bgimage"));
         credentialSupportedDisplay.setLogo(logo);
         credentialSupportedDisplay.setName(credentialSupportedName);
         credentialSupportedDisplay.setLocale("en");
@@ -40,18 +41,54 @@ public class TestUtilities {
         credentialsSupportedResponse.setFormat("ldp_vc");
         credentialsSupportedResponse.setScope(credentialSupportedName+"_vc_ldp");
         credentialsSupportedResponse.setDisplay(Collections.singletonList(credentialSupportedDisplay));
-        credentialsSupportedResponse.setProofTypesSupported(new HashMap<>());
+        HashMap<String,ProofTypesSupported> proofTypesSupportedHashMap=new HashMap<>();
+        ProofTypesSupported proofTypesSupported = new ProofTypesSupported();
+        proofTypesSupported.setProofSigningAlgValuesSupported(List.of("RS256"));
+        proofTypesSupportedHashMap.put("jwt",proofTypesSupported);
+        credentialsSupportedResponse.setProofTypesSupported(proofTypesSupportedHashMap);
         credentialsSupportedResponse.setCredentialDefinition(credentialDefinitionResponseDto);
+        return credentialsSupportedResponse;
+    }
+
+    public static CredentialsSupportedResponse getCredentialSupportedResponse(String credentialSupportedName, String format){
+        LogoDTO logo = new LogoDTO();
+        logo.setUrl("https://logo");
+        logo.setAlt_text("logo-url");
+        CredentialSupportedDisplayResponse credentialSupportedDisplay = new CredentialSupportedDisplayResponse();
+        credentialSupportedDisplay.setLogo(logo);
+        credentialSupportedDisplay.setName(credentialSupportedName);
+        credentialSupportedDisplay.setLocale("en");
+        credentialSupportedDisplay.setTextColor("#FFFFFF");
+        credentialSupportedDisplay.setBackgroundColor("#B34622");
+        credentialSupportedDisplay.setBackgroundImage(new BackgroundImageDTO("https://bgimage"));
+        CredentialIssuerDisplayResponse credentialIssuerDisplayResponse = new CredentialIssuerDisplayResponse();
+        credentialIssuerDisplayResponse.setName("Given Name");
+        credentialIssuerDisplayResponse.setLocale("en");
+        CredentialDisplayResponseDto credentialDisplayResponseDto = new CredentialDisplayResponseDto();
+        credentialDisplayResponseDto.setDisplay(Collections.singletonList(credentialIssuerDisplayResponse));
+        CredentialsSupportedResponse credentialsSupportedResponse = new CredentialsSupportedResponse();
+        credentialsSupportedResponse.setFormat(format);
+        credentialsSupportedResponse.setScope(credentialSupportedName+"_vc_"+format);
+        credentialsSupportedResponse.setDisplay(Collections.singletonList(credentialSupportedDisplay));
+        HashMap<String,ProofTypesSupported> proofTypesSupportedHashMap=new HashMap<>();
+        ProofTypesSupported proofTypesSupported = new ProofTypesSupported();
+        proofTypesSupported.setProofSigningAlgValuesSupported(List.of("RS256"));
+        proofTypesSupportedHashMap.put("jwt", proofTypesSupported);
+        credentialsSupportedResponse.setProofTypesSupported(proofTypesSupportedHashMap);
+        credentialsSupportedResponse.setDoctype("org.iso.18018");
+        credentialsSupportedResponse.setClaims(Map.of("org.iso.18018", Map.of("given_name",Map.of("display", List.of(Map.of("name","Given Name","locale","en"))))));
         return credentialsSupportedResponse;
     }
 
     public static CredentialIssuerWellKnownResponse getCredentialIssuerWellKnownResponseDto(String issuerName, Map<String,CredentialsSupportedResponse> credentialsSupportedResponses){
         CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = new CredentialIssuerWellKnownResponse();
-        credentialIssuerWellKnownResponse.setCredentialIssuer(issuerName);
-        credentialIssuerWellKnownResponse.setCredentialEndPoint("/credential_endpoint");
+        credentialIssuerWellKnownResponse.setCredentialIssuer("https://dev/"+issuerName);
+        credentialIssuerWellKnownResponse.setCredentialEndPoint("https://dev/issuance/credential");
+        credentialIssuerWellKnownResponse.setAuthorizationServers(List.of("https://dev.net"));
         credentialIssuerWellKnownResponse.setCredentialConfigurationsSupported(credentialsSupportedResponses);
         return credentialIssuerWellKnownResponse;
     }
+
     public static IssuerDTO getIssuerDTO(String issuerName) {
         LogoDTO logo = new LogoDTO();
         logo.setUrl("/logo");
@@ -184,6 +221,16 @@ public class TestUtilities {
         return VCCredentialResponse.builder()
                 .credential(getVCCredentialPropertiesDTO(type))
                 .format("ldp_vc").build();
+    }
+
+    public static io.mosip.mimoto.dto.idp.TokenResponseDTO getTokenResponseDTO(){
+        return io.mosip.mimoto.dto.idp.TokenResponseDTO.builder()
+                .id_token("test-id-token")
+                .access_token("test-accesstoken")
+                .expires_in(12345)
+                .scope("test-scope")
+                .token_type("test-token-type")
+                .build();
     }
 
     public static PresentationDefinitionDTO getPresentationDefinitionDTO(){
