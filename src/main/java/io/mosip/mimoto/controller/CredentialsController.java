@@ -1,19 +1,23 @@
 package io.mosip.mimoto.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.dto.ErrorDTO;
 import io.mosip.mimoto.dto.idp.TokenResponseDTO;
+import io.mosip.mimoto.dto.mimoto.VCCredentialResponse;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
+import io.mosip.mimoto.exception.VCVerificationException;
 import io.mosip.mimoto.service.CredentialService;
-import io.mosip.mimoto.service.IdpService;
-import io.mosip.mimoto.service.IssuersService;
 import io.mosip.mimoto.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
@@ -21,8 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static io.mosip.mimoto.exception.PlatformErrorMessages.API_NOT_ACCESSIBLE_EXCEPTION;
-import static io.mosip.mimoto.exception.PlatformErrorMessages.MIMOTO_PDF_SIGN_EXCEPTION;
+import static io.mosip.mimoto.exception.PlatformErrorMessages.*;
 
 @RestController
 @RequestMapping(value="/credentials")
@@ -31,14 +34,10 @@ public class CredentialsController {
     private static final String ID = "mosip.mimoto.credentials";
     private final Logger logger = LoggerFactory.getLogger(CredentialsController.class);
 
-    @Autowired
-    IssuersService issuersService;
 
     @Autowired
     CredentialService credentialService;
 
-    @Autowired
-    IdpService idpService;
 
     @PostMapping("/download")
     public ResponseEntity<?> downloadCredentialAsPDF(
@@ -72,11 +71,14 @@ public class CredentialsController {
             logger.error("Exception occurred while pushing the data to data share ", invalidCredentialResourceException);
             responseWrapper.setErrors(List.of(new ErrorDTO(invalidCredentialResourceException.getErrorCode(), invalidCredentialResourceException.getMessage())));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
+        } catch (VCVerificationException exception) {
+            logger.error("Exception occurred while verification of the verifiable Credential", exception);
+            responseWrapper.setErrors(List.of(new ErrorDTO(exception.getErrorCode(), exception.getMessage())));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         } catch (Exception exception) {
             logger.error("Exception occurred while generating pdf ", exception);
             responseWrapper.setErrors(List.of(new ErrorDTO(MIMOTO_PDF_SIGN_EXCEPTION.getCode(), exception.getMessage())));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
         }
     }
-
 }
