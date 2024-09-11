@@ -29,6 +29,7 @@ import io.mosip.testrig.apirig.utils.AdminTestUtil;
 import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.ConfigManager;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
+import io.mosip.testrig.apirig.utils.MimotoUtil;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
 import io.restassured.response.Response;
@@ -95,7 +96,8 @@ public class PostWithAutogenIdWithOtpGenerate extends AdminTestUtil implements I
 				throw new SkipException(GlobalConstants.VID_FEATURE_NOT_SUPPORTED);
 			}
 		}
-		testCaseName = isTestCaseValidForExecution(testCaseDTO);
+		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 		JSONObject req = new JSONObject(testCaseDTO.getInput());
 
 		auditLogCheck = testCaseDTO.isAuditLogCheck();
@@ -226,7 +228,7 @@ public class PostWithAutogenIdWithOtpGenerate extends AdminTestUtil implements I
 	@AfterClass(alwaysRun = true)
 	public void waittime() {
 		if (!testCaseName.contains(GlobalConstants._AUTHENTICATEUSER)
-				&& isOTPEnabled().equals("true")) {
+				&& MimotoUtil.isOTPEnabled().equals("true")) {
 			try {
 				long delayTime = Long.parseLong(properties.getProperty("Delaytime"));
 				if (!BaseTestCase.isTargetEnvLTS())
