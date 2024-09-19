@@ -8,11 +8,6 @@ import io.mosip.testrig.apirig.dto.TestCaseDTO;
 public class MimotoUtil extends AdminTestUtil {
 
 	private static final Logger logger = Logger.getLogger(MimotoUtil.class);
-	public static final String SEND_OTP_ENDPOINT = "mimoto/req/";
-	public static final String MIMOTO_CREDENTIAL_STATUS = "Mimoto_CredentialsStatus_";
-	public static final String OTP_FEATURE_NOT_SUPPORTED = "OTP feature not supported. Hence skipping the testcase";
-	
-	
 	private static String otpEnabled = "true";
 
 	public static String isOTPEnabled() {
@@ -41,10 +36,14 @@ public class MimotoUtil extends AdminTestUtil {
 	
 	public static String isTestCaseValidForExecution(TestCaseDTO testCaseDTO) {
 		String testCaseName = testCaseDTO.getTestCaseName();
-		if (isOTPEnabled().equals("false") && (testCaseDTO.getEndPoint().contains(SEND_OTP_ENDPOINT)
-				|| testCaseDTO.getInput().contains(SEND_OTP_ENDPOINT)
-				|| testCaseName.startsWith(MIMOTO_CREDENTIAL_STATUS) || testCaseName.contains("_vid"))) {
-			throw new SkipException(OTP_FEATURE_NOT_SUPPORTED);
+		if (isOTPEnabled().equals("false") && (testCaseDTO.getEndPoint().contains(GlobalConstants.SEND_OTP_ENDPOINT)
+				|| testCaseDTO.getInput().contains(GlobalConstants.SEND_OTP_ENDPOINT)
+				|| testCaseName.startsWith(GlobalConstants.MIMOTO_CREDENTIAL_STATUS) || testCaseName.contains("_vid"))) {
+			throw new SkipException(GlobalConstants.OTP_FEATURE_NOT_SUPPORTED);
+		}
+		
+		if (SkipTestCaseHandler.isTestCaseInSkippedList(testCaseName)) {
+			throw new SkipException(GlobalConstants.KNOWN_ISSUES);
 		}
 		return testCaseName;
 	}
