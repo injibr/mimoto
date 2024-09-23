@@ -7,10 +7,14 @@ import io.mosip.mimoto.core.http.ResponseWrapper;
 import io.mosip.mimoto.exception.ExceptionUtils;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -62,13 +66,13 @@ public class Utilities {
      * The get reg issuers config json.
      */
     @Value("${mosip.openid.issuers}")
-    private String getIssuersConfigJson;
+    private String issuersConfigPath;
 
     @Value("${mosip.openid.verifiers}")
-    private String trustedVerifiers;
+    private String trustedVerifiersPath;
 
     @Value("${mosip.openid.htmlTemplate}")
-    private String getCredentialSupportedHtml;
+    private String credentialTemplatePath;
 
     private String issuersConfigJsonString = null;
 
@@ -76,15 +80,21 @@ public class Utilities {
 
     private String credentialTemplateHtmlString = null;
 
-    //    uncomment for running mimoto Locally to populate the issuers json
-//    public Utilities(@Value("classpath:mimoto-issuers-config.json") Resource resource,
-//                     @Value("classpath:mimoto-trusted-verifiers.json") Resource trustedVerifiersResource,
-//                     @Value("classpath:/templates/credential-template.html") Resource credentialTemplateResource) throws IOException{
-//
-//        issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
-//        trustedVerifiersJsonString = (Files.readString(trustedVerifiersResource.getFile().toPath()));
-//        credentialTemplateHtmlString = (Files.readString(credentialTemplateResource.getFile().toPath()));
-//    }
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
+    @PostConstruct
+    public void setUp() throws IOException {
+        if(activeProfile.equals("local")) {
+            Resource resource = new ClassPathResource(issuersConfigPath);
+            Resource trustedVerifiersResource = new ClassPathResource(trustedVerifiersPath);
+            Resource credentialTemplateResource = new ClassPathResource("templates/"+ credentialTemplatePath);
+
+            trustedVerifiersJsonString = (Files.readString(trustedVerifiersResource.getFile().toPath()));
+            issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
+            credentialTemplateHtmlString = (Files.readString(credentialTemplateResource.getFile().toPath()));
+        }
+    }
 
     public static String encodeToString(BufferedImage image, String type) {
         String imageString = null;
@@ -150,14 +160,16 @@ public class Utilities {
     /**
      * Gets the json.
      *
-     * @param configServerFileStorageURL the config server file storage URL
-     * @param uri                        the uri
+     * @param configString the stringified config
+     * @param resourcePath path of the resource
      * @return the json
      */
-    public String getJson(String configServerFileStorageURL, String uri) {
-        String json = null;
+    public String getJson(String configString, String resourcePath) {
+        String json = configString;
         try {
-            json = restApiClient.getApi(URI.create(configServerFileStorageURL + uri), String.class);
+            if(StringUtils.isEmpty(json)){
+                json = restApiClient.getApi(URI.create(configServerFileStorageURL + resourcePath), String.class);
+            }
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e));
         }
@@ -165,16 +177,13 @@ public class Utilities {
     }
 
     public String getIssuersConfigJsonValue() {
-        return  (issuersConfigJsonString != null && !issuersConfigJsonString.isEmpty()) ?
-                issuersConfigJsonString : getJson(configServerFileStorageURL, getIssuersConfigJson);
+        return getJson(issuersConfigJsonString, issuersConfigPath);
     }
     public String getTrustedVerifiersJsonValue() {
-        return  (trustedVerifiersJsonString != null && !trustedVerifiersJsonString.isEmpty()) ?
-                trustedVerifiersJsonString : getJson(configServerFileStorageURL, trustedVerifiers);
+        return getJson(trustedVerifiersJsonString, trustedVerifiersPath);
     }
     public String getCredentialSupportedTemplateString() {
-        return (credentialTemplateHtmlString != null && !credentialTemplateHtmlString.isEmpty()) ?
-                credentialTemplateHtmlString : getJson(configServerFileStorageURL, getCredentialSupportedHtml);
+        return getJson(credentialTemplateHtmlString, credentialTemplatePath);
     }
     public static ResponseWrapper<Object> handleExceptionWithErrorCode(Exception exception) {
         String errorMessage = exception.getMessage();
