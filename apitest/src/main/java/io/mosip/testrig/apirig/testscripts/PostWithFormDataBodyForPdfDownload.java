@@ -81,7 +81,7 @@ public class PostWithFormDataBodyForPdfDownload extends AdminTestUtil implements
 	@Test(dataProvider = "testcaselist")
 	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {		
 		testCaseName = testCaseDTO.getTestCaseName();
-		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.isTestCaseValidForTheExecution(testCaseDTO);
 		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(GlobalConstants.TARGET_ENV_HEALTH_CHECK_FAILED + HealthChecker.healthCheckFailureMapS);

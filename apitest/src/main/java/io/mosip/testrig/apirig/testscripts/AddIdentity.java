@@ -98,7 +98,7 @@ public class AddIdentity extends AdminTestUtil implements ITest {
 								new KernelAuthentication().getTokenByRole(testCaseDTO.getRole())).asString(),
 						"response.uin");
 
-		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.isTestCaseValidForTheExecution(testCaseDTO);
 		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 
 		DateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss");

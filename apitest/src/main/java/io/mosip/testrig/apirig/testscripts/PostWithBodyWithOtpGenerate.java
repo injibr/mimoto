@@ -92,7 +92,7 @@ public class PostWithBodyWithOtpGenerate extends AdminTestUtil implements ITest 
 			}
 		}
 
-		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.isTestCaseValidForTheExecution(testCaseDTO);
 		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 		auditLogCheck = testCaseDTO.isAuditLogCheck();
 		String tempUrl = ConfigManager.getEsignetBaseUrl();

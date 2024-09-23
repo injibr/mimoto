@@ -78,7 +78,7 @@ public class DeleteWithParam extends AdminTestUtil implements ITest {
 	@Test(dataProvider = "testcaselist")
 	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {
 		testCaseName = testCaseDTO.getTestCaseName();
-		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.isTestCaseValidForTheExecution(testCaseDTO);
 		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(
