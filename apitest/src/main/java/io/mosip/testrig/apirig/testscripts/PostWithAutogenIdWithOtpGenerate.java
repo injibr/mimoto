@@ -96,7 +96,7 @@ public class PostWithAutogenIdWithOtpGenerate extends AdminTestUtil implements I
 				throw new SkipException(GlobalConstants.VID_FEATURE_NOT_SUPPORTED);
 			}
 		}
-		testCaseName = MimotoUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = MimotoUtil.isTestCaseValidForTheExecution(testCaseDTO);
 		testCaseDTO = MimotoUtil.changeContextURLByFlag(testCaseDTO);
 		JSONObject req = new JSONObject(testCaseDTO.getInput());
 
