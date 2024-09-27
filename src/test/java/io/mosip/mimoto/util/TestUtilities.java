@@ -262,7 +262,8 @@ public class TestUtilities {
     public static VerifiersDTO getTrustedVerifiers() {
         VerifierDTO verifierDTO = VerifierDTO.builder()
                 .clientId("test-clientId")
-                .redirectUri(Collections.singletonList("https://test-redirectUri")).build();
+                .redirectUri(Collections.singletonList("https://test-redirectUri"))
+                .responseUri(Collections.singletonList("https://test-responseUri")).build();
 
         return VerifiersDTO.builder()
                 .verifiers(Collections.singletonList(verifierDTO)).build();
