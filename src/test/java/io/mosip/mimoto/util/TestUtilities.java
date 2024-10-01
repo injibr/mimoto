@@ -68,7 +68,7 @@ public class TestUtilities {
         issuer.setCredential_issuer(issuerName + "id");
         issuer.setDisplay(Collections.singletonList(display));
         issuer.setClient_id("123");
-        if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
+        if (issuerName.equals("Issuer1")) issuer.setWellknown_endpoint("/well-known-proxy");
         else {
             issuer.setRedirect_uri(null);
             issuer.setToken_endpoint(null);
@@ -90,7 +90,7 @@ public class TestUtilities {
         issuer.setDisplay(Collections.singletonList(display));
         issuer.setClient_id("123");
         issuer.setEnabled("true");
-        if (issuerName.equals("Issuer1")) issuer.setWellKnownEndpoint("/.well-known");
+        if (issuerName.equals("Issuer1")) issuer.setWellknown_endpoint("/well-known-proxy");
         else {
             if (!nullFields.contains("redirect_uri"))
                 issuer.setRedirect_uri("/redirection");
@@ -217,7 +217,7 @@ public class TestUtilities {
     public static VerifiersDTO getTrustedVerifiers() {
         VerifierDTO verifierDTO = VerifierDTO.builder()
                 .clientId("test-clientId")
-                .redirectUri(Collections.singletonList("https://test-redirectUri")).build();
+                .redirectUris(Collections.singletonList("https://test-redirectUri")).build();
 
         return VerifiersDTO.builder()
                 .verifiers(Collections.singletonList(verifierDTO)).build();
