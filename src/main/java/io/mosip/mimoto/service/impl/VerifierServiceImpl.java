@@ -42,6 +42,14 @@ public class VerifierServiceImpl implements VerifierService {
 
     private final Logger logger = LoggerFactory.getLogger(VerifierServiceImpl.class);
 
+    public VerifiersDTO getTrustedVerifiers() throws ApiNotAccessibleException, JsonProcessingException {
+        String trustedVerifiersJsonValue = utilities.getTrustedVerifiersJsonValue();
+        if (trustedVerifiersJsonValue == null) {
+            throw new ApiNotAccessibleException();
+        }
+        return objectMapper.readValue(trustedVerifiersJsonValue, VerifiersDTO.class);
+    }
+
     public Optional<VerifierDTO> getVerifierByClientId(String clientId) throws ApiNotAccessibleException, JsonProcessingException {
         String trustedVerifiersJsonValue = utilities.getTrustedVerifiersJsonValue();
         if (trustedVerifiersJsonValue == null) {
@@ -50,12 +58,13 @@ public class VerifierServiceImpl implements VerifierService {
         VerifiersDTO verifiersDTO = objectMapper.readValue(trustedVerifiersJsonValue, VerifiersDTO.class);
         return verifiersDTO.getVerifiers().stream().filter(verifier -> verifier.getClientId().equals(clientId)).findFirst();
     }
+
     @Override
     public void validateVerifier(String clientId, String redirectUri) throws ApiNotAccessibleException, JsonProcessingException {
         logger.info("Started the presentation Validation");
         getVerifierByClientId(clientId).ifPresentOrElse(
             (verifierDTO) -> {
-                boolean isValidVerifier = verifierDTO.getRedirectUri().stream().anyMatch(registeredRedirectUri ->
+                boolean isValidVerifier = verifierDTO.getRedirectUris().stream().anyMatch(registeredRedirectUri ->
                         urlValidator.isValid(registeredRedirectUri) &&
                         urlValidator.isValid(redirectUri) &&
                         pathMatcher.match(registeredRedirectUri, redirectUri));
