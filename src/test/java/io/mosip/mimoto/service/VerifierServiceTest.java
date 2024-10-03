@@ -48,7 +48,7 @@ public class VerifierServiceTest {
         VerifierDTO verifierDTO = VerifierDTO.builder()
                 .clientId("test-clientId")
                 .redirectUris(Collections.singletonList("https://test-redirectUri"))
-                .responseUri(Collections.singletonList("https://test-responseUri")).build();
+                .responseUris(Collections.singletonList("https://test-responseUri")).build();
         VerifiersDTO expectedTrustedVerifiers = VerifiersDTO.builder()
                 .verifiers(Collections.singletonList(verifierDTO)).build();
 

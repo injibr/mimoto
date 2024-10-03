@@ -40,7 +40,7 @@ public class VerifiersControllerTest {
         VerifierDTO verifierDTO = VerifierDTO.builder()
                 .clientId("test-clientId")
                 .redirectUris(Collections.singletonList("https://test-redirectUri"))
-                .responseUri(Collections.singletonList("https://test-responseUri")).build();
+                .responseUris(Collections.singletonList("https://test-responseUri")).build();
 
         VerifiersDTO trustedVerifiers = VerifiersDTO.builder()
                 .verifiers(Collections.singletonList(verifierDTO)).build();
@@ -55,7 +55,7 @@ public class VerifiersControllerTest {
                         Matchers.allOf(
                                 Matchers.hasKey("client_id"),
                                 Matchers.hasKey("redirect_uris"),
-                                Matchers.hasKey("response_uri")
+                                Matchers.hasKey("response_uris")
                         )
                 )));
     }

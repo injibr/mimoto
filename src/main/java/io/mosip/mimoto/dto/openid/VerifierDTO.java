@@ -19,6 +19,6 @@ public class VerifierDTO {
     @JsonProperty("redirect_uris")
     List<String> redirectUris;
 
-    @JsonProperty("response_uri")
-    List<String> responseUri;
+    @JsonProperty("response_uris")
+    List<String> responseUris;
 }
