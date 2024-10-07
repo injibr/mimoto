@@ -156,7 +156,7 @@ public class SimplePostForAutoGenId extends AdminTestUtil implements ITest {
 				}
 				
 				if (inputJson.contains("$GETCLIENTIDFROMMIMOTOACTUATOR$")) {
-					String clientIdSection = MimotoUtil.getClientIdSection(ConfigManager.getEsignetBaseUrl());
+					String clientIdSection = MimotoUtil.getClientIdSection(tempUrl);
 					inputJson = replaceKeywordWithValue(inputJson, "$GETCLIENTIDFROMMIMOTOACTUATOR$",
 							getValueFromMimotoActuator("overrides", clientIdSection));
 				}
