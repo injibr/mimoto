@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.IssuersDTO;
 import io.mosip.mimoto.dto.mimoto.CredentialIssuerWellKnownResponse;
@@ -15,7 +14,6 @@ import io.mosip.mimoto.exception.InvalidIssuerIdException;
 import io.mosip.mimoto.exception.InvalidWellknownResponseException;
 import io.mosip.mimoto.service.IssuersService;
 import io.mosip.mimoto.util.CredentialIssuerWellknownResponseValidator;
-import io.mosip.mimoto.util.LoggerUtil;
 import io.mosip.mimoto.util.RestApiClient;
 import io.mosip.mimoto.util.Utilities;
 import jakarta.validation.Validator;
@@ -31,7 +29,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class IssuersServiceImpl implements IssuersService {
-    private final Logger logger = LoggerUtil.getLogger(IssuersServiceImpl.class);
 
     @Autowired
     private Utilities utilities;

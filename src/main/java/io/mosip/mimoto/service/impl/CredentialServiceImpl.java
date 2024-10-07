@@ -32,6 +32,7 @@ import io.mosip.pixelpass.PixelPass;
 import io.mosip.vercred.CredentialsVerifier;
 import io.mosip.vercred.exception.*;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.jetbrains.annotations.NotNull;
@@ -54,10 +55,9 @@ import java.util.*;
 
 import static io.mosip.mimoto.exception.ErrorConstants.*;
 
+@Slf4j
 @Service
 public class CredentialServiceImpl implements CredentialService {
-
-    private final Logger logger = LoggerUtil.getLogger(CredentialServiceImpl.class);
 
     @Autowired
     private Utilities utilities;
@@ -136,7 +136,7 @@ public class CredentialServiceImpl implements CredentialService {
     public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws InvalidCredentialResourceException {
         VCCredentialResponse vcCredentialResponse = restApiClient.postApi(credentialEndpoint, MediaType.APPLICATION_JSON,
                 vcCredentialRequest, VCCredentialResponse.class, accessToken);
-        logger.debug("VC Credential Response is -> " + vcCredentialResponse);
+        log.debug("VC Credential Response is -> " + vcCredentialResponse);
         if (vcCredentialResponse == null) throw new RuntimeException("VC Credential Issue API not accessible");
         return vcCredentialResponse;
     }
