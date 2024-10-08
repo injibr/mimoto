@@ -100,6 +100,13 @@
 			<class name="io.mosip.testrig.apirig.testscripts.SimplePostForAutoGenId" />
 		</classes>
 	</test>
+	<test name="DownloadIssuerCredential">
+		<parameter name="ymlFile"
+			value="mimoto/DownloadIssuerCredential/DownloadIssuerCredential.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.testscripts.PostWithFormDataBodyForPdfDownload" />
+		</classes>
+	</test>
 
 	<test name="AuthLock">
 		<parameter name="ymlFile"
@@ -178,13 +185,6 @@
 			value="mimoto/GetIssuerWellKnown/GetIssuerWellKnown.yml" />
 		<classes>
 			<class name="io.mosip.testrig.apirig.testscripts.GetWithParam" />
-		</classes>
-	</test>
-	<test name="DownloadIssuerCredential">
-		<parameter name="ymlFile"
-			value="mimoto/DownloadIssuerCredential/DownloadIssuerCredential.yml" />
-		<classes>
-			<class name="io.mosip.testrig.apirig.testscripts.PostWithFormDataBodyForPdfDownload" />
 		</classes>
 	</test>
 	
