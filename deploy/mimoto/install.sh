@@ -18,13 +18,12 @@ function installing_mimoto() {
   helm repo add mosip https://mosip.github.io/mosip-helm
   helm repo update
 
-  echo Copy configmaps
-  sed -i 's/\r$//' copy_cm.sh
-  ./copy_cm.sh
+  COPY_UTIL=../copy_cm_func.sh
+  $COPY_UTIL configmap global default $NS
+  $COPY_UTIL configmap artifactory-share artifactory $NS
+  $COPY_UTIL configmap inji-config-server-share config-server $NS
 
-  echo Copy secrets
-  sed -i 's/\r$//' copy_secrets.sh
-  ./copy_secrets.sh
+  $COPY_UTIL secret keycloak-client-secrets keycloak $NS
 
   echo "Do you have public domain & valid SSL? (Y/n) "
   echo "Y: if you have public domain & valid ssl certificate"
