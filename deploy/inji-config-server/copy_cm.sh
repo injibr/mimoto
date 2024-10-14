@@ -2,7 +2,7 @@
 # Copy configmaps from other namespaces
 
 function copying_cm() {
-  COPY_UTIL=./copy_cm_func.sh
+  COPY_UTIL=../copy_cm_func.sh
   DST_NS=config-server # DST_NS: Destination namespace
   $COPY_UTIL configmap global default $DST_NS
   return 0
