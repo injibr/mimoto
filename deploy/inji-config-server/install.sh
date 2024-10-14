@@ -23,9 +23,11 @@ CHART_VERSION=0.0.1-develop
     kubectl label ns $NS istio-injection=enabled --overwrite
     helm repo update
 
+    echo Copy configmaps
     COPY_UTIL=../copy_cm_func.sh
     $COPY_UTIL configmap global default $NS
 
+    echo Copy secrets
     $COPY_UTIL secret db-common-secrets postgres $NS
     $COPY_UTIL secret conf-secrets-various conf-secrets $NS
 

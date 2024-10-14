@@ -17,12 +17,14 @@ function installing_apitestrig() {
   kubectl label ns $NS istio-injection=disabled --overwrite
   helm repo update
 
+  echo Copy Configmaps
   COPY_UTIL=../copy_cm_func.sh
   $COPY_UTIL configmap global default $NS
   $COPY_UTIL configmap keycloak-host keycloak $NS
   $COPY_UTIL configmap artifactory-share artifactory $NS
   $COPY_UTIL configmap config-server-share config-server $NS
 
+  echo echo Copy Secrtes
   $COPY_UTIL secret keycloak-client-secrets keycloak $NS
   $COPY_UTIL secret s3 s3 $NS
   $COPY_UTIL secret postgres-postgresql postgres $NS
