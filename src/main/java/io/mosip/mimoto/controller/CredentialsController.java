@@ -52,12 +52,13 @@ public class CredentialsController {
         try {
             String issuerId = params.get("issuer");
             String credentialType = params.get("credential");
+            String locale = params.get("locale");
 
             logger.info("Initiated Token Call");
             TokenResponseDTO response = credentialService.getTokenResponse(params, issuerId);
 
             logger.info("Initiated Download Credential Call");
-            ByteArrayInputStream inputStream = credentialService.downloadCredentialAsPDF(issuerId, credentialType, response);
+            ByteArrayInputStream inputStream = credentialService.downloadCredentialAsPDF(issuerId, credentialType, response, locale);
 
             return ResponseEntity
                     .ok()

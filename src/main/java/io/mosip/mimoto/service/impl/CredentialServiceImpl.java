@@ -29,6 +29,7 @@ import io.mosip.mimoto.util.RestApiClient;
 import io.mosip.mimoto.util.Utilities;
 import io.mosip.pixelpass.PixelPass;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -112,14 +113,14 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @Override
-    public ByteArrayInputStream downloadCredentialAsPDF(String issuerId, String credentialType, TokenResponseDTO response) throws Exception {
+    public ByteArrayInputStream downloadCredentialAsPDF(String issuerId, String credentialType, TokenResponseDTO response, String locale) throws Exception {
         IssuerDTO issuerConfig = issuerService.getIssuerConfig(issuerId);
         CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuerService.getIssuerWellknown(issuerId);
         CredentialsSupportedResponse credentialsSupportedResponse = issuerService.getIssuerWellknownForCredentialType(issuerId, credentialType);
         VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerConfig, credentialIssuerWellKnownResponse,  credentialsSupportedResponse, response.getAccess_token());
         VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponse.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
         String dataShareUrl = QRCodeType.OnlineSharing.equals(issuerConfig.getQr_code_type()) ? dataShareService.storeDataInDataShare(objectMapper.writeValueAsString(vcCredentialResponse)) : "";
-        return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponse, dataShareUrl);
+        return generatePdfForVerifiableCredentials(issuerId, credentialType, vcCredentialResponse, issuerConfig, credentialsSupportedResponse, dataShareUrl, locale);
     }
 
     public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws InvalidCredentialResourceException {
@@ -145,20 +146,24 @@ public class CredentialServiceImpl implements CredentialService {
                 .build();
     }
 
-    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl) throws Exception {
-        LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponse);
-        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse, issuerDTO, dataShareUrl);
-        return renderVCInCredentialTemplate(data);
+    public ByteArrayInputStream generatePdfForVerifiableCredentials(String issuerId, String credentialType, VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl, String locale) throws Exception {
+        LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponse, locale);
+        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse, issuerDTO, dataShareUrl, locale);
+        return renderVCInCredentialTemplate(data, issuerId, credentialType);
     }
 
     @NotNull
-    private static LinkedHashMap<String, Object> loadDisplayPropertiesFromWellknown(VCCredentialResponse vcCredentialResponse, CredentialsSupportedResponse credentialsSupportedResponse) {
+    private static LinkedHashMap<String, Object> loadDisplayPropertiesFromWellknown(VCCredentialResponse vcCredentialResponse, CredentialsSupportedResponse credentialsSupportedResponse, String locale) {
         LinkedHashMap<String,Object> displayProperties = new LinkedHashMap<>();
         Map<String, Object> credentialProperties = vcCredentialResponse.getCredential().getCredentialSubject();
 
         LinkedHashMap<String, String> vcPropertiesFromWellKnown = new LinkedHashMap<>();
         Map<String, CredentialDisplayResponseDto> credentialSubject = credentialsSupportedResponse.getCredentialDefinition().getCredentialSubject();
-        credentialSubject.keySet().forEach(VCProperty -> vcPropertiesFromWellKnown.put(VCProperty, credentialSubject.get(VCProperty).getDisplay().get(0).getName()));
+        credentialSubject.keySet().forEach(VCProperty -> {
+            Optional<@Valid CredentialIssuerDisplayResponse> filteredResponse = credentialSubject.get(VCProperty).getDisplay().stream().filter(obj -> obj.getLocale().equals(locale)).findFirst();
+            String filteredValue = filteredResponse.isPresent() ? filteredResponse.get().getName() : "" ;
+            vcPropertiesFromWellKnown.put(VCProperty, filteredValue);
+        });
 
         List<String> orderProperty = credentialsSupportedResponse.getOrder();
 
@@ -172,7 +177,7 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
 
-    private Map<String, Object> getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponse credentialsSupportedResponse, VCCredentialResponse  vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl) throws IOException, WriterException {
+    private Map<String, Object> getPdfResourceFromVcProperties(LinkedHashMap<String, Object> displayProperties, CredentialsSupportedResponse credentialsSupportedResponse, VCCredentialResponse  vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl, String locale) throws IOException, WriterException {
         Map<String, Object> data = new HashMap<>();
         LinkedHashMap<String, Object> rowProperties = new LinkedHashMap<>();
         String backgroundColor = credentialsSupportedResponse.getDisplay().get(0).getBackgroundColor();
@@ -190,7 +195,8 @@ public class CredentialServiceImpl implements CredentialService {
                         if( ((List<?>) entry.getValue()).get(0) instanceof String) {
                             value = ((List<String>) entry.getValue()).stream().reduce((field1, field2) -> field1 + ", " + field2 ).get();
                         } else {
-                            value = (String) ((Map<?, ?>) ((List<?>) entry.getValue()).get(0)).get("value");
+                            Optional<Map<?, ?>> valueMap = ((List<Map<?, ?>>) entry.getValue()).stream().filter(obj -> obj.get("language").equals(locale)).findFirst();
+                            value = valueMap.isPresent() ? valueMap.get().get("value").toString() : "" ;
                         }
                         rowProperties.put(entry.getKey(), value);
                     } else {
@@ -212,8 +218,8 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @NotNull
-    private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data) throws IOException {
-        String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
+    private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data, String issuerId, String credentialType) throws IOException {
+        String  credentialTemplate = utilities.getCredentialSupportedTemplateString(issuerId, credentialType);
 
         Properties props = new Properties();
         props.setProperty("resource.loader", "class");
