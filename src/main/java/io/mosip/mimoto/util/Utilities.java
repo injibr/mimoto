@@ -68,14 +68,11 @@ public class Utilities {
     @Value("${mosip.openid.verifiers}")
     private String trustedVerifiers;
 
-    @Value("${mosip.openid.htmlTemplate}")
-    private String getCredentialSupportedHtml;
-
     private String issuersConfigJsonString = null;
 
     private String trustedVerifiersJsonString = null;
 
-    private String credentialTemplateHtmlString = null;
+
 
 //    uncomment for running mimoto Locally to populate the issuers json
 //    public Utilities(@Value("classpath:mimoto-issuers-config.json") Resource resource,
@@ -173,9 +170,8 @@ public class Utilities {
         return  (trustedVerifiersJsonString != null && !trustedVerifiersJsonString.isEmpty()) ?
                 trustedVerifiersJsonString : getJson(configServerFileStorageURL, trustedVerifiers);
     }
-    public String getCredentialSupportedTemplateString() {
-        return (credentialTemplateHtmlString != null && !credentialTemplateHtmlString.isEmpty()) ?
-                credentialTemplateHtmlString : getJson(configServerFileStorageURL, getCredentialSupportedHtml);
+    public String getCredentialSupportedTemplateString(String issuerId, String credentialType) {
+        return getJson(configServerFileStorageURL, String.format("%s-%s-template.html",issuerId, credentialType));
     }
     public static ResponseWrapper<Object> handleExceptionWithErrorCode(Exception exception) {
         String errorMessage = exception.getMessage();
