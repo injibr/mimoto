@@ -8,6 +8,7 @@ import io.mosip.mimoto.exception.ExceptionUtils;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
 import io.mosip.mimoto.service.impl.CredentialShareServiceImpl;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,11 +69,15 @@ public class Utilities {
     @Value("${mosip.openid.verifiers}")
     private String trustedVerifiers;
 
+    @Value("${mosip.openid.htmlTemplate}")
+    private String getCredentialSupportedHtml;
+
+
     private String issuersConfigJsonString = null;
 
     private String trustedVerifiersJsonString = null;
 
-
+    private String credentialTemplateHtmlString = null;
 
 //    uncomment for running mimoto Locally to populate the issuers json
 //    public Utilities(@Value("classpath:mimoto-issuers-config.json") Resource resource,
