@@ -96,7 +96,7 @@
       "authorization_audience": "https://esignet-insurance.dev1.mosip.net/v1/esignet/oauth/v2/token",
       "proxy_token_endpoint": "https://esignet-insurance.dev1.mosip.net/v1/esignet/oauth/v2/token",
       "client_alias": "esignet-sunbird-partner",
-      "qr_code_type": "OnlineSharing",
+      "qr_code_type": "EmbeddedVC",
       "enabled": "true",
       "wellknown_endpoint": "https://injicertify-insurance.dev1.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer"
     },
@@ -124,6 +124,41 @@
       "qr_code_type": "OnlineSharing",
       "enabled": "true",
       "wellknown_endpoint": "https://injicertify-mock.dev1.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer"
+    },
+    {
+      "credential_issuer": "CAR",
+      "protocol": "OpenId4VCI",
+      "display": [
+        {
+          "name": "Land Authority",
+          "logo": {
+            "url": "https://vharsh.github.io/demo/CAR.png",
+            "alt_text": "car-logo"
+          },
+          "title": "Land Authority",
+          "description": "Download Land Authority Issued Credential",
+          "language": "en"
+        },
+        {
+          "name": "Autoridade de Terras",
+          "logo": {
+            "url": "https://vharsh.github.io/demo/CAR.png",
+            "alt_text": "car-logo"
+          },
+          "title": "Autoridade de Terras",
+          "description": "Download Land Authority Issued Credential",
+          "language": "pt"
+        }
+      ],
+      "client_id": "mpartner-cp1-mimoto-mock-oidc",
+      "wellknown_endpoint": "https://injicertify-cp1.dev1.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
+      "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
+      "authorization_audience": "https://esignet-mock.dev1.mosip.net/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://injiweb-cp1.dev1.mosip.net/v1/mimoto/get-token/CAR",
+      "proxy_token_endpoint": "https://esignet-mock.dev1.mosip.net/v1/esignet/oauth/v2/token",
+      "client_alias": "mpartner-cp1-testing",
+      "qr_code_type": "OnlineSharing",
+      "enabled": "true"
     }
   ]
 }
