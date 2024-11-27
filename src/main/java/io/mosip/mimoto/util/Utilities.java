@@ -176,7 +176,6 @@ public class Utilities {
                 trustedVerifiersJsonString : getJson(configServerFileStorageURL, trustedVerifiers);
     }
     public String getCredentialSupportedTemplateString(String issuerId, String credentialType) {
-        credentialType = "lifeinsurancecredential";
         String specificCredentialPDFTemplate = getJson(configServerFileStorageURL, String.format("%s-%s-template.html", issuerId.toLowerCase(), credentialType.toLowerCase()));
         return !StringUtils.isEmpty(specificCredentialPDFTemplate)? specificCredentialPDFTemplate : getJson(credentialTemplateHtmlString, getCredentialSupportedHtml);
     }
