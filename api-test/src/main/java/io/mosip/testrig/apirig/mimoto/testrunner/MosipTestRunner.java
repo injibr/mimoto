@@ -94,6 +94,7 @@ public class MosipTestRunner {
 			KeycloakUserManager.removeUser();
 			KeycloakUserManager.createUsers();
 			KeycloakUserManager.closeKeycloakInstance();
+			AdminTestUtil.getRequiredField();
 
 			// Generate device certificates to be consumed by Mock-MDS
 			PartnerRegistration.deleteCertificates();
