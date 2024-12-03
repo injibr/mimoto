@@ -1,14 +1,24 @@
 package io.mosip.testrig.apirig.mimoto.utils;
 
+import java.io.StringWriter;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.util.HashMap;
+
 import org.apache.log4j.Logger;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.json.JSONObject;
 import org.testng.SkipException;
 
+import io.mosip.testrig.apirig.dataprovider.BiometricDataProvider;
 import io.mosip.testrig.apirig.dto.TestCaseDTO;
 import io.mosip.testrig.apirig.mimoto.testrunner.MosipTestRunner;
 import io.mosip.testrig.apirig.testrunner.OTPListener;
 import io.mosip.testrig.apirig.utils.AdminTestUtil;
+import io.mosip.testrig.apirig.utils.EncryptionDecrptionUtil;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
+import io.mosip.testrig.apirig.utils.KeycloakUserManager;
 import io.mosip.testrig.apirig.utils.SkipTestCaseHandler;
 
 public class MimotoUtil extends AdminTestUtil {
@@ -129,5 +139,90 @@ public class MimotoUtil extends AdminTestUtil {
 		}
 
 		return "mimoto.oidc.partner.clientid";
+	}
+	
+	public static String inputstringKeyWordHandeler(String jsonString, String testCaseName) {
+		if (jsonString.contains(GlobalConstants.TIMESTAMP)) {
+			jsonString = replaceKeywordValue(jsonString, GlobalConstants.TIMESTAMP, generateCurrentUTCTimeStamp());
+		}
+		
+		if (jsonString.contains("$POLICYNUMBERFORSUNBIRDRC$")) {
+			jsonString = replaceKeywordValue(jsonString, "$POLICYNUMBERFORSUNBIRDRC$",
+					properties.getProperty("policyNumberForSunBirdRC"));
+		}
+		
+		if (jsonString.contains("$FULLNAMEFORSUNBIRDRC$")) {
+			jsonString = replaceKeywordValue(jsonString, "$FULLNAMEFORSUNBIRDRC$", fullNameForSunBirdRC);
+		}
+		
+		if (jsonString.contains("$DOBFORSUNBIRDRC$")) {
+			jsonString = replaceKeywordValue(jsonString, "$DOBFORSUNBIRDRC$", dobForSunBirdRC);
+		}
+		
+		if (jsonString.contains("$CHALLENGEVALUEFORSUNBIRDC$")) {
+
+			HashMap<String, String> mapForChallenge = new HashMap<String, String>();
+			mapForChallenge.put(GlobalConstants.FULLNAME, fullNameForSunBirdRC);
+			mapForChallenge.put(GlobalConstants.DOB, dobForSunBirdRC);
+
+			String challenge = gson.toJson(mapForChallenge);
+
+			String challengeValue = BiometricDataProvider.toBase64Url(challenge);
+
+			jsonString = replaceKeywordValue(jsonString, "$CHALLENGEVALUEFORSUNBIRDC$", challengeValue);
+		}
+		
+		if (jsonString.contains("$PUBLICKEYFORBINDING$")) {
+			jsonString = replaceKeywordValue(jsonString, "$PUBLICKEYFORBINDING$",
+					generatePublicKeyForMimoto());
+		}
+		
+		if (jsonString.contains("$INJIREDIRECTURI$")) {
+			jsonString = replaceKeywordValue(jsonString, "$INJIREDIRECTURI$",
+					ApplnURI.replace(GlobalConstants.API_INTERNAL, "injiweb") + "/redirect");
+		}
+		
+		
+		return jsonString;
+		
+	}
+	
+	public static String replaceKeywordValue(String jsonString, String keyword, String value) {
+		if (value != null && !value.isEmpty())
+			return jsonString.replace(keyword, value);
+		else {
+			if (keyword.contains("$ID:"))
+				throw new SkipException("Marking testcase as skipped as required field is empty " + keyword
+						+ " please check the results of testcase: " + getTestCaseIDFromKeyword(keyword));
+			else
+				throw new SkipException("Marking testcase as skipped as required field is empty " + keyword);
+
+		}
+	}
+	
+	public static String generatePublicKeyForMimoto() {
+
+		String vcString = "";
+		try {
+			KeyPairGenerator keyPairGenerator = getKeyPairGeneratorInstance();
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+			PublicKey publicKey = keyPair.getPublic();
+			StringWriter stringWriter = new StringWriter();
+			try (JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)) {
+				pemWriter.writeObject(publicKey);
+				pemWriter.flush();
+				vcString = stringWriter.toString();
+				if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+					vcString = vcString.replaceAll("\r\n", "\\\\n");
+				} else {
+					vcString = vcString.replaceAll("\n", "\\\\n");
+				}
+			} catch (Exception e) {
+				throw e;
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return vcString;
 	}
 }
