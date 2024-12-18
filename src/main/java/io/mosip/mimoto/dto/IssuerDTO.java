@@ -1,9 +1,7 @@
 package io.mosip.mimoto.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import io.mosip.mimoto.model.QRCodeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -21,7 +19,7 @@ public class IssuerDTO {
     @Expose
     @NotBlank
     @Schema(description = "Unique Identifier of the Issuer")
-    String credential_issuer;
+    String issuer_id;
     @Expose
     @NotBlank
     @Schema(description = "protocol of the download flow", allowableValues = {"OTP", "OpenId4VCI"})
@@ -68,4 +66,9 @@ public class IssuerDTO {
     @NotBlank
     @Schema(description = "Toggler to Enable / Disable the Issuer", defaultValue = "false")
     String enabled;
+    @Expose
+    @NotBlank
+    @JsonInclude(NON_NULL)
+    @Schema(description = "Credential Issuer Host")
+    String credential_issuer;
 }

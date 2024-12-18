@@ -68,6 +68,7 @@ public class IssuersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
                         Matchers.allOf(
+                                Matchers.hasKey("issuer_id"),
                                 Matchers.hasKey("credential_issuer"),
                                 Matchers.hasKey("display"),
                                 Matchers.hasKey("client_id"),
@@ -86,6 +87,7 @@ public class IssuersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
                         Matchers.allOf(
+                                Matchers.hasKey("issuer_id"),
                                 Matchers.hasKey("credential_issuer"),
                                 Matchers.hasKey("display"),
                                 Matchers.hasKey("client_id"),
