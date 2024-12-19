@@ -69,6 +69,11 @@ public class IssuerDTO {
     @Expose
     @NotBlank
     @JsonInclude(NON_NULL)
-    @Schema(description = "Credential Issuer Host")
+    @Schema(description = "Unique Identifier of the Issuer")
     String credential_issuer;
+    @Expose
+    @NotBlank
+    @JsonInclude(NON_NULL)
+    @Schema(description = "Credential Issuer Host")
+    String credential_issuer_host;
 }

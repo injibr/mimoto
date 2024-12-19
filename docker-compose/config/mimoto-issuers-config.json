@@ -73,7 +73,8 @@
       "client_alias": "mpartner-default-test-mosipid",
       "qr_code_type": "OnlineSharing",
       "wellknown_endpoint": "https://injicertify-mosipid.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
-      "credential_issuer": "https://injicertify-mosipid.collab.mosip.net",
+      "credential_issuer": "Mosip",
+      "credential_issuer_host": "https://injicertify-mosipid.collab.mosip.net",
       "enabled": "true"
     },
     {
@@ -99,7 +100,8 @@
       "client_alias": "esignet-sunbird-partner",
       "qr_code_type": "OnlineSharing",
       "wellknown_endpoint": "https://injicertify-insurance.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
-      "credential_issuer": "https://injicertify-insurance.collab.mosip.net",
+      "credential_issuer": "StayProtected",
+      "credential_issuer_host": "https://injicertify-insurance.collab.mosip.net",
       "enabled": "true"
     },
     {
@@ -125,7 +127,8 @@
       "client_alias": "mpartner-mock-testing",
       "qr_code_type": "OnlineSharing",
       "wellknown_endpoint": "https://injicertify-mock.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
-      "credential_issuer": "https://injicertify-mock.collab.mosip.net",
+      "credential_issuer": "Mock",
+      "credential_issuer_host": "https://injicertify-mock.collab.mosip.net",
       "enabled": "true"
     }
   ]

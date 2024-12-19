@@ -79,7 +79,8 @@ public class IssuersControllerTest {
                                 Matchers.not(Matchers.hasKey("credential_endpoint")),
                                 Matchers.not(Matchers.hasKey("credential_audience")),
                                 Matchers.not(Matchers.hasKey("additional_headers")),
-                                Matchers.not(Matchers.hasKey("scopes_supported"))
+                                Matchers.not(Matchers.hasKey("scopes_supported")),
+                                Matchers.hasKey("credential_issuer_host")
                         )
                 )));
 
@@ -98,7 +99,8 @@ public class IssuersControllerTest {
                                 Matchers.not(Matchers.hasKey("credential_endpoint")),
                                 Matchers.not(Matchers.hasKey("credential_audience")),
                                 Matchers.not(Matchers.hasKey("additional_headers")),
-                                Matchers.not(Matchers.hasKey("scopes_supported"))
+                                Matchers.not(Matchers.hasKey("scopes_supported")),
+                                Matchers.hasKey("credential_issuer_host")
                         )
                 )));
 
