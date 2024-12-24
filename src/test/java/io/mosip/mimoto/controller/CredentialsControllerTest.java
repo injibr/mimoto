@@ -57,7 +57,8 @@ public class CredentialsControllerTest {
                                 new BasicNameValuePair("code_verifier", "test-code_verifier"),
                                 new BasicNameValuePair("issuer", issuer),
                                 new BasicNameValuePair("vcStorageExpiryLimitInTimes", "3"),
-                                new BasicNameValuePair("credential", credential)
+                                new BasicNameValuePair("credential", credential),
+                                new BasicNameValuePair("locale", locale)
                         )))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF))
@@ -69,7 +70,7 @@ public class CredentialsControllerTest {
 
     @Test
     public void throwExceptionWhenTokenIsNotFetched() throws Exception {
-
+        String locale="test-locale";
         String issuer = "test-issuer";
         String credential = "test-credential";
         Mockito.when(credentialService.getTokenResponse(Mockito.anyMap(), Mockito.eq(issuer))).thenThrow(ApiNotAccessibleException.class);
@@ -83,7 +84,8 @@ public class CredentialsControllerTest {
                                 new BasicNameValuePair("code_verifier", "test-code_verifier"),
                                 new BasicNameValuePair("issuer", issuer),
                                 new BasicNameValuePair("vcStorageExpiryLimitInTimes", "3"),
-                                new BasicNameValuePair("credential", credential)
+                                new BasicNameValuePair("credential", credential),
+                                new BasicNameValuePair("locale", locale)
                         )))))
                 .andExpect(status().isBadRequest())
                 .andReturn()
@@ -109,12 +111,12 @@ public class CredentialsControllerTest {
                                 new BasicNameValuePair("code_verifier", "test-code_verifier"),
                                 new BasicNameValuePair("issuer", issuer),
                                 new BasicNameValuePair("vcStorageExpiryLimitInTimes", "3"),
-                                new BasicNameValuePair("credential", credential)
+                                new BasicNameValuePair("credential", credential),
+                                new BasicNameValuePair("locale", locale)
                         )))))
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
     }
-
 }
