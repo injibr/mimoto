@@ -58,7 +58,6 @@ public class CredentialsController {
             String credentialType = params.get("credential");
             String credentialValidity = params.get("vcStorageExpiryLimitInTimes");
             String locale = params.get("locale");
-
             log.info("Initiated Token Call");
             TokenResponseDTO response = credentialService.getTokenResponse(params, issuerId);
 

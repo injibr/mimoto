@@ -182,11 +182,12 @@ public class Utilities {
     public String getTrustedVerifiersJsonValue() {
         return getJson(trustedVerifiersJsonString, trustedVerifiersPath);
     }
-    public String getCredentialSupportedTemplateString(String issuerId, String credentialType) {
+    public String getCredentialSupportedTemplateString() {
         if(activeProfile.equals("local")) {
             return credentialTemplateHtmlString;
         }
-        return getJson(configServerFileStorageURL, String.format("%s-%s-template.html", issuerId, credentialType));
+        return (credentialTemplateHtmlString != null && !credentialTemplateHtmlString.isEmpty()) ?
+                credentialTemplateHtmlString : getJson(configServerFileStorageURL,credentialTemplatePath );
     }
     public static String[] handleExceptionWithErrorCode(Exception exception) {
         String errorMessage = exception.getMessage();

@@ -130,7 +130,7 @@ public class CredentialServiceImpl implements CredentialService {
         boolean verificationStatus = issuerId.toLowerCase().contains("mock") || verifyCredential(vcCredentialResponse);
         if(verificationStatus) {
             String dataShareUrl =  QRCodeType.OnlineSharing.equals(issuerConfig.getQr_code_type()) ? dataShareService.storeDataInDataShare(objectMapper.writeValueAsString(vcCredentialResponse), credentialValidity) : "";
-            return generatePdfForVerifiableCredentials(issuerId, credentialType,vcCredentialResponse, issuerConfig, credentialsSupportedResponse, dataShareUrl, credentialValidity, locale);
+            return generatePdfForVerifiableCredentials(vcCredentialResponse, issuerConfig, credentialsSupportedResponse, dataShareUrl, credentialValidity, locale);
         }
         throw new VCVerificationException(SIGNATURE_VERIFICATION_EXCEPTION.getErrorCode(),
                 SIGNATURE_VERIFICATION_EXCEPTION.getErrorMessage());
@@ -158,10 +158,10 @@ public class CredentialServiceImpl implements CredentialService {
                 .build();
     }
 
-    public ByteArrayInputStream generatePdfForVerifiableCredentials(String issuerId, String credentialType, VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl, String credentialValidity, String locale) throws Exception {
+    public ByteArrayInputStream generatePdfForVerifiableCredentials(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl, String credentialValidity, String locale) throws Exception {
         LinkedHashMap<String, Object> displayProperties = loadDisplayPropertiesFromWellknown(vcCredentialResponse, credentialsSupportedResponse, locale);
         Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,  vcCredentialResponse, issuerDTO, dataShareUrl, credentialValidity, locale);
-        return renderVCInCredentialTemplate(data, issuerId, credentialType);
+        return renderVCInCredentialTemplate(data);
     }
 
     public Boolean verifyCredential(VCCredentialResponse vcCredentialResponse) throws VCVerificationException, JsonProcessingException {
@@ -242,8 +242,8 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @NotNull
-    private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data, String issuerId, String credentialType) throws IOException {
-        String  credentialTemplate = utilities.getCredentialSupportedTemplateString(issuerId, credentialType);
+    private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data) throws IOException {
+        String  credentialTemplate = utilities.getCredentialSupportedTemplateString();
         Properties props = new Properties();
         props.setProperty("resource.loader", "class");
         props.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
