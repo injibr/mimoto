@@ -17,11 +17,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Data
 public class IssuerDTO {
     @Expose
-    @NotBlank
+//    @NotBlank
     @Schema(description = "Unique Identifier of the Issuer")
     String issuer_id;
     @Expose
-    @NotBlank
+//    @NotBlank
     @Schema(description = "protocol of the download flow", allowableValues = {"OTP", "OpenId4VCI"})
     String protocol;
     @Expose
@@ -67,12 +67,12 @@ public class IssuerDTO {
     @Schema(description = "Toggler to Enable / Disable the Issuer", defaultValue = "false")
     String enabled;
     @Expose
-    @NotBlank
+//    @NotBlank
     @JsonInclude(NON_NULL)
     @Schema(description = "Unique Identifier of the Issuer")
     String credential_issuer;
     @Expose
-    @NotBlank
+//    @NotBlank
     @JsonInclude(NON_NULL)
     @Schema(description = "Credential Issuer Host")
     String credential_issuer_host;
