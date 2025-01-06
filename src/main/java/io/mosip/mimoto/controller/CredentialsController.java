@@ -53,6 +53,9 @@ public class CredentialsController {
     public ResponseEntity<?> downloadCredentialAsPDF(@RequestParam Map<String, String> params ) {
         ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
 
+        //TODO: remove this default value after the apitest is updated
+        params.putIfAbsent("vcStorageExpiryLimitInTimes", "-1");
+
         try {
             String issuerId = params.get("issuer");
             String credentialType = params.get("credential");

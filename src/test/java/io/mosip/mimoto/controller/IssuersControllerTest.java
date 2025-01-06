@@ -68,6 +68,7 @@ public class IssuersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
                         Matchers.allOf(
+                                Matchers.hasKey("issuer_id"),
                                 Matchers.hasKey("credential_issuer"),
                                 Matchers.hasKey("display"),
                                 Matchers.hasKey("client_id"),
@@ -78,7 +79,8 @@ public class IssuersControllerTest {
                                 Matchers.not(Matchers.hasKey("credential_endpoint")),
                                 Matchers.not(Matchers.hasKey("credential_audience")),
                                 Matchers.not(Matchers.hasKey("additional_headers")),
-                                Matchers.not(Matchers.hasKey("scopes_supported"))
+                                Matchers.not(Matchers.hasKey("scopes_supported")),
+                                Matchers.hasKey("credential_issuer_host")
                         )
                 )));
 
@@ -86,6 +88,7 @@ public class IssuersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.issuers", Matchers.everyItem(
                         Matchers.allOf(
+                                Matchers.hasKey("issuer_id"),
                                 Matchers.hasKey("credential_issuer"),
                                 Matchers.hasKey("display"),
                                 Matchers.hasKey("client_id"),
@@ -96,7 +99,8 @@ public class IssuersControllerTest {
                                 Matchers.not(Matchers.hasKey("credential_endpoint")),
                                 Matchers.not(Matchers.hasKey("credential_audience")),
                                 Matchers.not(Matchers.hasKey("additional_headers")),
-                                Matchers.not(Matchers.hasKey("scopes_supported"))
+                                Matchers.not(Matchers.hasKey("scopes_supported")),
+                                Matchers.hasKey("credential_issuer_host")
                         )
                 )));
 

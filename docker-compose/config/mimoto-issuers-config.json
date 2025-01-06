@@ -1,7 +1,7 @@
 {
   "issuers": [
     {
-      "credential_issuer": "Mosip",
+      "issuer_id": "Mosip",
       "protocol": "OpenId4VCI",
       "display": [
         {
@@ -72,11 +72,13 @@
       "proxy_token_endpoint": "https://esignet-mosipid.collab.mosip.net/v1/esignet/oauth/v2/token",
       "client_alias": "mpartner-default-test-mosipid",
       "qr_code_type": "OnlineSharing",
-      "enabled": "true",
-      "wellknown_endpoint": "https://injicertify-mosipid.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer"
+      "wellknown_endpoint": "https://injicertify-mosipid.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
+      "credential_issuer": "Mosip",
+      "credential_issuer_host": "https://injicertify-mosipid.collab.mosip.net",
+      "enabled": "true"
     },
     {
-      "credential_issuer": "StayProtected",
+      "issuer_id": "StayProtected",
       "protocol": "OpenId4VCI",
       "display": [
         {
@@ -97,11 +99,13 @@
       "proxy_token_endpoint": "https://esignet-insurance.collab.mosip.net/v1/esignet/oauth/v2/token",
       "client_alias": "esignet-sunbird-partner",
       "qr_code_type": "OnlineSharing",
-      "enabled": "true",
-      "wellknown_endpoint": "https://injicertify-insurance.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer"
+      "wellknown_endpoint": "https://injicertify-insurance.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
+      "credential_issuer": "StayProtected",
+      "credential_issuer_host": "https://injicertify-insurance.collab.mosip.net",
+      "enabled": "true"
     },
     {
-      "credential_issuer": "Mock",
+      "issuer_id": "Mock",
       "protocol": "OpenId4VCI",
       "display": [
         {
@@ -122,8 +126,10 @@
       "proxy_token_endpoint": "https://esignet-mock.collab.mosip.net/v1/esignet/oauth/v2/token",
       "client_alias": "mpartner-mock-testing",
       "qr_code_type": "OnlineSharing",
-      "enabled": "true",
-      "wellknown_endpoint": "https://injicertify-mock.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer"
+      "wellknown_endpoint": "https://injicertify-mock.collab.mosip.net/v1/certify/issuance/.well-known/openid-credential-issuer",
+      "credential_issuer": "Mock",
+      "credential_issuer_host": "https://injicertify-mock.collab.mosip.net",
+      "enabled": "true"
     }
   ]
 }
