@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{HOST}}/issuers",
+							"raw": "{{HOST}}/issuers/",
 							"host": [
 								"{{HOST}}"
 							],
@@ -379,6 +379,28 @@
 							],
 							"path": [
 								"wallet-binding"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiers",
+			"item": [
+				{
+					"name": "Get Verifiers List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/verifiers",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"verifiers"
 							]
 						}
 					},

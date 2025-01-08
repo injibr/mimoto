@@ -107,7 +107,7 @@ public class Utilities {
             imageString = encoder.encodeToString(imageBytes);
             bos.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         return imageString;
     }
