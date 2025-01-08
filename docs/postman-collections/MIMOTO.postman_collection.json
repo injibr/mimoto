@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{HOST}}/issuers/",
+							"raw": "{{HOST}}/issuers",
 							"host": [
 								"{{HOST}}"
 							],
