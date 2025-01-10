@@ -131,7 +131,7 @@
                 "tags": [
                     "Verifiers"
                 ],
-                "description": "This API retrieves all trusted verifiers in Inji Web.",
+                "description": "This API retrieves all trusted verifiers for Inji Wallet.",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -160,23 +160,10 @@
                                                 {
                                                     "client_id": "https://injiverify.collab.mosip.net",
                                                     "redirect_uris": [
-                                                        "https://injiverify.cp2.collab.mosip.net/redirect",
                                                         "https://injiverify.collab.mosip.net/redirect"
                                                     ],
                                                     "response_uris": [
-                                                        "https://injiverify.cp2.collab.mosip.net/redirect",
                                                         "https://injiverify.collab.mosip.net/redirect"
-                                                    ]
-                                                },
-                                                {
-                                                    "client_id": "https://injiverify.cp1.collab.mosip.net",
-                                                    "redirect_uris": [
-                                                        "https://injiverify.cp2.collab.mosip.net/redirect",
-                                                        "https://injiverify.cp1.collab.mosip.net/redirect"
-                                                    ],
-                                                    "response_uris": [
-                                                        "https://injiverify.cp2.collab.mosip.net/redirect",
-                                                        "https://injiverify.cp1.collab.mosip.net/redirect"
                                                     ]
                                                 }
                                             ]
@@ -207,7 +194,7 @@
         "/get-token/{issuer}": {
             "post": {
                 "tags": [
-                    "Wallet Binding"
+                    "Credentials Download"
                 ],
                 "summary": "Retrieve accessToken for OIDC flow",
                 "description": "This endpoint allows you to retrieve the access token in exchange for the authorization code.",
@@ -2712,7 +2699,7 @@
                     "required": true
                 },
                 "tags": [
-                    "Trusted Issuers"
+                    "Credentials Download"
                 ],
                 "description": "This API is responsible for generating PDFs for the received VC content. It fetches display properties from the well-known configuration of the issuer and incorporates them into the predefined template of the PDF file.",
                 "responses": {
