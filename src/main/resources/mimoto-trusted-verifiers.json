@@ -1,25 +1,12 @@
 {
   "verifiers": [
     {
-      "client_id": "https://injiverify.dev2.mosip.net",
+      "client_id": "https://injiverify-cp1.collab.mosip.net",
       "redirect_uris": [
-        "https://injiverify.qa-inji.mosip.net/redirect",
-        "https://injiverify.dev2.mosip.net/redirect"
+        "https://injiverify-cp1.collab.mosip.net/redirect"
       ],
       "response_uris": [
-        "https://injiverify.qa-inji.mosip.net/redirect",
-        "https://injiverify.dev2.mosip.net/redirect"
-      ]
-    },
-    {
-      "client_id": "https://injiverify.dev1.mosip.net",
-      "redirect_uris": [
-        "https://injiverify.qa-inji.mosip.net/redirect",
-        "https://injiverify.dev1.mosip.net/redirect"
-      ],
-      "response_uris": [
-        "https://injiverify.qa-inji.mosip.net/redirect",
-        "https://injiverify.dev1.mosip.net/redirect"
+        "https://9055-2405-201-c058-b814-81ee-2d4-a331-aa1c.ngrok-free.app/verifier/vp-response"
       ]
     }
   ]

@@ -186,8 +186,7 @@ public class Utilities {
         if(activeProfile.equals("local")) {
             return credentialTemplateHtmlString;
         }
-        return (credentialTemplateHtmlString != null && !credentialTemplateHtmlString.isEmpty()) ?
-                credentialTemplateHtmlString : getJson(configServerFileStorageURL,credentialTemplatePath );
+        return getJson(credentialTemplateHtmlString,credentialTemplatePath );
     }
     public static String[] handleExceptionWithErrorCode(Exception exception) {
         String errorMessage = exception.getMessage();
