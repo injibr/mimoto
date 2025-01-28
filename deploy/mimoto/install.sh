@@ -18,13 +18,14 @@ function installing_mimoto() {
   helm repo add mosip https://mosip.github.io/mosip-helm
   helm repo update
 
-  echo Copy configmaps
-  sed -i 's/\r$//' copy_cm.sh
-  ./copy_cm.sh
+  echo Copy Configmaps
+  COPY_UTIL=../copy_cm_func.sh
+  $COPY_UTIL configmap global default $NS
+  $COPY_UTIL configmap artifactory-share artifactory $NS
+  $COPY_UTIL configmap inji-config-server-share config-server $NS
 
-  echo Copy secrets
-  sed -i 's/\r$//' copy_secrets.sh
-  ./copy_secrets.sh
+  echo Copy Secrets
+  $COPY_UTIL secret keycloak-client-secrets keycloak $NS
 
   echo "Do you have public domain & valid SSL? (Y/n) "
   echo "Y: if you have public domain & valid ssl certificate"
@@ -41,11 +42,11 @@ function installing_mimoto() {
   fi
 
   echo  "Copy secrets to config-server namespace"
-  ./copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
-  ./copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto config-server
+  ../copy_cm_func.sh secret mimoto-wallet-binding-partner-api-key mimoto config-server
+  ../copy_cm_func.sh secret mimoto-oidc-partner-clientid mimoto config-server
 
   echo Updating mimoto-oidc-keystore-password value
-  ./copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto config-server
+  ../copy_cm_func.sh secret mimoto-oidc-keystore-password mimoto config-server
 
   kubectl -n config-server set env --keys=mimoto-wallet-binding-partner-api-key --from secret/mimoto-wallet-binding-partner-api-key deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
   kubectl -n config-server set env --keys=mimoto-oidc-partner-clientid --from secret/mimoto-oidc-partner-clientid deployment/inji-config-server --prefix=SPRING_CLOUD_CONFIG_SERVER_OVERRIDES_
