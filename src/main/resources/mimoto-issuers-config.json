@@ -16,13 +16,13 @@
         }
       ],
       "protocol": "OpenId4VCI",
-      "client_id": "inji-demo-1",
-      "client_alias": "inji-demo-1",
+      "client_id": "local1",
+      "client_alias": "local1",
       "wellknown_endpoint": "http://localhost:8090/v1/certify/issuance",
-      "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
-      "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "redirect_uri": "http://localhost:3004/redirect",
+      "authorization_audience": "http://localhost:8088/v1/esignet/oauth/v2/token",
       "token_endpoint": "https://localhost:8099/v1/mimoto/get-token/StayProtected",
-      "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "proxy_token_endpoint": "http://localhost:8088/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
       "credential_issuer_host": "http://localhost:8090",
       "enabled": "true"
