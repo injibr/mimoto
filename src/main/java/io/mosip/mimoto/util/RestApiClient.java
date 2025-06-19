@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -129,6 +130,21 @@ public class RestApiClient {
         }
         return result;
     }
+
+//    public <T> T getApi(String url, Class<?> responseType, Map<String,String> queryParams) {
+//        T result = null;
+//        RestTemplate rt = restTemplate;
+//        if (disableSelfTokenRestTemplate) {
+//            rt = plainRestTemplate;
+//        }
+//        try {
+//            log.info("RestApiClient::getApi()::entry uri: {}", url);
+//            result = (T) rt.getForObject(url, responseType,queryParams);
+//        } catch (Exception e) {
+//            log.error("RestApiClient::getApi()::error uri:{} {} {}", url, e.getMessage(), e);
+//        }
+//        return result;
+//    }
 
     /**
      * HTTP POST API

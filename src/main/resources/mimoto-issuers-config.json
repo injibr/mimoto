@@ -1,18 +1,18 @@
 {
   "issuers": [
     {
-      "issuer_id": "StayProtected",
-      "credential_issuer": "StayProtected",
+      "issuer_id": "CCIR",
+      "credential_issuer": "CCIR",
       "display": [
         {
-          "name": "StayProtected Insurance",
+          "name": "CCIR",
           "logo": {
-            "url": "https://raw.githubusercontent.com/tw-mosip/file-server/master/StayProtectedInsurance.png",
-            "alt_text": "a square logo of a Sunbird"
+            "url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png",
+            "alt_text": "a square logo of a CCIR"
           },
           "language": "en",
-          "title": "Download StayProtected Insurance Credentials",
-          "description": "Download insurance credential"
+          "title": "Download CCIR Credentials",
+          "description": "Download CCIR credential"
         }
       ],
       "protocol": "OpenId4VCI",
@@ -21,7 +21,34 @@
       "wellknown_endpoint": "http://localhost:8090/v1/certify/issuance",
       "redirect_uri": "http://localhost:3004/redirect",
       "authorization_audience": "http://localhost:8088/v1/esignet/oauth/v2/token",
-      "token_endpoint": "https://localhost:8099/v1/mimoto/get-token/StayProtected",
+      "token_endpoint": "https://localhost:8099/v1/mimoto/get-token/CCIR",
+      "proxy_token_endpoint": "http://localhost:8088/v1/esignet/oauth/v2/token",
+      "qr_code_type": "OnlineSharing",
+      "credential_issuer_host": "http://localhost:8090",
+      "enabled": "true"
+    },
+    {
+      "issuer_id": "CAR",
+      "credential_issuer": "CAR",
+      "display": [
+        {
+          "name": "CAR",
+          "logo": {
+            "url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png",
+            "alt_text": "a square logo of a CAR"
+          },
+          "language": "en",
+          "title": "Download CAR Credentials",
+          "description": "Download CAR credential"
+        }
+      ],
+      "protocol": "OpenId4VCI",
+      "client_id": "local1",
+      "client_alias": "local1",
+      "wellknown_endpoint": "http://localhost:8090/v1/certify/issuance",
+      "redirect_uri": "http://localhost:3004/redirect",
+      "authorization_audience": "http://localhost:8088/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://localhost:8099/v1/mimoto/get-token/CAR",
       "proxy_token_endpoint": "http://localhost:8088/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
       "credential_issuer_host": "http://localhost:8090",
