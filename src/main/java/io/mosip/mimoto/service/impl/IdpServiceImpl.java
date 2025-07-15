@@ -41,7 +41,7 @@ public class IdpServiceImpl implements IdpService {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String clientAssertion = joseUtil.getJWT(issuerDTO.getClient_id(), keyStorePath, fileName, "local1", cyptoPassword, authorizationAudience);
+        String clientAssertion = joseUtil.getJWT(issuerDTO.getClient_id(), keyStorePath, fileName, issuerDTO.getClient_alias(), cyptoPassword, authorizationAudience);
         map.add("code", params.get("code"));
         map.add("client_id", issuerDTO.getClient_id());
         map.add("grant_type", params.get("grant_type"));
