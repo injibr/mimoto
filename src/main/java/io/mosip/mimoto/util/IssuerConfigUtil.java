@@ -49,19 +49,6 @@ public class IssuerConfigUtil {
         return credentialIssuerWellKnownResponse;
     }
 
-//    @Cacheable(value = "issuerWellknown", key = "#p0")
-    public CredentialIssuerWellKnownResponse getIssuerWellknown(String credentialIssuerHost,String issuerId) throws ApiNotAccessibleException, IOException, InvalidWellknownResponseException {
-        String wellknownEndpoint = credentialIssuerHost + "/.well-known/openid-credential-issuer?version=" + issuerId;
-//        Map<String,String> queryParams = Map.of("version", issuerId);
-        String wellknownResponse = restApiClient.getApi(wellknownEndpoint, String.class);
-        if (wellknownResponse == null) {
-            throw new ApiNotAccessibleException();
-        }
-        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = objectMapper.readValue(wellknownResponse, CredentialIssuerWellKnownResponse.class);
-        credentialIssuerWellknownResponseValidator.validate(credentialIssuerWellKnownResponse, validator);
-        return credentialIssuerWellKnownResponse;
-    }
-
     @Cacheable(value = "authServerWellknown", key = "#p0")
     public AuthorizationServerWellKnownResponse getAuthServerWellknown(String authorizationServerHostUrl) throws AuthorizationServerWellknownResponseException {
         try {
