@@ -37,9 +37,9 @@ public class IssuerConfigUtil {
     private Validator validator;
 
 
-    @Cacheable(value = "issuerWellknown", key = "#p0")
-    public CredentialIssuerWellKnownResponse getIssuerWellknown(String credentialIssuerHost) throws ApiNotAccessibleException, IOException, InvalidWellknownResponseException {
-        String wellknownEndpoint = credentialIssuerHost + "/.well-known/openid-credential-issuer";
+    @Cacheable(value = "issuerId", key = "#p1")
+    public CredentialIssuerWellKnownResponse getIssuerWellknown(String credentialIssuerHost, String issuerId) throws ApiNotAccessibleException, IOException, InvalidWellknownResponseException {
+        String wellknownEndpoint = credentialIssuerHost + "/.well-known/openid-credential-issuer?issuer_id=" + issuerId;
         String wellknownResponse = restApiClient.getApi(wellknownEndpoint, String.class);
         if (wellknownResponse == null) {
             throw new ApiNotAccessibleException();

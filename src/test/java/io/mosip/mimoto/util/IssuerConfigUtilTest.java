@@ -108,7 +108,7 @@ public class IssuerConfigUtilTest {
 
     @Test
     public void shouldReturnIssuerWellknownForTheRequestedIssuerId() throws ApiNotAccessibleException, IOException, InvalidWellknownResponseException {
-        CredentialIssuerWellKnownResponse actualCredentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl);
+        CredentialIssuerWellKnownResponse actualCredentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl,"test");
 
         assertEquals(expectedCredentialIssuerWellKnownResponse, actualCredentialIssuerWellKnownResponse);
         verify(restApiClient, times(1)).getApi(issuerWellKnownUrl, String.class);
@@ -120,7 +120,7 @@ public class IssuerConfigUtilTest {
                 .thenReturn(null);
 
         ApiNotAccessibleException actualException = assertThrows(ApiNotAccessibleException.class, () -> {
-            issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl);
+            issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl, "test");
         });
 
         assertEquals("RESIDENT-APP-026 --> Api not accessible failure", actualException.getMessage());

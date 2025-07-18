@@ -24,4 +24,6 @@ public class VCCredentialRequest {
     @Valid
     @NotNull
     private VCCredentialDefinition credentialDefinition;
+    private String doctype;
+    private String issuerId;
 }

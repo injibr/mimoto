@@ -2,6 +2,8 @@ package io.mosip.mimoto.govbr;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.mosip.mimoto.dto.idp.TokenResponseDTO;
+import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.govbr.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,8 @@ public class GovBRServiceImpl implements GovBRService {
     public GovBRUserProfileResponse getUserProfile(String code, String codeVerifier) throws GovBRException {
         try {
             logger.info("Getting token from GovBR");
-            String accessToken = getToken(code, codeVerifier);
+            TokenResponseDTO tokenResponse = getToken(code, codeVerifier);
+            String accessToken = tokenResponse.getAccess_token();
             logger.info("Token received, fetching user info");
             GovBRUserProfileResponse userProfile = getUserInfo(accessToken);
             logger.info("User info received, fetching profile picture");
@@ -54,7 +57,7 @@ public class GovBRServiceImpl implements GovBRService {
         }
     }
 
-    private String getToken(String code, String codeVerifier) {
+    public TokenResponseDTO getToken(String code, String codeVerifier) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.set("Authorization", authHeader);
@@ -65,9 +68,11 @@ public class GovBRServiceImpl implements GovBRService {
         map.add("redirect_uri", redirectUri);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
-            JsonNode node = objectMapper.readTree(response.getBody());
-            return node.get("access_token").asText();
+            TokenResponseDTO response = restTemplate.postForObject(tokenUrl, request, TokenResponseDTO.class);
+            if (response == null) {
+                throw new IdpException("Exception occurred while performing the authorization");
+            }
+            return response;
         } catch (HttpClientErrorException e) {
             String responseBody = e.getResponseBodyAsString();
             logger.error("Token request failed: {}", responseBody);
