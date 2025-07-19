@@ -36,7 +36,7 @@ public class IssuerConfigUtil {
     @Autowired
     private Validator validator;
 
-
+//Changed the cache name to issuerId to avoid conflict with other cache names, to integrate govbr
     @Cacheable(value = "issuerId", key = "#p1")
     public CredentialIssuerWellKnownResponse getIssuerWellknown(String credentialIssuerHost, String issuerId) throws ApiNotAccessibleException, IOException, InvalidWellknownResponseException {
         String wellknownEndpoint = credentialIssuerHost + "/.well-known/openid-credential-issuer?issuer_id=" + issuerId;

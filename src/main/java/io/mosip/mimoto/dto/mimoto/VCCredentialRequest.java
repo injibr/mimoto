@@ -24,6 +24,7 @@ public class VCCredentialRequest {
     @Valid
     @NotNull
     private VCCredentialDefinition credentialDefinition;
+    //Added additional fields for issuerId and doctype, to integrate with govbr
     private String doctype;
     private String issuerId;
 }

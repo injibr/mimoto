@@ -63,6 +63,7 @@ public class CredentialsController {
             String credentialValidity = params.get("vcStorageExpiryLimitInTimes");
             String locale = params.get("locale");
             log.info("Initiated Token Call");
+            //Changed the token API call with govbr, to integrate with govbr
             TokenResponseDTO response = govBRService.getToken(params.get("code"), params.get("code_verifier"));
             log.info("Initiated Download Credential Call");
             ByteArrayInputStream inputStream = credentialService.downloadCredentialAsPDF(issuerId, credentialType, response, credentialValidity, locale);
