@@ -75,7 +75,7 @@ public class IssuersServiceTest {
 
         expectedCredentialIssuerWellKnownResponse = getCredentialIssuerWellKnownResponseDto(issuerId,
                 Map.of("CredentialType1", getCredentialSupportedResponse("CredentialType1")));
-        Mockito.when(issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl))
+        Mockito.when(issuersConfigUtil.getIssuerWellknown(credentialIssuerHostUrl, "test"))
                 .thenReturn(expectedCredentialIssuerWellKnownResponse);
 
         expectedCredentialIssuerConfiguration = getCredentialIssuerConfigurationResponseDto(issuerId, "CredentialType1", List.of());

@@ -129,6 +129,8 @@ public class CredentialServiceImpl implements CredentialService {
                 credentialIssuerConfiguration.getCredentialConfigurationsSupported());
         CredentialsSupportedResponse credentialsSupportedResponse = credentialIssuerWellKnownResponse.getCredentialConfigurationsSupported().get(credentialType);
         VCCredentialRequest vcCredentialRequest = generateVCCredentialRequest(issuerDTO, credentialIssuerWellKnownResponse, credentialsSupportedResponse, response.getAccess_token());
+//Added CredentialType to the request, to integrate with govbr
+        vcCredentialRequest.setDoctype(credentialType);
         VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponse.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
         boolean verificationStatus = issuerId.toLowerCase().contains("mock") || verifyCredential(vcCredentialResponse);
         if (verificationStatus) {
@@ -159,6 +161,7 @@ public class CredentialServiceImpl implements CredentialService {
                         .type(credentialsSupportedResponse.getCredentialDefinition().getType())
                         .context(List.of("https://www.w3.org/2018/credentials/v1"))
                         .build())
+                .issuerId(issuerDTO.getIssuer_id())
                 .build();
     }
 
