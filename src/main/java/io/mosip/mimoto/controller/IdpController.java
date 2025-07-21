@@ -9,6 +9,7 @@ import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
+import io.mosip.mimoto.govbr.GovBRService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.service.IssuersService;
 import io.mosip.mimoto.service.RestClientService;
@@ -57,6 +58,9 @@ public class IdpController {
 
     @Autowired
     CredentialServiceImpl credentialService;
+
+    @Autowired
+    GovBRService govBRService;
 
     @Operation(summary = SwaggerLiteralConstants.IDP_BINDING_OTP_SUMMARY, description = SwaggerLiteralConstants.IDP_BINDING_OTP_DESCRIPTION)
     @PostMapping(value = "/binding-otp", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,7 +131,7 @@ public class IdpController {
         log.info("Reached the getToken Controller for Issuer " + issuer);
         ResponseWrapper<TokenResponseDTO> responseWrapper = new ResponseWrapper<>();
         try {
-            TokenResponseDTO response = credentialService.getTokenResponse(params, issuer);
+            TokenResponseDTO response = govBRService.getToken(params.get("code"), params.get("code_verifier"));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception ex) {
             log.error("Exception Occurred while Invoking the Token Endpoint : ", ex);
