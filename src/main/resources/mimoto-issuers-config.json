@@ -18,13 +18,13 @@
       "protocol": "OpenId4VCI",
       "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
       "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
-      "wellknown_endpoint": "http://localhost:8090/v1/certify/issuance/.well-known/openid-credential-issuer?version=CCIR_mock",
+      "wellknown_endpoint": "https://vcdemo.crabdance.com/certify/v1/certify/issuance/.well-known/openid-credential-issuer?version=CCIR_mock",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
-      "token_endpoint": "http://localhost:8099/v1/mimoto/get-token/INCRA",
+      "token_endpoint": "https://vcdemo.crabdance.com/v1/mimoto/get-token/INCRA",
       "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://localhost:8090/v1/certify/issuance",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify/v1/certify/issuance",
       "enabled": "true"
     },
     {
@@ -45,13 +45,40 @@
       "protocol": "OpenId4VCI",
       "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
       "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
-      "wellknown_endpoint": "http://localhost:8090/v1/certify/issuance/.well-known/openid-credential-issuer?version=CAR_mock",
+      "wellknown_endpoint": "https://vcdemo.crabdance.com/certify/v1/certify/issuance/.well-known/openid-credential-issuer?version=CAR_mock",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
-      "token_endpoint": "http://localhost:8099/v1/mimoto/get-token/MGI",
+      "token_endpoint": "https://vcdemo.crabdance.com/v1/mimoto/get-token/MGI",
       "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://localhost:8090/v1/certify/issuance",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify/v1/certify/issuance",
+      "enabled": "true"
+    },
+    {
+      "issuer_id": "MDA",
+      "credential_issuer": "MDA",
+      "display": [
+        {
+          "name": "MDA",
+          "logo": {
+            "url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png",
+            "alt_text": "a square logo of a CAR"
+          },
+          "language": "en",
+          "title": "Download CAF Credentials",
+          "description": "Download CAF credential"
+        }
+      ],
+      "protocol": "OpenId4VCI",
+      "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
+      "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
+      "wellknown_endpoint": "https://vcdemo.crabdance.com/certify/v1/certify/issuance/.well-known/openid-credential-issuer?version=CAF_mock",
+      "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
+      "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://vcdemo.crabdance.com/v1/mimoto/get-token/MDA",
+      "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "qr_code_type": "OnlineSharing",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify/v1/certify/issuance",
       "enabled": "true"
     }
   ]
