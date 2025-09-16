@@ -64,10 +64,10 @@ public class DataShareServiceImpl {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        return "sas";
-//        DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
-//        log.info("Data pushed into DataShare -> " + dataShareResponseWrapperDTO);
-//        return  dataShareResponseWrapperDTO.getDataShare().getUrl();
+//        return "sas";
+        DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
+        log.info("Data pushed into DataShare -> " + dataShareResponseWrapperDTO);
+        return  dataShareResponseWrapperDTO.getDataShare().getUrl();
     }
 
     private DataShareResponseWrapperDTO pushCredentialIntoDataShare(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity, String credentialValidity) throws Exception {
@@ -104,7 +104,7 @@ public class DataShareServiceImpl {
             }
 
             // Call the API with the custom headers
-            String vcCredentialResponseString = restApiClient.getApiWithCustomHeaders(credentialsResourceUri, String.class, customHeaders);
+            String vcCredentialResponseString = restApiClient.getApiWithCustomHeaders(credentialsResourceUri.replace("http://datashare-inji.injiweb","https://datashare-inji.collab.mosip.net"), String.class, customHeaders);
             if (vcCredentialResponseString == null) {
                 throw new InvalidCredentialResourceException(
                         ErrorConstants.SERVER_UNAVAILABLE.getErrorCode(),
