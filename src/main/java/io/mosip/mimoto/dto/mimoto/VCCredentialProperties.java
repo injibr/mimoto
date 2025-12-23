@@ -49,4 +49,7 @@ public class VCCredentialProperties implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, Object> credentialStatus;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Object renderMethod;
 }

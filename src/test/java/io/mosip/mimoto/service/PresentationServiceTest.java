@@ -630,4 +630,69 @@ public class PresentationServiceTest {
 
     // Tests for rejectVerifier removed - method moved to WalletPresentationService
 
+    @Test
+    public void constructPresentationDefinitionWithRenderMethod() throws Exception{
+        VCCredentialResponse vcCredentialResponse = new VCCredentialResponse();
+        vcCredentialResponse.setFormat(CredentialFormat.LDP_VC.getFormat());
+
+        Map<String, Object> template = Map.of(
+            "id", "https://degree.example/credential-templates/bachelors",
+            "mediaType", "image/svg+xml",
+            "digestMultibase", "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+        );
+        Map<String, Object> renderMethod = Map.of(
+            "type", "TemplateRenderMethod",
+            "renderSuite", "svg-mustache",
+            "template", template
+        );
+
+        VCCredentialProperties credential = new VCCredentialProperties();
+        credential.setType(Arrays.asList("VerifiableCredential", "TestCredential"));
+        credential.setContext("https://www.w3.org/2018/credentials/v2");
+        credential.setRenderMethod(renderMethod);
+        VCCredentialResponseProof proof = new VCCredentialResponseProof();
+        proof.setType("Ed25519Signature2020");
+        credential.setProof(proof);
+
+        vcCredentialResponse.setCredential(credential);
+
+        when(objectMapper.convertValue(eq(vcCredentialResponse.getCredential()), eq(VCCredentialProperties.class)))
+                .thenReturn(credential);
+
+        PresentationDefinitionDTO result = presentationService.constructPresentationDefinition(vcCredentialResponse);
+
+        assertNotNull(result);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(credential);
+        assertTrue(json.contains("renderMethod"));
+    }
+
+    @Test
+    public void constructPresentationDefinitionWithoutRenderMethod() throws Exception {
+        VCCredentialResponse vcCredentialResponse = new VCCredentialResponse();
+        vcCredentialResponse.setFormat(CredentialFormat.LDP_VC.getFormat());
+
+        VCCredentialProperties credential = new VCCredentialProperties();
+        credential.setType(Arrays.asList("VerifiableCredential", "TestCredential"));
+        credential.setContext("https://www.w3.org/2018/credentials/v2");
+        // renderMethod not set
+        VCCredentialResponseProof proof = new VCCredentialResponseProof();
+        proof.setType("Ed25519Signature2020");
+        credential.setProof(proof);
+
+        vcCredentialResponse.setCredential(credential);
+
+        when(objectMapper.convertValue(eq(vcCredentialResponse.getCredential()), eq(VCCredentialProperties.class)))
+                .thenReturn(credential);
+
+        PresentationDefinitionDTO result = presentationService.constructPresentationDefinition(vcCredentialResponse);
+
+        assertNotNull(result);
+
+        //Not mocking the ObjectMapper here to test the actual serialization : renderMethod should be absent
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(credential);
+        assertFalse(json.contains("renderMethod"));
+    }
 }

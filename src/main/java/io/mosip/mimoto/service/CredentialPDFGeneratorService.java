@@ -13,7 +13,10 @@ import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.nimbusds.jose.util.Base64URL;
+import io.mosip.injivcrenderer.InjiVcRenderer;
 import io.mosip.mimoto.constant.CredentialFormat;
+import io.mosip.mimoto.constant.LdpVcV2Constants;
 import io.mosip.mimoto.dto.IssuerDTO;
 import io.mosip.mimoto.dto.mimoto.CredentialIssuerDisplayResponse;
 import io.mosip.mimoto.dto.mimoto.CredentialSupportedDisplayResponse;
@@ -23,11 +26,11 @@ import io.mosip.mimoto.dto.openid.presentation.PresentationDefinitionDTO;
 import io.mosip.mimoto.model.QRCodeType;
 import io.mosip.mimoto.service.impl.PresentationServiceImpl;
 import io.mosip.mimoto.util.LocaleUtils;
+import io.mosip.mimoto.util.SvgFixerUtil;
 import io.mosip.mimoto.util.Utilities;
 import io.mosip.pixelpass.PixelPass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +46,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import java.util.Map;
-import java.util.Properties;
 
 @Slf4j
 @Service
@@ -68,6 +68,12 @@ public class CredentialPDFGeneratorService {
     @Autowired
     private CredentialFormatHandlerFactory credentialFormatHandlerFactory;
 
+    @Autowired
+    private InjiVcRenderer injiVcRenderer;
+
+    @Autowired
+    private SvgFixerUtil svgFixerUtil;
+
     @Value("${mosip.inji.ovp.qrdata.pattern}")
     private String ovpQRDataPattern;
 
@@ -87,20 +93,27 @@ public class CredentialPDFGeneratorService {
     private boolean maskDisclosures;
 
     public ByteArrayInputStream generatePdfForVerifiableCredential(String credentialConfigurationId, VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, CredentialsSupportedResponse credentialsSupportedResponse, String dataShareUrl, String credentialValidity, String locale) throws Exception {
-        // Get the appropriate processor based on format
-        CredentialFormatHandler processor = credentialFormatHandlerFactory.getHandler(vcCredentialResponse.getFormat());
+        // Check if the credential can support SVG based rendering
+        if (isSvgBasedRenderingSupported(vcCredentialResponse)) {
+            log.info("Detected LDP VC v2 credential with svg template, using InjiVcRenderer for PDF generation");
+            return generatePdfUsingSvgTemplate(vcCredentialResponse, issuerDTO, dataShareUrl);
+        } else {
+            log.info("Using v1 data model flow for credential");
+            // Get the appropriate processor based on format
+            CredentialFormatHandler processor = credentialFormatHandlerFactory.getHandler(vcCredentialResponse.getFormat());
 
-        // Extract credential properties using the specific processor
-        Map<String, Object> credentialProperties = processor.extractCredentialClaims(vcCredentialResponse);
+            // Extract credential properties using the specific processor
+            Map<String, Object> credentialProperties = processor.extractCredentialClaims(vcCredentialResponse);
 
-        // Load display properties using the specific processor
-        LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProperties =
-                processor.loadDisplayPropertiesFromWellknown(credentialProperties, credentialsSupportedResponse, locale);
+            // Load display properties using the specific processor
+            LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProperties =
+                    processor.loadDisplayPropertiesFromWellknown(credentialProperties, credentialsSupportedResponse, locale);
 
-        Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,
-                vcCredentialResponse, issuerDTO, dataShareUrl, credentialValidity);
+            Map<String, Object> data = getPdfResourceFromVcProperties(displayProperties, credentialsSupportedResponse,
+                    vcCredentialResponse, issuerDTO, dataShareUrl, credentialValidity);
 
-        return renderVCInCredentialTemplate(data, issuerDTO.getIssuer_id(), credentialConfigurationId);
+            return renderVCInCredentialTemplate(data, issuerDTO.getIssuer_id(), credentialConfigurationId);
+        }
     }
 
     private Map<String, Object> getPdfResourceFromVcProperties(
@@ -151,7 +164,7 @@ public class CredentialPDFGeneratorService {
                 if (disclosures.contains(key)) {
                     disclosuresProps.put(key, displayName);
                     if (maskDisclosures) {
-                        strVal = utilities.maskValue(strVal);
+                        strVal = Utilities.maskValue(strVal);
                     }
                 }
                 if (!isFaceKey && displayName != null) {
@@ -275,5 +288,85 @@ public class CredentialPDFGeneratorService {
         BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
         return Utilities.encodeToString(qrImage, "png");
     }
-}
 
+    private boolean isSvgBasedRenderingSupported(VCCredentialResponse vcCredentialResponse) {
+        if (!CredentialFormat.LDP_VC.getFormat().equals(vcCredentialResponse.getFormat())) {
+            return false;
+        }
+
+        Object credentialPayload = vcCredentialResponse.getCredential();
+        if (!(credentialPayload instanceof Map<?, ?>)) return false;
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> credentialPayloadMap = (Map<String, Object>) credentialPayload;
+
+        return containsV2Context(credentialPayloadMap)
+                && containsSvgTemplate(credentialPayloadMap);
+    }
+
+    private boolean containsV2Context(Map<String, Object> credentialPayloadMap) {
+        Object contextField = credentialPayloadMap.get(LdpVcV2Constants.CONTEXT);
+
+        if (contextField instanceof List<?> contextList)
+            return contextList.stream().anyMatch(entry -> LdpVcV2Constants.V2_CONTEXT_URL.equals(entry.toString()));
+        if (contextField instanceof String contextString)
+            return LdpVcV2Constants.V2_CONTEXT_URL.equals(contextString);
+
+        return false;
+    }
+
+    private boolean containsSvgTemplate(Map<String, Object> credentialPayloadMap) {
+        Object renderMethod = credentialPayloadMap.get(LdpVcV2Constants.RENDER_METHOD);
+        if (renderMethod instanceof List<?> renderMethodList) {
+            return renderMethodList.stream().allMatch(entry -> {
+                if (!(entry instanceof Map<?, ?> renderMethodProperties)) return false;
+
+                String renderSuite = (String) renderMethodProperties.get(LdpVcV2Constants.RENDER_SUITE);
+                return renderMethodProperties.containsKey(LdpVcV2Constants.TEMPLATE) && LdpVcV2Constants.SVG_MUSTACHE_RENDER_SUITE.equals(renderSuite);
+            });
+        }
+        if (renderMethod instanceof Map<?, ?> renderMethodMap) {
+            String renderSuite = (String) renderMethodMap.get(LdpVcV2Constants.RENDER_SUITE);
+            return renderMethodMap.containsKey(LdpVcV2Constants.TEMPLATE) && LdpVcV2Constants.SVG_MUSTACHE_RENDER_SUITE.equals(renderSuite);
+        }
+
+        return false;
+    }
+
+    private ByteArrayInputStream generatePdfUsingSvgTemplate(VCCredentialResponse vcCredentialResponse, IssuerDTO issuerDTO, String dataShareUrl) throws Exception {
+        try {
+            // Get the ldp_vc credential and convert to string
+            String credentialJsonString = objectMapper.writeValueAsString(vcCredentialResponse.getCredential());
+
+            // Generate the QR code data to embed into the svg for Online Sharing
+            String qrCodeData = null;
+            if (QRCodeType.OnlineSharing.equals(issuerDTO.getQr_code_type())) {
+                PresentationDefinitionDTO presentationDefinitionDTO = presentationService.constructPresentationDefinition(vcCredentialResponse);
+                String presentationString = objectMapper.writeValueAsString(presentationDefinitionDTO);
+                qrCodeData = String.format(ovpQRDataPattern, URLEncoder.encode(dataShareUrl, StandardCharsets.UTF_8), URLEncoder.encode(presentationString, StandardCharsets.UTF_8));
+            }
+
+            // Generate list of rendered svg strings using InjiVcRenderer
+            List<Object> generatedSvgObjects = injiVcRenderer.generateCredentialDisplayContent(
+                    io.mosip.injivcrenderer.constants.CredentialFormat.LDP_VC, null, credentialJsonString, qrCodeData);
+
+            if (generatedSvgObjects.isEmpty()) {
+                 throw new Exception("No SVG content generated for v2 credential");
+            }
+
+            List<String> svgStrings = generatedSvgObjects.stream()
+                    .map(Object::toString)
+                    .map(svgFixerUtil::addMissingOffsetToStopElements)
+                    .toList();
+
+            log.debug("Fixed {} SVG elements for PDF conversion", svgStrings.size());
+
+            String base64PdfContent = injiVcRenderer.convertSvgToPdf(svgStrings);
+            byte[] decodedPdfBytes = Base64URL.from(base64PdfContent).decode();
+            return new ByteArrayInputStream(decodedPdfBytes);
+        } catch (Exception e) {
+            log.error("Error generating PDF for v2 credential using InjiVcRenderer: {}", e.getMessage(), e);
+            throw new Exception("Failed to generate PDF for v2 credential: " + e.getMessage(), e);
+        }
+    }
+}

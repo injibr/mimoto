@@ -4,6 +4,7 @@ package io.mosip.mimoto.service;
 import com.authlete.sd.Disclosure;
 import com.authlete.sd.SDJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.mosip.injivcrenderer.InjiVcRenderer;
 import io.mosip.mimoto.dto.BackgroundImageDTO;
 import io.mosip.mimoto.dto.DisplayDTO;
 import io.mosip.mimoto.dto.IssuerDTO;
@@ -14,6 +15,7 @@ import io.mosip.mimoto.model.QRCodeType;
 import io.mosip.mimoto.service.impl.LdpVcCredentialFormatHandler;
 import io.mosip.mimoto.service.impl.PresentationServiceImpl;
 import io.mosip.mimoto.service.impl.VcSdJwtCredentialFormatHandler;
+import io.mosip.mimoto.util.SvgFixerUtil;
 import io.mosip.mimoto.util.Utilities;
 import io.mosip.pixelpass.PixelPass;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +30,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.ByteArrayInputStream;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.mosip.mimoto.constant.LdpVcV2Constants.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -40,6 +43,8 @@ class CredentialPDFGeneratorServiceTest {
     @Mock private PresentationServiceImpl presentationService;
     @Mock private Utilities utilities;
     @Mock private PixelPass pixelPass;
+    @Mock private SvgFixerUtil svgFixerUtil;
+    @Mock private InjiVcRenderer injiVcRenderer;
     @Mock
     private CredentialFormatHandlerFactory credentialFormatHandlerFactory;
     @Mock
@@ -883,5 +888,388 @@ class CredentialPDFGeneratorServiceTest {
                 "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse, "", "", "en");
 
         assertNotNull(result);  // Verifies formatValue converted 25 to "25"
+    }
+
+    @Test
+    void testInjiVcRendererInvokedForLdpVcWithContextStringAndTemplate() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, V2_CONTEXT_URL);
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("ldp_vc")
+            .credential(credentialMap)
+            .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.EmbeddedVC);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(injiVcRenderer.generateCredentialDisplayContent(any(), any(), anyString(), any()))
+            .thenReturn(List.of("<svg></svg>"));
+        when(svgFixerUtil.addMissingOffsetToStopElements(anyString())).thenAnswer(inv -> inv.getArgument(0));
+
+        String urlSafeBase64Pdf = "AQID";
+        when(injiVcRenderer.convertSvgToPdf(anyList())).thenReturn(urlSafeBase64Pdf);
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+            "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+            "https://example.com/share", "", "en");
+        assertNotNull(result);
+        verify(injiVcRenderer).generateCredentialDisplayContent(any(), any(), anyString(), any());
+    }
+
+    @Test
+    void testInjiVcRendererInvokedForLdpVcWithContextListAndTemplate() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL, "https://w3id.org/security/v1"));
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(injiVcRenderer.generateCredentialDisplayContent(any(), any(), anyString(), any()))
+                .thenReturn(List.of("<svg></svg>"));
+        when(svgFixerUtil.addMissingOffsetToStopElements(anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(injiVcRenderer.convertSvgToPdf(anyList())).thenReturn("AQID");
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer).generateCredentialDisplayContent(any(), any(), anyString(), any());
+    }
+
+    @Test
+    void testInjiVcRendererInvokedForLdpVcWhenRenderMethodListWithTemplates() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, List.of(
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE,
+                TEMPLATE, Map.of("id", "https://certify/rendering-template/5b9c")
+            ),
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE,
+                TEMPLATE, Map.of("id", "https://certify/rendering-template/6b9c")
+            ),
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE,
+                TEMPLATE, Map.of("id", "https://certify/rendering-template/7b9c")
+            )
+        ));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("ldp_vc")
+            .credential(credentialMap)
+            .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(injiVcRenderer.generateCredentialDisplayContent(any(), any(), anyString(), any()))
+                .thenReturn(List.of("<svg></svg>"));
+        when(svgFixerUtil.addMissingOffsetToStopElements(anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(injiVcRenderer.convertSvgToPdf(anyList())).thenReturn("AQID");
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer).generateCredentialDisplayContent(any(), any(), anyString(), any());
+    }
+
+    @Test
+    void testV2ContextNullDisablesSvgRendering() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, null); // contextField is null
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>", RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+
+        VCCredentialResponse vc = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+        when(credentialFormatHandler.extractCredentialClaims(any())).thenReturn(Map.of("name", "John"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString())).thenReturn(new LinkedHashMap<>());
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vc, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedWhenRenderSuiteIsNotSvgMustache() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, Map.of(TEMPLATE, "<svg></svg>", RENDER_SUITE, "pdf-mustache"));
+
+        VCCredentialResponse vc = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+        when(credentialFormatHandler.extractCredentialClaims(any())).thenReturn(Map.of("name", "John"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString())).thenReturn(new LinkedHashMap<>());
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vc, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedForLdpVcWhenV2ContextAbsent() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of("https://www.w3.org/ns/credentials/v1"));
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>")));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+        when(credentialFormatHandler.extractCredentialClaims(vcCredentialResponse)).thenReturn(Map.of("name", "John"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString()))
+                .thenReturn(new LinkedHashMap<>());
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedForSdJwt() throws Exception {
+        when(credentialFormatHandlerFactory.getHandler("vc+sd-jwt")).thenReturn(sdJwtCredentialFormatHandler);
+        String validSdJwt = "eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJfc2QiOltdLCJuYW1lIjoiSm9obiBEb2UifQ.signature~WyJzYWx0IiwgIm5hbWUiLCAiSm9obiBEb2UiXQ";
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("vc+sd-jwt")
+            .credential(validSdJwt)
+            .build();
+
+        Map<String, Object> extractedClaims = new HashMap<>();
+        extractedClaims.put("name", "John Doe");
+        when(sdJwtCredentialFormatHandler.extractCredentialClaims(vcCredentialResponse))
+            .thenReturn(extractedClaims);
+
+        LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProps = new LinkedHashMap<>();
+        displayProps.put("name", Map.of(createDisplayResponse("Name", "en"), "John Doe"));
+        when(sdJwtCredentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString()))
+            .thenReturn(displayProps);
+
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString()))
+            .thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any()))
+            .thenReturn(new PresentationDefinitionDTO());
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+            "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+            "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedForLdpVcWithRenderMethodButNoTemplate() throws Exception {
+        // Credential with v2 context and renderMethod, but missing "template"
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("ldp_vc")
+            .credential(credentialMap)
+            .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("name", "John Doe");
+        when(credentialFormatHandler.extractCredentialClaims(vcCredentialResponse)).thenReturn(claims);
+
+        LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProps = new LinkedHashMap<>();
+        displayProps.put("name", Map.of(createDisplayResponse("Name", "en"), "John Doe"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString())).thenReturn(displayProps);
+
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+            "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+            "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedForLdpVcWithoutRenderMethod() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("ldp_vc")
+            .credential(credentialMap)
+            .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("name", "John Doe");
+        when(credentialFormatHandler.extractCredentialClaims(vcCredentialResponse)).thenReturn(claims);
+
+        LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProps = new LinkedHashMap<>();
+        displayProps.put("name", Map.of(createDisplayResponse("Name", "en"), "John Doe"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString())).thenReturn(displayProps);
+
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+            "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+            "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testInjiVcRendererNotInvokedForLdpVcWhenOneRenderMethodListEntryMissingTemplate() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, List.of(
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE,
+                TEMPLATE, Map.of("id", "https://certify/rendering-template/5b9c")
+            ),
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE
+                // missing TEMPLATE
+            ),
+            Map.of(
+                "type", "TemplateRenderMethod",
+                RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE,
+                TEMPLATE, Map.of("id", "https://certify/rendering-template/5b8c")
+            )
+        ));
+
+        VCCredentialResponse vcCredentialResponse = VCCredentialResponse.builder()
+            .format("ldp_vc")
+            .credential(credentialMap)
+            .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(credentialFormatHandlerFactory.getHandler("ldp_vc")).thenReturn(credentialFormatHandler);
+        when(credentialFormatHandler.extractCredentialClaims(vcCredentialResponse)).thenReturn(Map.of("name", "John Doe"));
+        LinkedHashMap<String, Map<CredentialIssuerDisplayResponse, Object>> displayProps = new LinkedHashMap<>();
+        displayProps.put("name", Map.of(createDisplayResponse("Name", "en"), "John Doe"));
+        when(credentialFormatHandler.loadDisplayPropertiesFromWellknown(any(), any(), anyString())).thenReturn(displayProps);
+
+        when(utilities.getCredentialSupportedTemplateString(anyString(), anyString())).thenReturn("<html></html>");
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+
+        ByteArrayInputStream result = credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+            "TestCredential", vcCredentialResponse, issuerDTO, credentialsSupportedResponse,
+            "https://example.com/share", "", "en");
+
+        assertNotNull(result);
+        verify(injiVcRenderer, never()).generateCredentialDisplayContent(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testGeneratePdfForV2CredentialThrowsExceptionWhenRendererReturnsEmptyList() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>", RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+
+        VCCredentialResponse vc = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+        when(injiVcRenderer.generateCredentialDisplayContent(any(), any(), anyString(), any()))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(Exception.class, () -> credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vc, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en"));
+
+        verify(injiVcRenderer).generateCredentialDisplayContent(any(), any(), anyString(), any());
+    }
+
+    @Test
+    void testGeneratePdfForV2CredentialCatchBlockWhenRendererThrows() throws Exception {
+        Map<String, Object> credentialMap = new HashMap<>();
+        credentialMap.put(CONTEXT, List.of(V2_CONTEXT_URL));
+        credentialMap.put(RENDER_METHOD, List.of(Map.of(TEMPLATE, "<svg></svg>", RENDER_SUITE, SVG_MUSTACHE_RENDER_SUITE)));
+
+        VCCredentialResponse vc = VCCredentialResponse.builder()
+                .format("ldp_vc")
+                .credential(credentialMap)
+                .build();
+
+        issuerDTO.setQr_code_type(QRCodeType.OnlineSharing);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+        when(presentationService.constructPresentationDefinition(any())).thenReturn(new PresentationDefinitionDTO());
+        when(injiVcRenderer.generateCredentialDisplayContent(any(), any(), anyString(), any()))
+                .thenThrow(new RuntimeException("Renderer failed"));
+
+        assertThrows(Exception.class, () -> credentialPDFGeneratorService.generatePdfForVerifiableCredential(
+                "TestCredential", vc, issuerDTO, credentialsSupportedResponse,
+                "https://example.com/share", "", "en"));
     }
 }
