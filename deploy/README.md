@@ -41,8 +41,38 @@ cd ../partner-onboarder
 ## Install mimoto and datashare
 * Execute mimoto install script
 * Before installing Mimoto, please ensure that the database host and port are correctly configured in the [values.yaml](mimoto/values.yaml) file.
-* Datashare will be deployed as part of the Mimoto installation.
+* **Datashare Deployment:**
+  * If you are using **Inji Web Wallet**, datashare will be deployed as part of the Mimoto installation.
+  * If you are using only **Inji Mobile Wallet**, datashare deployment is not required.
 * Note: During the installation of Mimoto and Datashare, ensure that the active_profile_env parameter in the ConfigMap of the config-server-share (in the injiweb namespace) is set to: default,inji-default,standalone
+
+### To Deploy Mimoto WITHOUT Datashare
+If you are using only Inji Mobile Wallet and do not need datashare, follow these steps:
+
+1. **Edit the install.sh script:**
+   - Open `deploy/mimoto/install.sh`
+   - Locate the datashare deployment section (around line 61-66)
+   - Comment out or remove the following lines:
+     ```bash
+     INJI_DATASHARE_HOST=$(kubectl get cm inji-stack-config -o jsonpath={.data.inji-datashare-host})
+     echo "Installing datashare"
+     helm -n $NS install datashare-inji mosip/datashare \
+     -f datashare-values.yaml \
+     --version $DATASHARE_CHART_VERSION
+     ```
+
+2. **Configure Mimoto for Mobile Wallet only:**
+   - Ensure that `qr_code_type` is set to `"EmbeddedVC"` in your `mimoto-issuers-config.json` file
+   - This embeds the entire Verifiable Credential in the QR code.
+
+3. **Run the modified install script:**
+```bash
+cd ../deploy/mimoto
+./install.sh
+ ```
+
+### To Deploy Mimoto WITH Datashare (Default)
+If you are using Inji Web Wallet or need datashare for online verification:
 ```
 cd ../deploy/mimoto
 ./install.sh
