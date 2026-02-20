@@ -1,8 +1,6 @@
-package io.mosip.mimoto.util;
+package io.mosip.mimoto.service;
 
 import io.mosip.kernel.core.util.CryptoUtil;
-import io.mosip.kernel.cryptomanager.dto.CryptoWithPinRequestDto;
-import io.mosip.kernel.cryptomanager.dto.CryptoWithPinResponseDto;
 import io.mosip.kernel.cryptomanager.dto.CryptomanagerRequestDto;
 import io.mosip.kernel.cryptomanager.dto.CryptomanagerResponseDto;
 import io.mosip.kernel.cryptomanager.service.CryptomanagerService;
@@ -12,7 +10,7 @@ import io.mosip.openID4VP.common.DecoderKt;
 import io.mosip.openID4VP.common.EncoderKt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -31,8 +29,8 @@ import static io.mosip.mimoto.exception.ErrorConstants.ENCRYPTION_FAILED;
  * Utility class for encryption and decryption operations.
  */
 @Slf4j
-@Component
-public class EncryptionDecryptionUtil {
+@Service
+public class DataProtectionService {
     private static final String AES_ALGORITHM = "AES/GCM/NoPadding";
     private static final int NONCE_LENGTH = 12; // Recommended nonce length for GCM
     private static final int TAG_LENGTH = 128; // Authentication tag length in bits (16 bytes)
@@ -43,7 +41,7 @@ public class EncryptionDecryptionUtil {
     @Value("${mosip.inji.app.id:MIMOTO}")
     private String appId;
 
-    public EncryptionDecryptionUtil(CryptomanagerService cryptomanagerService) {
+    public DataProtectionService(CryptomanagerService cryptomanagerService) {
         this.cryptomanagerService = cryptomanagerService;
     }
 
@@ -237,65 +235,6 @@ public class EncryptionDecryptionUtil {
     }
 
     /**
-     * Encrypts a SecretKey with a user PIN.
-     *
-     * @param encryptionKey The SecretKey to encrypt.
-     * @param pin           The user PIN.
-     * @return The encrypted key data.
-     */
-    public String encryptKeyWithPin(SecretKey encryptionKey, String pin) {
-        if (encryptionKey == null) {
-            log.error("Encryption key is null");
-            throw new IllegalArgumentException("Encryption key cannot be null");
-        }
-        if (pin == null || pin.isEmpty()) {
-            log.error("PIN is null or empty");
-            throw new IllegalArgumentException("PIN cannot be null or empty");
-        }
-        try {
-            CryptoWithPinRequestDto requestDto = new CryptoWithPinRequestDto();
-            requestDto.setUserPin(pin);
-            String dataAsString = Base64.getEncoder().encodeToString(encryptionKey.getEncoded());
-            requestDto.setData(dataAsString);
-            CryptoWithPinResponseDto responseDto = cryptomanagerService.encryptWithPin(requestDto);
-            log.debug("Key encrypted with PIN successfully");
-            return responseDto.getData();
-        } catch (Exception e) {
-            log.error("Failed to encrypt key with PIN", e);
-            throw new RuntimeException("Failed to encrypt key with PIN", e);
-        }
-    }
-
-    /**
-     * Decrypts data using a user PIN.
-     *
-     * @param encryptedString The encrypted data.
-     * @param pin             The user PIN.
-     * @return The decrypted data.
-     */
-    public String decryptWithPin(String encryptedString, String pin) {
-        if (encryptedString == null || encryptedString.isEmpty()) {
-            log.error("Encrypted string is null or empty");
-            throw new IllegalArgumentException("Encrypted string cannot be null or empty");
-        }
-        if (pin == null || pin.isEmpty()) {
-            log.error("PIN is null or empty");
-            throw new IllegalArgumentException("PIN cannot be null or empty");
-        }
-        try {
-            CryptoWithPinRequestDto requestDto = new CryptoWithPinRequestDto();
-            requestDto.setUserPin(pin);
-            requestDto.setData(encryptedString);
-            CryptoWithPinResponseDto responseDto = cryptomanagerService.decryptWithPin(requestDto);
-            log.debug("Data decrypted with PIN successfully");
-            return responseDto.getData();
-        } catch (Exception e) {
-            log.error("Failed to decrypt with PIN", e);
-            throw new RuntimeException("Failed to decrypt with PIN", e);
-        }
-    }
-
-    /**
      * Encrypts credential data using a wallet key.
      *
      * @param credentialData        The credential data to encrypt.
@@ -415,7 +354,7 @@ public class EncryptionDecryptionUtil {
             inputBytes[headerBytes.length] = (byte) '.';
             System.arraycopy(payloadBytes, 0, inputBytes, headerBytes.length + 1, payloadBytes.length);
 
-            log.debug("Detached JWT signing input created successfully, header length: {}, payload length: {}", 
+            log.debug("Detached JWT signing input created successfully, header length: {}, payload length: {}",
                     headerBytes.length, payloadBytes.length);
             return inputBytes;
         } catch (Exception e) {
