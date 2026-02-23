@@ -35,6 +35,7 @@ import static io.mosip.mimoto.util.TestUtilities.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = IssuersController.class)
@@ -181,6 +182,16 @@ public class IssuersControllerTest {
                 .getContentAsString();
 
         JSONAssert.assertEquals(new JSONObject(expectedCredentialIssuerWellknownResponse), new JSONObject(actualResponse), JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    public void getIssuerWellknownWhenServiceThrowsReturnsNotFound() throws Exception {
+        String issuerId = "issuer1";
+        Mockito.when(issuersService.getIssuerConfiguration(issuerId)).thenThrow(new RuntimeException("well-known unreachable"));
+
+        mockMvc.perform(get("/issuers/" + issuerId + "/well-known-proxy").accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResponse().getContentAsString().isEmpty()));
     }
 
     @Test

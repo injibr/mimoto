@@ -1,9 +1,10 @@
 package io.mosip.mimoto.service.impl;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.mimoto.dto.IssuerDTO;
+import io.mosip.mimoto.dto.IssuerV2DTO;
 import io.mosip.mimoto.dto.IssuersDTO;
+import io.mosip.mimoto.dto.IssuersV2DTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.*;
 import io.mosip.mimoto.service.IssuersService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -46,7 +48,7 @@ public class IssuersServiceImpl implements IssuersService {
     }
 
     @Override
-    public IssuerDTO getIssuerDetails(String issuerId) throws ApiNotAccessibleException, IOException, AuthorizationServerWellknownResponseException, InvalidWellknownResponseException {
+    public IssuerDTO getIssuerDetails(String issuerId) throws ApiNotAccessibleException, IOException {
         IssuersDTO issuersDTO = getAllIssuers();
         issuersDTO = getAllEnabledIssuers(issuersDTO);
 
@@ -118,5 +120,38 @@ public class IssuersServiceImpl implements IssuersService {
             }
             throw new ApiNotAccessibleException("Unable to fetch issuer configuration for issuerId: " + issuerId, e);
         }
+    }
+
+    @Override
+    public IssuersV2DTO getIssuersV2DTO() throws ApiNotAccessibleException, IOException {
+        IssuersDTO issuersDTO = getIssuers(null);
+        List<IssuerV2DTO> list = issuersDTO.getIssuers().parallelStream().map(this::toIssuerV2DTO).collect(Collectors.toList());
+        return new IssuersV2DTO(list);
+    }
+
+    @Override
+    public IssuerV2DTO getIssuerV2Details(String issuerId) throws ApiNotAccessibleException, IOException {
+        IssuerDTO issuerDTO = getIssuerDetails(issuerId);
+        return toIssuerV2DTO(issuerDTO);
+    }
+
+    /**
+     * Maps an {@link IssuerDTO} (from config) to {@link IssuerV2DTO} (API response).
+     */
+    private IssuerV2DTO toIssuerV2DTO(IssuerDTO issuer) {
+
+        IssuerV2DTO issuerV2DTO= new  IssuerV2DTO();
+
+        issuerV2DTO.setIssuerId(issuer.getIssuer_id());
+        issuerV2DTO.setProtocol(issuer.getProtocol());
+        issuerV2DTO.setDisplay(issuer.getDisplay());
+        issuerV2DTO.setClientId(issuer.getClient_id());
+        issuerV2DTO.setTokenEndpoint(issuer.getToken_endpoint());
+        issuerV2DTO.setClientAlias(issuer.getClient_alias());
+        issuerV2DTO.setQrCodeType(issuer.getQr_code_type());
+        issuerV2DTO.setEnabled(issuer.getEnabled());
+        issuerV2DTO.setCredentialIssuerHost(issuer.getCredential_issuer_host());
+
+        return issuerV2DTO;
     }
 }

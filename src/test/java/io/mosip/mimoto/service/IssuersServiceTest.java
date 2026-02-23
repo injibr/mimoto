@@ -3,7 +3,9 @@ package io.mosip.mimoto.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.mosip.mimoto.dto.IssuerDTO;
+import io.mosip.mimoto.dto.IssuerV2DTO;
 import io.mosip.mimoto.dto.IssuersDTO;
+import io.mosip.mimoto.dto.IssuersV2DTO;
 import io.mosip.mimoto.dto.mimoto.CredentialIssuerConfiguration;
 import io.mosip.mimoto.dto.mimoto.CredentialIssuerWellKnownResponse;
 import io.mosip.mimoto.dto.mimoto.IssuerConfig;
@@ -290,5 +292,68 @@ public class IssuersServiceTest {
         verify(utilities, times(1)).getIssuersConfigJsonValue();
         verify(issuersConfigUtil, times(1)).getIssuerWellknown(credentialIssuerHostUrl);
         // Note: Logging verification requires a logging framework setup (e.g., Logback with ListAppender)
+    }
+
+    
+    @Test
+    public void shouldReturnIssuersV2DTOWhenGetIssuersV2DTO() throws Exception {
+        IssuersV2DTO result = issuersService.getIssuersV2DTO();
+
+        assertEquals(2, result.getIssuers().size());
+        IssuerV2DTO first = result.getIssuers().get(0);
+        assertEquals("Issuer3id", first.getIssuerId());
+        assertEquals("OpenId4VCI", first.getProtocol());
+        assertEquals(getIssuerConfigDTO("Issuer3").getDisplay(), first.getDisplay());
+        assertEquals("123", first.getClientId());
+        assertEquals("https://dev/Issuer3id", first.getTokenEndpoint());
+        assertEquals("test-client-alias", first.getClientAlias());
+        assertEquals(getIssuerConfigDTO("Issuer3").getQr_code_type(), first.getQrCodeType());
+        assertEquals("true", first.getEnabled());
+        assertEquals("https://issuer.env.net", first.getCredentialIssuerHost());
+        IssuerV2DTO second = result.getIssuers().get(1);
+        assertEquals("Issuer4id", second.getIssuerId());
+        assertEquals("https://issuer.env.net", second.getCredentialIssuerHost());
+        verify(utilities, atLeast(1)).getIssuersConfigJsonValue();
+    }
+
+    @Test
+    public void shouldReturnIssuerV2DetailsForValidIssuerId() throws Exception {
+        IssuerV2DTO result = issuersService.getIssuerV2Details("Issuer3id");
+
+        assertEquals("Issuer3id", result.getIssuerId());
+        assertEquals("OpenId4VCI", result.getProtocol());
+        assertEquals(getIssuerConfigDTO("Issuer3").getDisplay(), result.getDisplay());
+        assertEquals("123", result.getClientId());
+        assertEquals("https://dev/Issuer3id", result.getTokenEndpoint());
+        assertEquals("test-client-alias", result.getClientAlias());
+        assertEquals(getIssuerConfigDTO("Issuer3").getQr_code_type(), result.getQrCodeType());
+        assertEquals("true", result.getEnabled());
+        assertEquals("https://issuer.env.net", result.getCredentialIssuerHost());
+        verify(utilities, times(1)).getIssuersConfigJsonValue();
+    }
+
+    @Test
+    public void shouldThrowInvalidIssuerIdWhenGetIssuerV2DetailsForInvalidId() {
+        InvalidIssuerIdException exception = assertThrows(InvalidIssuerIdException.class,
+                () -> issuersService.getIssuerV2Details("NonExistentId"));
+
+        assertEquals("RESIDENT-APP-035 --> Invalid issuer ID", exception.getMessage());
+        verify(utilities, times(1)).getIssuersConfigJsonValue();
+    }
+
+    @Test
+    public void shouldPropagateApiNotAccessibleWhenGetIssuersV2DTOFails() {
+        Mockito.when(utilities.getIssuersConfigJsonValue()).thenReturn(null);
+
+        assertThrows(ApiNotAccessibleException.class, () -> issuersService.getIssuersV2DTO());
+        verify(utilities, times(1)).getIssuersConfigJsonValue();
+    }
+
+    @Test
+    public void shouldPropagateApiNotAccessibleWhenGetIssuerV2DetailsFails() {
+        Mockito.when(utilities.getIssuersConfigJsonValue()).thenReturn(null);
+
+        assertThrows(ApiNotAccessibleException.class, () -> issuersService.getIssuerV2Details("Issuer3id"));
+        verify(utilities, times(1)).getIssuersConfigJsonValue();
     }
 }
