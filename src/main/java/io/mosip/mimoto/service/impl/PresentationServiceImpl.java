@@ -193,10 +193,25 @@ public class PresentationServiceImpl implements PresentationService {
             );
         }
 
-        //throw exception if the response_mode is not direct_post
-        else {
-            throw new VPNotCreatedException(ErrorConstants.INVALID_RESPONSE_MODE.getErrorCode(), ErrorConstants.INVALID_RESPONSE_MODE.getErrorMessage());
+        // Otherwise, do redirect
+        String redirectString = buildRedirectString(
+                vpToken,
+                presentationRequestDTO.getRedirectUri(),
+                presentationSubmission
+        );
+
+        if (redirectString.length() > maximumResponseHeaderSize) {
+            throw new VPNotCreatedException(ErrorConstants.URI_TOO_LONG.getErrorCode(), ErrorConstants.URI_TOO_LONG.getErrorMessage());
         }
+
+        return redirectString;
+    }
+
+    private String buildRedirectString(String vpToken, String redirectUri, String presentationSubmission) {
+        return String.format(injiOvpRedirectURLPattern,
+                redirectUri,
+                Base64.getUrlEncoder().encodeToString(vpToken.getBytes(StandardCharsets.UTF_8)),
+                URLEncoder.encode(presentationSubmission, StandardCharsets.UTF_8));
     }
 
     private String createVpToken(VerifiablePresentationDTO vpDTO) throws JsonProcessingException {
