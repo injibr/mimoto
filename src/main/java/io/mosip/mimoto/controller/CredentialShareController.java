@@ -188,6 +188,7 @@ public class CredentialShareController {
     public ResponseEntity<CredentialDownloadResponseDTO> download(@Valid @RequestBody CredentialDownloadRequestDTO requestDTO, BindingResult result)
             throws Exception {
         try {
+            log.info("Calling download credential for request id in credential share: {}", requestDTO.getRequestId());
             requestValidator.validateInputRequest(result);
             JsonNode decryptedCredentialJSON = utilities.getDecryptedVC(requestDTO.getRequestId());
             JsonNode requestedCredentialJSON = utilities.getRequestVC(requestDTO.getRequestId());

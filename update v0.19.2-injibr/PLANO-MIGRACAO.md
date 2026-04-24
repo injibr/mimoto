@@ -472,10 +472,10 @@ Verificar se a v0.19.2 já tem keystores próprios que não devem ser sobrescrit
 
 ### 18. `pom.xml`
 
-**O que muda:** Versão de `0.17.0` para `1.0.0` (versão INJIBR).
+**O que muda:** Versão de `0.17.0` para `4.0.0` (versão INJIBR).
 
 **Como aplicar na v0.19.2:** A versão atual já é `0.19.2`. Manter `0.19.2` ou
-definir a versão INJIBR conforme padrão do projeto.
+definir a versão INJIBR conforme padrão do projeto (`4.0.0`).
 
 ---
 

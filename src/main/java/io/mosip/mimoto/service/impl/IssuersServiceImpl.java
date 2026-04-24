@@ -88,15 +88,16 @@ public class IssuersServiceImpl implements IssuersService {
 
     @Override
     public CredentialIssuerConfiguration getIssuerConfiguration(String issuerId) throws ApiNotAccessibleException, IOException, AuthorizationServerWellknownResponseException, InvalidWellknownResponseException {
-        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(getIssuerDetails(issuerId).getCredential_issuer_host());
-        AuthorizationServerWellKnownResponse authorizationServerWellKnownResponse = issuersConfigUtil.getAuthServerWellknown(credentialIssuerWellKnownResponse.getAuthorizationServers().get(0));
+        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(getIssuerDetails(issuerId).getCredential_issuer_host(), issuerId);
+        // INJIBR-CUSTOM: govbr does not expose AuthorizationServer well-known; skip the call
+        // AuthorizationServerWellKnownResponse authorizationServerWellKnownResponse = issuersConfigUtil.getAuthServerWellknown(credentialIssuerWellKnownResponse.getAuthorizationServers().get(0));
 
         return new CredentialIssuerConfiguration(
                 credentialIssuerWellKnownResponse.getCredentialIssuer(),
                 credentialIssuerWellKnownResponse.getAuthorizationServers(),
                 credentialIssuerWellKnownResponse.getCredentialEndPoint(),
                 credentialIssuerWellKnownResponse.getCredentialConfigurationsSupported(),
-                authorizationServerWellKnownResponse
+                new AuthorizationServerWellKnownResponse()
         );
     }
 
@@ -105,7 +106,7 @@ public class IssuersServiceImpl implements IssuersService {
         log.info("Fetching issuer config for issuerId: {}", issuerId);
         try {
             IssuerDTO issuerDTO = getIssuerDetails(issuerId);
-            CredentialIssuerWellKnownResponse wellKnownResponse = issuersConfigUtil.getIssuerWellknown(issuerDTO.getCredential_issuer_host());
+            CredentialIssuerWellKnownResponse wellKnownResponse = issuersConfigUtil.getIssuerWellknown(issuerDTO.getCredential_issuer_host(), issuerId);
             return new IssuerConfig(
                     issuerDTO,
                     wellKnownResponse,

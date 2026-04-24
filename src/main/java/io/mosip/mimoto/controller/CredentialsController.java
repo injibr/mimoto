@@ -6,6 +6,7 @@ import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
 import io.mosip.mimoto.exception.VCVerificationException;
+import io.mosip.mimoto.govbr.GovBRService;
 import io.mosip.mimoto.service.CredentialService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.util.Utilities;
@@ -45,6 +46,9 @@ public class CredentialsController {
     @Autowired
     IdpService idpService;
 
+    @Autowired
+    GovBRService govBRService;
+
     @Operation(summary = SwaggerLiteralConstants.CREDENTIALS_DOWNLOAD_VC_SUMMARY, description = SwaggerLiteralConstants.CREDENTIALS_DOWNLOAD_VC_DESCRIPTION)
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/pdf")}),
@@ -60,7 +64,9 @@ public class CredentialsController {
             String credentialValidity = params.get("vcStorageExpiryLimitInTimes");
             String locale = params.get("locale");
             log.info("Initiated Token Call");
-            TokenResponseDTO response = idpService.getTokenResponse(params);
+            // INJIBR-CUSTOM: govbr uses its own token endpoint via GovBRService instead of esignet
+            // TokenResponseDTO response = idpService.getTokenResponse(params);
+            TokenResponseDTO response = govBRService.getToken(params.get("code"), params.get("code_verifier"));
 
             log.info("Initiated Download Credential Call");
             ByteArrayInputStream inputStream = credentialService.downloadCredentialAsPDF(issuerId, credentialType, response, credentialValidity, locale);

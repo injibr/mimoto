@@ -77,6 +77,9 @@ public class CredentialServiceImpl implements CredentialService {
                 credentialIssuerConfiguration.getCredentialConfigurationsSupported());
         CredentialsSupportedResponse credentialsSupportedResponse = credentialIssuerWellKnownResponse.getCredentialConfigurationsSupported().get(credentialConfigurationId);
         VCCredentialRequest vcCredentialRequest = credentialRequestService.buildRequest(issuerDTO, credentialConfigurationId, credentialIssuerWellKnownResponse, response.getC_nonce(), null, null, false);
+        // INJIBR-CUSTOM: certify uses doctype and issuerId for credential dispatch and multi-issuer lookup
+        vcCredentialRequest.setDoctype(credentialConfigurationId);
+        vcCredentialRequest.setIssuerId(issuerId);
 
         VCCredentialResponse vcCredentialResponse = downloadCredential(credentialIssuerWellKnownResponse.getCredentialEndPoint(), vcCredentialRequest, response.getAccess_token());
 
@@ -231,12 +234,17 @@ public class CredentialServiceImpl implements CredentialService {
     private boolean verifyCredential(VCCredentialResponse vcCredentialResponse, String issuerId, String credentialConfigurationId)
             throws VCVerificationException {
         try {
-            return credentialVerifierService.verify(vcCredentialResponse);
+            // INJIBR-CUSTOM: VC verification failure does not block issuance (govbr VC format compatibility)
+            // return credentialVerifierService.verify(vcCredentialResponse);
+            credentialVerifierService.verify(vcCredentialResponse);
+            return true;
         } catch (VCVerificationException | JsonProcessingException e) {
             log.error("Credential verification failed for issuerId: {}, credentialConfigurationId: {}", issuerId, credentialConfigurationId, e);
-            throw new VCVerificationException(
-                    SIGNATURE_VERIFICATION_EXCEPTION.getErrorCode(),
-                    "Credential verification failed");
+            // INJIBR-CUSTOM: VC verification failure does not block issuance (govbr VC format compatibility)
+            // throw new VCVerificationException(
+            //         SIGNATURE_VERIFICATION_EXCEPTION.getErrorCode(),
+            //         "Credential verification failed");
+            return true;
         }
     }
 

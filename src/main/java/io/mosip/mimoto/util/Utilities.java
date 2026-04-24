@@ -188,16 +188,17 @@ public class Utilities {
     public String getCredentialSupportedTemplateString(String issuerId, String credentialConfigurationId) {
         String templateFileName = String.format("%s-%s-template.html", issuerId, credentialConfigurationId);
         if(activeProfile.contains("local")) {
-            Path basePath = Paths.get("templates").toAbsolutePath().normalize();
+            // INJIBR-CUSTOM: fix template path for local development profile
+            Path basePath = Paths.get("src/main/resources/templates").toAbsolutePath().normalize();
             Path resolvedPath = basePath.resolve(templateFileName).normalize();
 
             if (!resolvedPath.startsWith(basePath)) {
                 throw new SecurityException("Attempted path traversal attack: " + resolvedPath);
             }
 
-            Resource credentialTemplateResource = new ClassPathResource(resolvedPath.toString());
             try {
-                return Files.readString(credentialTemplateResource.getFile().toPath());
+                // INJIBR-CUSTOM: read directly from resolved path instead of ClassPathResource
+                return Files.readString(resolvedPath);
             } catch (IOException e) {
                 log.error(ExceptionUtils.getStackTrace(e));
             }

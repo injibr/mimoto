@@ -9,6 +9,7 @@ import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.dto.mimoto.*;
 import io.mosip.mimoto.exception.IdpException;
 import io.mosip.mimoto.exception.PlatformErrorMessages;
+import io.mosip.mimoto.govbr.GovBRService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.service.RestClientService;
 import io.mosip.mimoto.util.JoseUtil;
@@ -46,6 +47,9 @@ public class IdpController {
 
     @Autowired
     IdpService idpService;
+
+    @Autowired
+    GovBRService govBRService;
 
     @Autowired
     RequestValidator requestValidator;
@@ -120,7 +124,9 @@ public class IdpController {
         ResponseWrapper<TokenResponseDTO> responseWrapper = new ResponseWrapper<>();
         try {
             params.put("issuer", issuer);
-            TokenResponseDTO response = idpService.getTokenResponse(params);
+            // INJIBR-CUSTOM: govbr uses its own token endpoint via GovBRService instead of esignet
+            // TokenResponseDTO response = idpService.getTokenResponse(params);
+            TokenResponseDTO response = govBRService.getToken(params.get("code"), params.get("code_verifier"));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception ex) {
             log.error("Exception Occurred while Invoking the Token Endpoint : ", ex);

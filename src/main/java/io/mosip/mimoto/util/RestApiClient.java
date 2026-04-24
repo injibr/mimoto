@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -129,6 +130,22 @@ public class RestApiClient {
         }
         return result;
     }
+
+    // INJIBR-CUSTOM: experimental method to pass queryParams to getApi, not used — issuer_id appended directly in IssuerConfigUtil
+//    public <T> T getApi(String url, Class<?> responseType, Map<String,String> queryParams) {
+//        T result = null;
+//        RestTemplate rt = restTemplate;
+//        if (disableSelfTokenRestTemplate) {
+//            rt = plainRestTemplate;
+//        }
+//        try {
+//            log.info("RestApiClient::getApi()::entry uri: {}", url);
+//            result = (T) rt.getForObject(url, responseType,queryParams);
+//        } catch (Exception e) {
+//            log.error("RestApiClient::getApi()::error uri:{} {} {}", url, e.getMessage(), e);
+//        }
+//        return result;
+//    }
 
     /**
      * HTTP POST API

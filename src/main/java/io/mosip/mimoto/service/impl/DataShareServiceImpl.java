@@ -64,6 +64,8 @@ public class DataShareServiceImpl {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+        // INJIBR-CUSTOM: DataShare not used in govbr flow, returning placeholder
+        //return "sas";
         DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
         log.info("Data pushed into DataShare -> ");
         return  dataShareResponseWrapperDTO.getDataShare().getUrl();
