@@ -92,16 +92,18 @@ return true;
 
 **Arquivo:** `src/main/java/io/mosip/mimoto/service/impl/DataShareServiceImpl.java`
 
-O DataShare do MOSIP não está disponível no ambiente govbr. O método `storeDataInDataShare()`
-retorna placeholder `"sas"` em vez de chamar o DataShare real:
+O DataShare está ativo — o método `storeDataInDataShare()` chama o DataShare real.
+O comentário `// INJIBR-CUSTOM: DataShare not used in govbr flow, returning placeholder` foi mantido
+no código mas o `return "sas"` está comentado, pois o DataShare está disponível no ambiente atual.
 
 ```java
 // INJIBR-CUSTOM: DataShare not used in govbr flow, returning placeholder
-return "sas";
+//return "sas";
+DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
+return dataShareResponseWrapperDTO.getDataShare().getUrl();
 ```
 
-**Impacto:** o QR code de apresentação (OpenID4VP) dentro do PDF gerado não funcionará.
-O download do PDF em si não é afetado.
+**Nota:** se o DataShare não estiver disponível no ambiente, reativar o `return "sas"` e comentar as linhas seguintes.
 
 ---
 
@@ -309,7 +311,7 @@ FROM eclipse-temurin:21-jre
 | `IssuerConfigUtil` — nova assinatura + cache + `?issuer_id=` | ✅ implementado |
 | `IssuersServiceImpl` — nova assinatura + remover AuthServer wellknown | ✅ implementado |
 | `CredentialServiceImpl` — injetar doctype/issuerId + bypass verificação | ✅ implementado |
-| `DataShareServiceImpl` — bypass DataShare | ✅ implementado |
+| `DataShareServiceImpl` — DataShare ativo (bypass comentado) | ✅ implementado |
 | `IdpServiceImpl` — `@Slf4j` + log | ✅ implementado |
 | `CredentialsController` — `govBRService.getToken()` | ✅ implementado |
 | `IdpController` — `govBRService.getToken()` | ✅ implementado |

@@ -88,9 +88,9 @@ public class CredentialServiceImpl implements CredentialService {
             String dataShareUrl = QRCodeType.OnlineSharing.equals(issuerDTO.getQr_code_type()) ? dataShareService.storeDataInDataShare(objectMapper.writeValueAsString(vcCredentialResponse), credentialValidity) : "";
             return credentialPDFGeneratorService.generatePdfForVerifiableCredential(credentialConfigurationId, vcCredentialResponse, issuerDTO, credentialsSupportedResponse, dataShareUrl, credentialValidity, locale);
         }
-            throw new VCVerificationException(SIGNATURE_VERIFICATION_EXCEPTION.getErrorCode(),
-                    SIGNATURE_VERIFICATION_EXCEPTION.getErrorMessage());
-        }
+        throw new VCVerificationException(SIGNATURE_VERIFICATION_EXCEPTION.getErrorCode(),
+                SIGNATURE_VERIFICATION_EXCEPTION.getErrorMessage());
+    }
 
     @Override
     public VCCredentialResponse downloadCredential(String credentialEndpoint, VCCredentialRequest vcCredentialRequest, String accessToken) throws InvalidCredentialResourceException {
