@@ -6,6 +6,7 @@ import io.mosip.mimoto.dto.idp.TokenResponseDTO;
 import io.mosip.mimoto.exception.ApiNotAccessibleException;
 import io.mosip.mimoto.exception.InvalidCredentialResourceException;
 import io.mosip.mimoto.exception.VCVerificationException;
+import io.mosip.mimoto.govbr.GovBRService;
 import io.mosip.mimoto.service.CredentialService;
 import io.mosip.mimoto.service.IdpService;
 import io.mosip.mimoto.util.Utilities;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,9 @@ public class CredentialsController {
         this.idpService = idpService;
     }
 
+    @Autowired
+    GovBRService govBRService;
+
     @Operation(summary = SwaggerLiteralConstants.CREDENTIALS_DOWNLOAD_VC_SUMMARY, description = SwaggerLiteralConstants.CREDENTIALS_DOWNLOAD_VC_DESCRIPTION)
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/pdf")}),
@@ -62,7 +67,9 @@ public class CredentialsController {
             String credentialValidity = params.get("vcStorageExpiryLimitInTimes");
             String locale = params.get("locale");
             log.info("Initiated Token Call");
-            TokenResponseDTO response = idpService.getTokenResponse(params);
+            // INJIBR-CUSTOM: govbr uses its own token endpoint via GovBRService instead of esignet
+            // TokenResponseDTO response = idpService.getTokenResponse(params);
+            TokenResponseDTO response = govBRService.getToken(params.get("code"), params.get("code_verifier"), params.get("redirect_uri"));
 
             log.info("Initiated Download Credential Call");
             ByteArrayInputStream inputStream = credentialService.downloadCredentialAsPDF(issuerId, credentialType, response, credentialValidity, locale);

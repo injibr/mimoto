@@ -93,19 +93,21 @@ public class IssuersServiceImpl implements IssuersService {
     @Override
     public CredentialIssuerConfiguration getIssuerConfiguration(String issuerId) throws ApiNotAccessibleException, IOException, AuthorizationServerWellknownResponseException, InvalidWellknownResponseException {
         String credentialIssuerHost = getIssuerDetails(issuerId).getCredential_issuer_host();
-        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(credentialIssuerHost);
+        CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = issuersConfigUtil.getIssuerWellknown(credentialIssuerHost, issuerId);
 
         if(credentialIssuerWellKnownResponse.getAuthorizationServers() == null || credentialIssuerWellKnownResponse.getAuthorizationServers().isEmpty()) {
             credentialIssuerWellKnownResponse.setAuthorizationServers(List.of(credentialIssuerHost));
         }
-        AuthorizationServerWellKnownResponse authorizationServerWellKnownResponse = issuersConfigUtil.getAuthServerWellknown(credentialIssuerWellKnownResponse.getAuthorizationServers().getFirst());
+        // INJIBR-CUSTOM: govbr does not expose AuthorizationServer well-known; skip the call
+        // AuthorizationServerWellKnownResponse authorizationServerWellKnownResponse = issuersConfigUtil.getAuthServerWellknown(credentialIssuerWellKnownResponse.getAuthorizationServers().getFirst());
+        AuthorizationServerWellKnownResponse authorizationServerWellKnownResponse = new AuthorizationServerWellKnownResponse();
 
         return new CredentialIssuerConfiguration(
                 credentialIssuerWellKnownResponse.getCredentialIssuer(),
                 credentialIssuerWellKnownResponse.getAuthorizationServers(),
                 credentialIssuerWellKnownResponse.getCredentialEndPoint(),
                 credentialIssuerWellKnownResponse.getCredentialConfigurationsSupported(),
-                authorizationServerWellKnownResponse
+                new AuthorizationServerWellKnownResponse()
         );
     }
 
@@ -114,7 +116,7 @@ public class IssuersServiceImpl implements IssuersService {
         log.info("Fetching issuer config for issuerId: {}", issuerId);
         try {
             IssuerDTO issuerDTO = getIssuerDetails(issuerId);
-            CredentialIssuerWellKnownResponse wellKnownResponse = issuersConfigUtil.getIssuerWellknown(issuerDTO.getCredential_issuer_host());
+            CredentialIssuerWellKnownResponse wellKnownResponse = issuersConfigUtil.getIssuerWellknown(issuerDTO.getCredential_issuer_host(), issuerId);
             return new IssuerConfig(
                     issuerDTO,
                     wellKnownResponse,

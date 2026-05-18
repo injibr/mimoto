@@ -74,9 +74,11 @@ public class DataShareServiceImpl {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
-        log.info("Data pushed into DataShare -> ");
-        return  dataShareResponseWrapperDTO.getDataShare().getUrl();
+        // INJIBR-CUSTOM: DataShare not used in govbr flow, returning placeholder
+        return "sas";
+//        DataShareResponseWrapperDTO dataShareResponseWrapperDTO = pushCredentialIntoDataShare(requestEntity, credentialValidity);
+//        log.info("Data pushed into DataShare -> " + dataShareResponseWrapperDTO);
+//        return  dataShareResponseWrapperDTO.getDataShare().getUrl();
     }
 
     private DataShareResponseWrapperDTO pushCredentialIntoDataShare(HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity, String credentialValidity) throws InvalidCredentialResourceException {

@@ -28,4 +28,8 @@ public class VCCredentialRequest {
     private VCCredentialDefinition credentialDefinition;
 
     private String vct;
+
+    // INJIBR-CUSTOM: certify uses doctype and issuerId for credential dispatch and multi-issuer lookup
+    private String doctype;
+    private String issuerId;
 }
