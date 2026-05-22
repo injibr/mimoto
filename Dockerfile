@@ -58,7 +58,7 @@ ARG container_user_gid=1001
 RUN apt-get update -qq && \
     apt-get install -y -qq unzip wget adduser && \
     groupadd -g ${container_user_gid} ${container_user_group} && \
-    useradd -u ${container_user_uid} -g ${container_user_group} -d /home/${container_user} -m -s /bin/sh ${container_user} && \
+    useradd -l -u ${container_user_uid} -g ${container_user_group} -d /home/${container_user} -m -s /bin/sh ${container_user} && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 # set working directory for the user
 WORKDIR /home/${container_user}
