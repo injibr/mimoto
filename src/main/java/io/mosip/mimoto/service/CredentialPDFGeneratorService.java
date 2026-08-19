@@ -34,7 +34,7 @@ import io.mosip.pixelpass.PixelPass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -302,13 +302,13 @@ public class CredentialPDFGeneratorService {
     private ByteArrayInputStream renderVCInCredentialTemplate(Map<String, Object> data, String issuerId, String credentialConfigurationId) {
         String credentialTemplate = utilities.getCredentialSupportedTemplateString(issuerId, credentialConfigurationId);
         Properties props = new Properties();
-        props.setProperty("resource.loader", "class");
-        props.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        Velocity.init(props);
+        props.setProperty("resource.loaders", "classpath");
+        props.setProperty("resource.loader.classpath.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        VelocityEngine velocityEngine = new VelocityEngine(props);
         VelocityContext velocityContext = new VelocityContext(data);
 
         StringWriter writer = new StringWriter();
-        Velocity.evaluate(velocityContext, writer, "Credential Template", credentialTemplate);
+        velocityEngine.evaluate(velocityContext, writer, "Credential Template", credentialTemplate);
 
         String mergedHtml = writer.toString();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
