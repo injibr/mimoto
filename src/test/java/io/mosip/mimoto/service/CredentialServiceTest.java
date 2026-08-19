@@ -11,7 +11,7 @@ import io.mosip.mimoto.service.impl.CredentialServiceImpl;
 import io.mosip.mimoto.service.impl.IssuersServiceImpl;
 import io.mosip.mimoto.util.RestApiClient;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,10 +111,11 @@ public class CredentialServiceTest {
         String htmlContent = "<html><body><h1>$message</h1></body></html>";
         Map<String, Object> data = new HashMap<>();
         data.put("message", "PDF");
+        VelocityEngine velocityEngine = new VelocityEngine();
         VelocityContext velocityContext = new VelocityContext();
         StringWriter writer = new StringWriter();
         velocityContext.put("message", data.get("message"));
-        Velocity.evaluate(velocityContext, writer, "Credential Template", htmlContent);
+        velocityEngine.evaluate(velocityContext, writer, "Credential Template", htmlContent);
         String mergedHtml = writer.toString();
         assertTrue(mergedHtml.contains("PDF"));
     }
